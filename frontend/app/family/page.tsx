@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { BorderBeam } from "border-beam";
+import { AgentOrb } from "@/components/AgentOrb";
 
 const API = "/api";
 
@@ -21,48 +23,96 @@ const FALLBACK: Status = {
   memories: [{ title: "1959 wedding photo", note: "Ruth smiled recalling dancing with Henry." }],
 };
 
+function adherencePct(s: string) {
+  const m = s.match(/(\d+)\s*\/\s*(\d+)/);
+  if (!m) return 0;
+  return Math.round((parseInt(m[1]) / Math.max(1, parseInt(m[2]))) * 100);
+}
+
 export default function FamilyPage() {
   const [s, setS] = useState<Status>(FALLBACK);
 
   useEffect(() => {
-    fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
-    const t = setInterval(() => {
-      fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
-    }, 10000);
+    const load = () => fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
+    load();
+    const t = setInterval(load, 10000);
     return () => clearInterval(t);
   }, []);
 
+  const urgent = s.escalations.find((e) => e.level === "urgent");
+  const pct = adherencePct(s.adherence_today);
+
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold">👨‍👩‍👧 Family Dashboard</h1>
-        <p className="text-slate-600">Quiet monitoring — we only ping you when it matters. No action needed right now ✅</p>
-      </header>
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+      <div className="max-w-3xl mx-auto px-5 py-8 space-y-6">
+        <header className="flex items-center gap-4">
+          <AgentOrb phase={urgent ? "speaking" : "idle"} scale={1} dark speed={urgent ? 1.6 : 1} />
+          <div>
+            <h1 className="text-3xl font-bold">Family Dashboard</h1>
+            <p className={urgent ? "text-red-300 font-semibold" : "text-emerald-300"}>
+              {urgent ? "⚠️ Attention needed — see below" : "✅ Quiet monitoring — no action needed"}
+            </p>
+          </div>
+        </header>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow"><p className="text-sm text-slate-500">Adherence today</p><p className="text-2xl font-bold">{s.adherence_today}</p></div>
-        <div className="bg-white rounded-2xl p-5 shadow"><p className="text-sm text-slate-500">Mood</p><p className="text-2xl font-bold">{s.mood}</p></div>
-        <div className="bg-white rounded-2xl p-5 shadow"><p className="text-sm text-slate-500">Last check-in</p><p className="text-2xl font-bold">{s.last_checkin}</p></div>
-      </div>
-
-      <section className="bg-white rounded-2xl p-5 shadow">
-        <h2 className="font-bold text-xl mb-3">🚨 Escalations</h2>
-        <div className="space-y-2">
-          {s.escalations.map((e, i) => (
-            <div key={i} className={`rounded-xl p-3 ${e.level === "urgent" ? "bg-red-100 border border-red-400" : "bg-slate-100"}`}>
-              <span className="text-xs font-bold uppercase">[{e.level}] {e.time}</span>
-              <p>{e.message}</p>
+        {/* Stat cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5 text-center">
+            <div
+              className="mx-auto w-20 h-20 rounded-full grid place-items-center font-bold text-lg"
+              style={{ background: `conic-gradient(#34d399 ${pct * 3.6}deg, rgba(255,255,255,0.1) 0deg)` }}
+            >
+              <div className="w-14 h-14 rounded-full bg-[#14123a] grid place-items-center">{pct}%</div>
             </div>
-          ))}
+            <p className="text-sm text-slate-300 mt-2">Adherence</p>
+            <p className="font-bold">{s.adherence_today}</p>
+          </div>
+          <div className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5 text-center flex flex-col justify-center">
+            <p className="text-4xl">💜</p>
+            <p className="text-sm text-slate-300 mt-2">Mood</p>
+            <p className="font-bold capitalize">{s.mood}</p>
+          </div>
+          <div className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5 text-center flex flex-col justify-center">
+            <p className="text-4xl">🕰️</p>
+            <p className="text-sm text-slate-300 mt-2">Last check-in</p>
+            <p className="font-bold">{s.last_checkin}</p>
+          </div>
         </div>
-      </section>
 
-      <section className="bg-white rounded-2xl p-5 shadow">
-        <h2 className="font-bold text-xl mb-3">💜 Memory moments</h2>
-        {s.memories.map((m, i) => (
-          <p key={i} className="bg-indigo-50 rounded-xl p-3 mb-2"><b>{m.title}:</b> {m.note}</p>
-        ))}
-      </section>
+        {/* Escalations */}
+        <section>
+          <h2 className="font-bold text-xl mb-3">🚨 Escalations</h2>
+          <div className="space-y-3">
+            {s.escalations.map((e, i) => {
+              const card = (
+                <div className={`rounded-3xl p-4 ${e.level === "urgent" ? "bg-red-950/70" : e.level === "attention" ? "bg-amber-950/50" : "bg-white/5"} ring-1 ring-white/10`}>
+                  <span className={`text-xs font-bold uppercase tracking-wider ${e.level === "urgent" ? "text-red-300" : e.level === "attention" ? "text-amber-300" : "text-slate-300"}`}>
+                    [{e.level}] · {e.time}
+                  </span>
+                  <p className="mt-1 text-lg">{e.message}</p>
+                </div>
+              );
+              return e.level === "urgent" ? (
+                <BorderBeam key={i} size="md" colorVariant="sunset" theme="dark">{card}</BorderBeam>
+              ) : (
+                <div key={i}>{card}</div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Memories */}
+        <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+          <h2 className="font-bold text-xl mb-3">💜 Memory moments</h2>
+          <div className="grid gap-2">
+            {s.memories.map((m, i) => (
+              <p key={i} className="bg-indigo-500/15 ring-1 ring-indigo-400/20 rounded-2xl p-3">
+                <b>{m.title}:</b> {m.note}
+              </p>
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
