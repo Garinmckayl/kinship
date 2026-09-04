@@ -44,10 +44,18 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Agent tool `call_elder` tries Twilio → WhatsApp voice → family escalation, in that order.
 - Setup: developers.facebook.com → app → WhatsApp API Setup → test number works instantly. Env: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `ELDER_WHATSAPP_NUMBER` (e.g. 251911234567), `WHATSAPP_VERIFY_TOKEN`.
 
+## Data: Postgres (Neon) + auth + meds
+- `lib/store.ts` persists everything (meds, intakes, moods, memories, escalations, tasks, reports, users). No `DATABASE_URL` → in-memory demo mode, nothing breaks.
+- Auth: signup/login/logout/me with scrypt + JWT httpOnly cookie (`lib/auth.ts`). `/family` requires a caregiver session. Demo login: `caregiver@demo.local` / `demo1234` (auto-seeded).
+- Medication management: caregiver adds/pauses/removes meds in the dashboard (`/api/meds`); the agent reads the live schedule — no hardcoded pills.
+- Daily report: 8pm ET Inngest cron → WhatsApp text (`CAREGIVER_WHATSAPP_NUMBER`) + email via Resend (`RESEND_API_KEY`, `CAREGIVER_EMAIL`) + saved to DB. Manual: `POST /api/reports/generate` (caregiver session or `REPORT_SECRET`).
+- Urgent/attention escalations also push WhatsApp text to the caregiver automatically.
+- Vercel env add: `DATABASE_URL`, `AUTH_SECRET`, `REPORT_SECRET`, `RESEND_API_KEY`, `CAREGIVER_WHATSAPP_NUMBER`, `CAREGIVER_EMAIL`.
+
 ## Run locally
 ```bash
 cd frontend && npm install && npm run dev
-# -> http://localhost:3000  (/elder and /family, /api/chat + /api/status + /api/tasks)
+# -> http://localhost:3000  (/elder, /family, /login, /signup)
 ```
 
 ## Deploy (Vercel)

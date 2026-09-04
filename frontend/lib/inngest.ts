@@ -23,17 +23,17 @@ export const processElderTask = inngest.createFunction(
     }
 
     const outcome = await step.run("execute-agent-task", async () => {
-      const { getTask, updateTask } = await import("./tasks");
+      const { getTask, updateTask } = await import("./store");
       const { chat } = await import("./guardian");
-      const task = getTask(taskId);
+      const task = await getTask(taskId);
       if (!task) return { ok: false, error: "task not found" };
-      updateTask(taskId, { status: "running" });
+      await updateTask(taskId, { status: "running" });
       try {
         const out = await chat(task.userId, `[background task — Ruth may be offline, act via tools and escalate if needed] ${task.instruction}`);
-        updateTask(taskId, { status: "done", result: out.reply.slice(0, 500) });
+        await updateTask(taskId, { status: "done", result: out.reply.slice(0, 500) });
         return { ok: true };
       } catch (e) {
-        updateTask(taskId, { status: "failed", result: String(e).slice(0, 300) });
+        await updateTask(taskId, { status: "failed", result: String(e).slice(0, 300) });
         return { ok: false };
       }
     });
@@ -49,8 +49,8 @@ export const morningCheckin = inngest.createFunction(
   },
   async ({ step }) => {
     await step.run("enqueue-checkin", async () => {
-      const { enqueueTask } = await import("./tasks");
-      const task = enqueueTask(
+      const { enqueueTask } = await import("./store");
+      const task = await enqueueTask(
         "ruth-78",
         "Morning check-in: warmly greet Ruth, confirm Lisinopril intake, sense mood, share one memory. Escalate to family only if something is wrong.",
         new Date()
@@ -61,4 +61,19 @@ export const morningCheckin = inngest.createFunction(
   }
 );
 
-export const functions = [processElderTask, morningCheckin];
+// 8pm ET caregiver digest (00:00 UTC next day).
+export const dailyReport = inngest.createFunction(
+  {
+    id: "daily-report",
+    retries: 1,
+    triggers: [{ cron: "0 0 * * *" }],
+  },
+  async ({ step }) => {
+    await step.run("build-and-send-report", async () => {
+      const { sendDailyReport } = await import("./notify");
+      return sendDailyReport("ruth-78");
+    });
+  }
+);
+
+export const functions = [processElderTask, morningCheckin, dailyReport];

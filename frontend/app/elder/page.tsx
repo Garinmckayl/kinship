@@ -4,6 +4,7 @@ import { BorderBeam } from "border-beam";
 import { AgentOrb, PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
 import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
+import { BellIcon, ChatIcon, CheckIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
 
 const API = "/api";
 type Msg = { role: "agent" | "elder"; text: string };
@@ -248,21 +249,21 @@ export default function ElderPage() {
               <AgentOrb phase={phase} scale={2.5} dark />
             </div>
           </BorderBeam>
-          <h1 className="text-4xl font-bold mt-2">Hi Ruth 💜</h1>
-          <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “ElderLove”… 👂" : PHASE_LABEL[phase]}</p>
+          <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Ruth <HeartIcon className="w-8 h-8 text-rose-400" /></h1>
+          <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “ElderLove” — I'm listening" : PHASE_LABEL[phase]}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={toggleWake}
-              className={`px-6 py-3 rounded-2xl text-white text-xl font-bold ${wakeOn ? "bg-red-500 animate-pulse" : "bg-slate-700 hover:bg-slate-600"}`}
+              className={`px-6 py-3 rounded-2xl text-white text-xl font-bold flex items-center gap-2 ${wakeOn ? "bg-red-500 animate-pulse" : "bg-slate-700 hover:bg-slate-600"}`}
             >
-              {wakeOn ? "👂 Wake word ON" : "👂 Wake word OFF"}
+              <BellIcon className="w-6 h-6" /> {wakeOn ? "Wake word ON" : "Wake word OFF"}
             </button>
           </div>
           <button
             onClick={simulateCall}
-            className="mt-2 px-6 py-3 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold shadow-[0_0_30px_rgba(34,197,94,0.5)]"
+            className="mt-2 px-6 py-3 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold shadow-[0_0_30px_rgba(34,197,94,0.5)] flex items-center gap-2"
           >
-            📞 Simulate morning call
+            <PhoneIcon className="w-6 h-6" /> Simulate morning call
           </button>
         </div>
 
@@ -286,14 +287,14 @@ export default function ElderPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
         <div className="max-w-xl mx-auto space-y-3">
           <div className="grid grid-cols-3 gap-3">
-            <button onClick={() => send("Yes, I took my morning pill")} className="py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold">
-              ✅ Yes
+            <button onClick={() => send("Yes, I took my morning pill")} className="py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold flex items-center justify-center gap-2">
+              <CheckIcon className="w-6 h-6" /> Yes
             </button>
-            <button onClick={voiceInput} className={`py-4 rounded-2xl text-white text-xl font-bold ${phase === "listening" ? "bg-red-500 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500"}`}>
-              🎤 Speak
+            <button onClick={voiceInput} className={`py-4 rounded-2xl text-white text-xl font-bold flex items-center justify-center gap-2 ${phase === "listening" ? "bg-red-500 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500"}`}>
+              <MicIcon className="w-6 h-6" /> Speak
             </button>
-            <button onClick={() => send("I feel lonely, can you keep me company?")} className="py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-white text-xl font-bold">
-              💬 Talk
+            <button onClick={() => send("I feel lonely, can you keep me company?")} className="py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-white text-xl font-bold flex items-center justify-center gap-2">
+              <ChatIcon className="w-6 h-6" /> Talk
             </button>
           </div>
           <BeamInput value={input} onChange={setInput} onSend={() => send(input)} onMic={voiceInput} micActive={phase === "listening"} />

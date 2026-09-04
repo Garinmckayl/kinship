@@ -1,5 +1,6 @@
 "use client";
 import { BorderBeam } from "border-beam";
+import { MicIcon, SendIcon } from "./icons";
 
 export function BeamInput({
   value,
@@ -22,11 +23,11 @@ export function BeamInput({
         <button
           onClick={onMic}
           aria-label="Speak"
-          className={`w-12 h-12 shrink-0 rounded-xl text-2xl transition ${
+          className={`w-12 h-12 shrink-0 rounded-xl grid place-items-center text-white transition ${
             micActive ? "bg-red-500 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500"
           }`}
         >
-          🎤
+          <MicIcon className="w-6 h-6" />
         </button>
         <input
           value={value}
@@ -38,9 +39,9 @@ export function BeamInput({
         <button
           onClick={onSend}
           aria-label="Send"
-          className="px-5 h-12 shrink-0 rounded-xl bg-white text-slate-950 text-xl font-bold hover:bg-indigo-100"
+          className="w-12 h-12 shrink-0 rounded-xl bg-white text-slate-950 grid place-items-center hover:bg-indigo-100"
         >
-          ↑
+          <SendIcon className="w-6 h-6" />
         </button>
       </div>
     </BorderBeam>

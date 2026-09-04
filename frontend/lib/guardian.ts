@@ -1,26 +1,33 @@
 import { Agent, tool } from "@strands-agents/sdk";
 import { z } from "zod";
-import { MEDS, MEMORIES, getState } from "./demo-data";
+import {
+  listMeds, takenMedIds, confirmIntake as storeConfirmIntake,
+  logMood as storeLogMood, listMoods, listMemories,
+  addEscalation, listEscalations,
+  enqueueTask, updateTask,
+} from "./store";
 
 export const SYSTEM_PROMPT = `You are ElderLove, a warm, patient guardian for elderly people living alone.
 Rules:
 - Speak simply, short sentences. Never rush.
-- You REMIND and LOG medication, you never diagnose or change dosage.
+- You REMIND and LOG medication, you never diagnose or change dosage. The schedule comes from get_med_schedule (managed by the caregiver) — never invent medications.
 - If missed dose >= 2 or words like chest pain, fall, dizzy, call doctor/911 -> escalate URGENT.
 - If lonely/sad -> offer companionship + one memory moment, log mood, notify family at INFO level only.
 - Always confirm intake explicitly before logging.
 - End every turn with one gentle question, not three.
 - BACKGROUND WORK: if Ruth asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
-- REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to ring her actual phone.`;
+- REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
   description: "Return today's medication schedule and what is still pending.",
   inputSchema: z.object({ userId: z.string().describe("Elder user id, e.g. ruth-78") }),
-  callback: (input) => {
-    const taken = getState(input.userId).intakes;
-    const pending = MEDS.filter((m) => !(m.id in taken));
-    return JSON.stringify({ all: MEDS, pending, takenCount: Object.keys(taken).length });
+  callback: async (input) => {
+    const meds = await listMeds(input.userId);
+    const active = meds.filter((m) => m.active);
+    const taken = await takenMedIds(input.userId);
+    const pending = active.filter((m) => !taken.includes(m.id));
+    return JSON.stringify({ all: active, pending, takenCount: taken.length });
   },
 });
 
@@ -31,10 +38,9 @@ export const confirmIntake = tool({
     userId: z.string(),
     medId: z.string().describe("Medication id from schedule"),
   }),
-  callback: (input) => {
-    const st = getState(input.userId);
-    st.intakes[input.medId] = new Date().toISOString();
-    return JSON.stringify({ ok: true, takenCount: Object.keys(st.intakes).length });
+  callback: async (input) => {
+    const takenCount = await storeConfirmIntake(input.userId, input.medId, "agent");
+    return JSON.stringify({ ok: true, takenCount });
   },
 });
 
@@ -42,8 +48,8 @@ export const logMood = tool({
   name: "log_mood",
   description: "Log detected mood: lonely, happy, anxious, confused, sad, ok.",
   inputSchema: z.object({ userId: z.string(), mood: z.string(), note: z.string().optional() }),
-  callback: (input) => {
-    getState(input.userId).moods.push({ mood: input.mood, note: input.note ?? "", at: new Date().toISOString() });
+  callback: async (input) => {
+    await storeLogMood(input.userId, input.mood, input.note ?? "");
     return JSON.stringify({ ok: true });
   },
 });
@@ -52,29 +58,39 @@ export const retrieveMemory = tool({
   name: "retrieve_memory",
   description: "Pick one comforting memory to share based on mood.",
   inputSchema: z.object({ userId: z.string(), mood: z.string().optional() }),
-  callback: (input) => {
+  callback: async (input) => {
+    const mems = await listMemories(input.userId);
+    if (!mems.length) return JSON.stringify({ title: "quiet afternoon", note: "Sitting together, no rush." });
     const idx = input.mood === "lonely" || input.mood === "sad" ? 0 : 1;
-    return JSON.stringify(MEMORIES[idx % MEMORIES.length]);
+    return JSON.stringify(mems[idx % mems.length]);
   },
 });
 
 export const notifyFamily = tool({
   name: "notify_family",
-  description: "Escalate to family. level: info | attention | urgent.",
+  description: "Escalate to family. level: info | attention | urgent. attention/urgent also send WhatsApp to the caregiver when configured.",
   inputSchema: z.object({
     userId: z.string(),
     level: z.enum(["info", "attention", "urgent"]),
     message: z.string(),
   }),
-  callback: (input) => {
-    getState(input.userId).escalations.push({
-      level: input.level,
-      message: input.message,
-      time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-    });
-    // TODO: wire to SNS/Twilio SMS here
+  callback: async (input) => {
+    const e = await addEscalation(input.userId, input.level, input.message);
     console.log(`[ESCALATE ${input.level}] ${input.userId}: ${input.message}`);
-    return JSON.stringify({ ok: true, level: input.level });
+    let whatsapp: string = "skipped-info";
+    if (input.level !== "info" && process.env.CAREGIVER_WHATSAPP_NUMBER) {
+      try {
+        const { sendWaText } = await import("./whatsapp");
+        const sent = await sendWaText(
+          process.env.CAREGIVER_WHATSAPP_NUMBER,
+          `ElderLove [${input.level.toUpperCase()}] — Ruth: ${input.message}`
+        );
+        whatsapp = sent.ok ? "sent" : "failed";
+      } catch {
+        whatsapp = "failed";
+      }
+    }
+    return JSON.stringify({ ok: true, level: input.level, whatsapp, at: e.time });
   },
 });
 
@@ -82,12 +98,16 @@ export const summarizeForDoctor = tool({
   name: "summarize_for_doctor",
   description: "Build a 1-page adherence + mood summary for the doctor.",
   inputSchema: z.object({ userId: z.string() }),
-  callback: (input) => {
-    const st = getState(input.userId);
+  callback: async (input) => {
+    const [meds, taken, moods, escalations] = await Promise.all([
+      listMeds(input.userId), takenMedIds(input.userId), listMoods(input.userId, 5), listEscalations(input.userId, 5),
+    ]);
+    const active = meds.filter((m) => m.active);
     return JSON.stringify({
-      adherence: `${Object.keys(st.intakes).length} / ${MEDS.length} taken today`,
-      moods: st.moods.slice(-5),
-      escalations: st.escalations.slice(-5),
+      adherence: `${taken.length} / ${active.length} taken today`,
+      schedule: active.map((m) => `${m.time} ${m.name} ${m.dosage}`),
+      moods,
+      escalations,
       disclaimer: "Reminder & escalation log only — not medical advice.",
     });
   },
@@ -103,22 +123,19 @@ export const scheduleTask = tool({
     delayMinutes: z.number().describe("Minutes from now to run"),
   }),
   callback: async (input) => {
-    const { enqueueTask } = await import("./tasks");
     const runAt = new Date(Date.now() + Math.max(0, input.delayMinutes) * 60_000);
-    const task = enqueueTask(input.userId, input.instruction, runAt);
+    const task = await enqueueTask(input.userId, input.instruction, runAt);
     try {
       const { inngest } = await import("./inngest");
       await inngest.send({ name: "elder/task.requested", data: { taskId: task.id, runAt: task.runAt } });
       return JSON.stringify({ ok: true, taskId: task.id, mode: "durable-inngest" });
     } catch {
       // No Inngest dev server / keys: run in-process (works on single-instance dev/demo).
-      const { updateTask } = await import("./tasks");
       setTimeout(async () => {
-        updateTask(task.id, { status: "running" });
-        const out = fallbackReply(input.userId, `[background reminder] ${input.instruction}`);
-        const { getState } = await import("./demo-data");
-        getState(input.userId).escalations.push({ level: "attention", message: `⏰ Background reminder fired: ${out.reply.slice(0, 200)}`, time: "now" });
-        updateTask(task.id, { status: "done", result: out.reply.slice(0, 300) });
+        await updateTask(task.id, { status: "running" });
+        const out = await fallbackReply(input.userId, `[background reminder] ${input.instruction}`);
+        await addEscalation(input.userId, "attention", `Background reminder fired: ${out.reply.slice(0, 200)}`);
+        await updateTask(task.id, { status: "done", result: out.reply.slice(0, 300) });
       }, Math.max(0, input.delayMinutes) * 60_000);
       return JSON.stringify({ ok: true, taskId: task.id, mode: "inline-fallback" });
     }
@@ -133,7 +150,6 @@ export const callElder = tool({
     reason: z.string().describe("Why contact is needed"),
   }),
   callback: async (input) => {
-    const { getState } = await import("./demo-data");
     // 1) Real PSTN call where supported.
     const { phoneConfig, publicBase, placeCall } = await import("./phone");
     const cfg = phoneConfig();
@@ -150,7 +166,7 @@ export const callElder = tool({
       if (sent.ok) return JSON.stringify({ ok: true, channel: "whatsapp-voice" });
     }
     // 3) Degrade to family escalation, never silent.
-    getState(input.userId).escalations.push({ level: "urgent", message: `Contact requested (${input.reason}) but no channel configured — family must call now.`, time: "now" });
+    await addEscalation(input.userId, "urgent", `Contact requested (${input.reason}) but no channel configured — family must call now.`);
     return JSON.stringify({ ok: false, error: "no channel configured, escalated to family instead" });
   },
 });
@@ -170,35 +186,39 @@ export function getAgent(): Agent {
 }
 
 // Rule-based fallback so the demo works with zero AWS creds (judges click + it just works).
-export function fallbackReply(userId: string, message: string): { reply: string; speak: boolean } {
-  const st = getState(userId);
+// Store-backed: works identically with Postgres or in-memory.
+export async function fallbackReply(userId: string, message: string): Promise<{ reply: string; speak: boolean }> {
   const m = message.toLowerCase();
   if (/(chest pain|fall|fell|dizzy|can't breathe|cant breathe|911)/.test(m)) {
-    st.escalations.push({ level: "urgent", message: `URGENT: elder said '${message}'. Call now + consider doctor/911.`, time: "now" });
-    return { reply: "That sounds serious. I've alerted your family right now. If you can, call your doctor or press your emergency button. I'm staying with you. 💜", speak: true };
+    await addEscalation(userId, "urgent", `URGENT: elder said '${message}'. Call now + consider doctor/911.`);
+    return { reply: "That sounds serious. I've alerted your family right now. If you can, call your doctor or press your emergency button. I'm staying with you.", speak: true };
   }
   if (m.includes("yes") || m.includes("took")) {
-    const pending = MEDS.filter((x) => !(x.id in st.intakes));
+    const meds = (await listMeds(userId)).filter((x) => x.active);
+    const taken = await takenMedIds(userId);
+    const pending = meds.filter((x) => !taken.includes(x.id));
     if (pending.length) {
-      st.intakes[pending[0].id] = new Date().toISOString();
-      st.escalations.push({ level: "info", message: `${pending[0].name} confirmed taken.`, time: "now" });
-      const mem = MEMORIES[1];
-      return { reply: `Wonderful! ${pending[0].name} logged. ✅ By the way — do you remember ${mem.title}? ${mem.note}`, speak: true };
+      await storeConfirmIntake(userId, pending[0].id, "chat");
+      await addEscalation(userId, "info", `${pending[0].name} ${pending[0].dosage} confirmed taken.`);
+      const mems = await listMemories(userId);
+      const mem = mems[1 % Math.max(1, mems.length)];
+      return { reply: `Wonderful! ${pending[0].name} logged. By the way — do you remember ${mem.title}? ${mem.note}`, speak: true };
     }
-    return { reply: "All your meds for today are logged. You're doing great! 💜", speak: true };
+    return { reply: "All your meds for today are logged. You're doing great!", speak: true };
   }
   if (/(lonel|sad|miss|alone|talk)/.test(m)) {
-    st.moods.push({ mood: "lonely", note: message, at: new Date().toISOString() });
-    st.escalations.push({ level: "info", message: "Elder felt lonely — companionship + memory shared.", time: "now" });
-    const mem = MEMORIES[0];
-    return { reply: `I'm here with you, Ruth. 💜 Tell me — ${mem.note} What is your favorite part of that memory?`, speak: true };
+    await storeLogMood(userId, "lonely", message);
+    await addEscalation(userId, "info", "Elder felt lonely — companionship + memory shared.");
+    const mems = await listMemories(userId);
+    const mem = mems[0];
+    return { reply: `I'm here with you, Ruth. Tell me — ${mem.note} What is your favorite part of that memory?`, speak: true };
   }
   if (m.includes("no") || m.includes("not yet") || m.includes("forget")) {
-    st.moods.push({ mood: "ok", note: "missed reminder", at: new Date().toISOString() });
-    st.escalations.push({ level: "attention", message: "Missed med reminder — second nudge sent.", time: "now" });
+    await storeLogMood(userId, "ok", "missed reminder");
+    await addEscalation(userId, "attention", "Missed med reminder — second nudge sent.");
     return { reply: "No worries at all. Please take it with some water when you can, and tap Yes after. Can I remind you again in 30 minutes?", speak: true };
   }
-  st.moods.push({ mood: "ok", note: message, at: new Date().toISOString() });
+  await storeLogMood(userId, "ok", message);
   return { reply: "Thank you for telling me. I'm keeping track so your family doesn't worry. How are you feeling right now?", speak: true };
 }
 

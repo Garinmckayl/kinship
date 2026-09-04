@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { BorderBeam } from "border-beam";
 import { AgentOrb } from "@/components/AgentOrb";
+import { BellIcon, HeartIcon, PhoneIcon, PillIcon } from "@/components/icons";
 
 export default function Home() {
   return (
@@ -13,7 +14,9 @@ export default function Home() {
           </div>
         </div>
         <div className="space-y-3">
-          <h1 className="text-6xl font-black tracking-tight">💜 ElderLove</h1>
+          <h1 className="text-6xl font-black tracking-tight flex items-center justify-center gap-3">
+            ElderLove <HeartIcon className="w-12 h-12 text-rose-400" />
+          </h1>
           <p className="text-2xl text-indigo-200">
             The autonomous guardian that <b>calls your parents</b> so you don't have to worry.
           </p>
@@ -23,28 +26,31 @@ export default function Home() {
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
           <BorderBeam size="md" colorVariant="ocean" theme="dark">
-            <Link href="/elder" className="block px-10 py-5 rounded-2xl bg-indigo-600 text-white text-2xl font-bold">
-              👵 Answer as Ruth
+            <Link href="/elder" className="flex items-center gap-2 px-10 py-5 rounded-2xl bg-indigo-600 text-white text-2xl font-bold">
+              <PhoneIcon className="w-7 h-7" /> Answer as Ruth
             </Link>
           </BorderBeam>
           <BorderBeam size="md" colorVariant="sunset" theme="dark">
-            <Link href="/family" className="block px-10 py-5 rounded-2xl bg-white text-slate-950 text-2xl font-bold">
-              👨‍👩‍👧 Family view
+            <Link href="/family" className="flex items-center gap-2 px-10 py-5 rounded-2xl bg-white text-slate-950 text-2xl font-bold">
+              <HeartIcon className="w-7 h-7" /> Family view
             </Link>
           </BorderBeam>
         </div>
         <div className="grid sm:grid-cols-3 gap-4 pt-6 text-left">
           {[
-            ["📞", "Calls her", "Morning voice check-in. She just answers — no apps, no passwords."],
-            ["💊", "Meds logged", "Confirms every pill. Nudges gently, escalates only when it matters."],
-            ["💜", "Never alone", "Notices loneliness, shares memories, alerts family with context."],
-          ].map(([e, t, d]) => (
-            <div key={t} className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
-              <p className="text-3xl">{e}</p>
-              <p className="font-bold text-xl mt-2">{t}</p>
-              <p className="text-slate-300 mt-1">{d}</p>
-            </div>
-          ))}
+            ["Calls her", "Morning voice check-in. She just answers — no apps, no passwords.", PhoneIcon],
+            ["Meds logged", "Confirms every pill. Nudges gently, escalates only when it matters.", PillIcon],
+            ["Never alone", "Notices loneliness, shares memories, alerts family with context.", BellIcon],
+          ].map(([t, d, Icon]) => {
+            const I = Icon as typeof PhoneIcon;
+            return (
+              <div key={t as string} className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+                <I className="w-8 h-8 text-indigo-300" />
+                <p className="font-bold text-xl mt-2">{t as string}</p>
+                <p className="text-slate-300 mt-1">{d as string}</p>
+              </div>
+            );
+          })}
         </div>
         <p className="text-slate-500 text-sm pt-4">Demo persona: Ruth, 78, lives alone, 3 meds · Single codebase: Next.js PWA + Strands TS SDK</p>
       </div>
