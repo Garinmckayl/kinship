@@ -17,11 +17,23 @@ export default function ElderPage() {
   const [phase, setPhase] = useState<AgentPhase>("idle");
   const [callMode, setCallMode] = useState<CallMode>("off");
   const [seconds, setSeconds] = useState(0);
+  const [wakeOn, setWakeOn] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recogRef = useRef<any>(null);
+  const wakeRecRef = useRef<any>(null);
   const callActiveRef = useRef(false);
   callActiveRef.current = callMode === "active";
+  const phaseRef = useRef<AgentPhase>("idle");
+  phaseRef.current = phase;
+  const wakeOnRef = useRef(false);
+  wakeOnRef.current = wakeOn;
+
+  useEffect(() => {
+    return () => {
+      try { wakeRecRef.current?.abort(); recogRef.current?.abort(); } catch {}
+    };
+  }, []);
 
   useEffect(() => {
     if (callMode !== "active") return;
@@ -96,6 +108,7 @@ export default function ElderPage() {
 
   function voiceInput() {
     try { recogRef.current?.abort(); } catch {}
+    try { wakeRecRef.current?.abort(); } catch {}
     const SR: any = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (!SR) return;
     setPhase("listening");
@@ -104,9 +117,91 @@ export default function ElderPage() {
     rec.lang = "en-US";
     rec.interimResults = false;
     rec.onresult = (e: any) => send(e.results[0][0].transcript);
-    rec.onerror = () => setPhase("idle");
-    rec.onend = () => setPhase((p) => (p === "listening" ? "idle" : p));
-    try { rec.start(); } catch { setPhase("idle"); }
+    rec.onerror = () => {
+      setPhase("idle");
+      if (wakeOnRef.current) startWakeLoop();
+    };
+    rec.onend = () => {
+      setPhase((p) => (p === "listening" ? "idle" : p));
+      if (wakeOnRef.current) startWakeLoop();
+    };
+    try { rec.start(); } catch {
+      setPhase("idle");
+      if (wakeOnRef.current) startWakeLoop();
+    }
+  }
+
+  // Hands-free wake word: Ruth just says "ElderLove…" from her chair.
+  // Browser keyword spotting (free, today). Pro path: Porcupine WASM for iOS reliability.
+  function chime() {
+    try {
+      const Ctx: any = (window as any).AudioContext || (window as any).webkitAudioContext;
+      const ctx = new Ctx();
+      [880, 1318].forEach((f, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = f;
+        o.connect(g);
+        g.connect(ctx.destination);
+        const t = ctx.currentTime + i * 0.16;
+        g.gain.setValueAtTime(0.001, t);
+        g.gain.exponentialRampToValueAtTime(0.3, t + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        o.start(t);
+        o.stop(t + 0.16);
+      });
+    } catch {}
+  }
+
+  function startWakeLoop() {
+    if (wakeRecRef.current) return; // already listening for the name
+    const SR: any = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SR) {
+      setWakeOn(false);
+      return;
+    }
+    const rec = new SR();
+    wakeRecRef.current = rec;
+    rec.lang = "en-US";
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = (e: any) => {
+      if (phaseRef.current !== "idle" || callActiveRef.current) return;
+      let text = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) text += e.results[i][0].transcript + " ";
+      if (/elder\s?love/.test(text.toLowerCase())) {
+        try { wakeRecRef.current?.abort(); } catch {}
+        wakeRecRef.current = null;
+        chime();
+        voiceInput();
+      }
+    };
+    rec.onerror = (e: any) => {
+      wakeRecRef.current = null;
+      if (e?.error === "not-allowed" || e?.error === "service-not-allowed") setWakeOn(false);
+      else if (wakeOnRef.current && phaseRef.current === "idle") setTimeout(startWakeLoop, 800);
+    };
+    rec.onend = () => {
+      wakeRecRef.current = null;
+      if (wakeOnRef.current && phaseRef.current === "idle" && !callActiveRef.current) setTimeout(startWakeLoop, 400);
+    };
+    try {
+      rec.start();
+    } catch {
+      wakeRecRef.current = null;
+      setWakeOn(false);
+    }
+  }
+
+  function toggleWake() {
+    if (wakeOn) {
+      setWakeOn(false);
+      try { wakeRecRef.current?.abort(); } catch {}
+      wakeRecRef.current = null;
+    } else {
+      setWakeOn(true);
+      setTimeout(startWakeLoop, 50);
+    }
   }
 
   function simulateCall() {
@@ -154,7 +249,15 @@ export default function ElderPage() {
             </div>
           </BorderBeam>
           <h1 className="text-4xl font-bold mt-2">Hi Ruth 💜</h1>
-          <p className="text-indigo-200 text-xl">{PHASE_LABEL[phase]}</p>
+          <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “ElderLove”… 👂" : PHASE_LABEL[phase]}</p>
+          <div className="flex gap-3 mt-2">
+            <button
+              onClick={toggleWake}
+              className={`px-6 py-3 rounded-2xl text-white text-xl font-bold ${wakeOn ? "bg-red-500 animate-pulse" : "bg-slate-700 hover:bg-slate-600"}`}
+            >
+              {wakeOn ? "👂 Wake word ON" : "👂 Wake word OFF"}
+            </button>
+          </div>
           <button
             onClick={simulateCall}
             className="mt-2 px-6 py-3 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold shadow-[0_0_30px_rgba(34,197,94,0.5)]"
