@@ -31,7 +31,26 @@ export default function ElderPage() {
     setLoading(false);
   }
 
-  function speak(text: string) {
+  // ElevenLabs voice first (warm guardian), browser TTS as fallback.
+  async function speak(text: string) {
+    try {
+      const res = await fetch(`${API}/speak`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok && res.headers.get("Content-Type")?.includes("audio")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play().catch(() => browserSpeak(text));
+        return;
+      }
+    } catch {}
+    browserSpeak(text);
+  }
+
+  function browserSpeak(text: string) {
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.rate = 0.9;
