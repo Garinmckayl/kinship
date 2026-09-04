@@ -9,31 +9,44 @@ Single codebase: Next.js PWA + Strands TS SDK in `frontend/` — no separate Pyt
 
 ## Problem / Who / Why
 - **Problem:** elders miss meds + suffer loneliness; families worry constantly; doctors get no adherence signal.
-- **Who:** elders living alone (simple voice-first PWA at `/elder`) + adult children (dashboard at `/family`) + doctors (1-page summary via `summarize_for_doctor` tool).
+- **Who:** elders living alone (simple voice-first PWA at `/elder`, or her **real phone** via Twilio voice) + adult children (dashboard at `/family`) + doctors (1-page summary via `summarize_for_doctor` tool).
 - **Why:** 65+ US 58M → 84M by 2050; non-adherence ~$300B/yr; loneliness mortality ≈ smoking 15 cigs/day. High spending power, underserved.
 
 ## Architecture
 ```
 [PWA /elder + /family] --fetch /api--> [Next.js API routes] --> [Strands TS guardian-agent]
-        |                              /api/chat  /api/status      | tools (lib/guardian.ts):
-        |                                                         get_med_schedule, confirm_intake,
-   voice in/out                                                   log_mood, retrieve_memory,
-   (Web Speech)                                                   notify_family (SNS/Twilio TODO),
-                                                                  summarize_for_doctor
+        |                              /api/chat /status /tasks      | 8 tools (lib/guardian.ts):
+   orb + beam UI,                                                   | meds, mood, memory, notify_family,
+   ElevenLabs voice                                                  | summarize_for_doctor, schedule_task,
+   in-app Call Mode                                                  | call_elder
+                                          |
+                    [Inngest] durable background tasks (survives disconnects)
+                    [Twilio] REAL phone calls: /api/voice/incoming|respond|trigger
 ```
 
 Works with zero AWS creds via rule-based fallback (judges click + it just works). Set AWS creds to enable live Bedrock reasoning. See `ARCHITECTURE.md`.
 
+## Background agent (survives disconnects)
+- Ruth says "remind me in 30 minutes" → agent calls `schedule_task` → Inngest runs it durably (`elder/task.requested` + `step.sleepUntil`), executes the agent, updates `/api/tasks`, escalates if needed.
+- Daily 9am ET proactive check-in via Inngest cron (`morning-checkin`).
+- Without Inngest keys: inline in-process fallback (single-instance dev/demo).
+- Local full loop: `npx inngest-cli dev` + `INNGEST_DEV=1`. Prod: set `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY`.
+
+## Real phone calls (Twilio, no simulation)
+- `POST /api/voice/trigger {secret, to?}` → Ruth's real phone rings → Gather speech → `/api/voice/respond` runs the Strands agent → replies in ElevenLabs voice via `<Play /api/speak>` (Twilio voice fallback without public URL).
+- Agent tool `call_elder` lets the agent itself place urgent calls; degrades to family escalation without creds.
+- Env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `ELDER_PHONE_NUMBER`, `VOICE_CALLBACK_SECRET`, `PUBLIC_BASE_URL`.
+
 ## Run locally
 ```bash
 cd frontend && npm install && npm run dev
-# -> http://localhost:3000  (/elder and /family, /api/chat + /api/status)
+# -> http://localhost:3000  (/elder and /family, /api/chat + /api/status + /api/tasks)
 ```
 
-## Deploy
-- Frontend + agent deploy together (Vercel / Amplify Hosting). No separate backend.
-- Optional: Bedrock AgentCore TypeScript deploy per Strands docs for production scale.
-- Wire `notifyFamily` in `frontend/lib/guardian.ts` to SNS SMS.
+## Deploy (Vercel)
+- Import `Garinmckayl/elderai`, root directory `frontend`.
+- Env vars: AWS creds, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, Inngest keys, Twilio vars, `PUBLIC_BASE_URL=https://<your-app>.vercel.app`.
+- Inngest syncs via `/api/inngest` automatically.
 
 ## Safety
 Reminder + escalation log only. Not medical advice. Urgent keywords (chest pain, fall, dizzy) → URGENT escalation + advise emergency button/911.

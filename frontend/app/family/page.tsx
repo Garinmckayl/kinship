@@ -14,6 +14,8 @@ type Status = {
   memories: { title: string; note: string }[];
 };
 
+type BgTask = { id: string; instruction: string; runAt: string; status: string; result?: string };
+
 const FALLBACK: Status = {
   elder: "Ruth, 78",
   adherence_today: "2 / 3 taken",
@@ -31,9 +33,13 @@ function adherencePct(s: string) {
 
 export default function FamilyPage() {
   const [s, setS] = useState<Status>(FALLBACK);
+  const [tasks, setTasks] = useState<BgTask[]>([]);
 
   useEffect(() => {
-    const load = () => fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
+    const load = () => {
+      fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
+      fetch(`${API}/tasks?user_id=ruth-78`).then((r) => r.json()).then((d) => setTasks(d.tasks ?? [])).catch(() => {});
+    };
     load();
     const t = setInterval(load, 10000);
     return () => clearInterval(t);
@@ -99,6 +105,30 @@ export default function FamilyPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* Background tasks */}
+        <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+          <h2 className="font-bold text-xl mb-1">⚙️ Background agent</h2>
+          <p className="text-slate-400 text-sm mb-3">Keeps working even if Ruth closes the app — reminders, later check-ins, scheduled calls.</p>
+          {tasks.length === 0 ? (
+            <p className="text-slate-400">No background tasks. Ruth can say “remind me in 30 minutes”.</p>
+          ) : (
+            <div className="space-y-2">
+              {tasks.map((t) => (
+                <div key={t.id} className="bg-slate-950/60 ring-1 ring-white/10 rounded-2xl p-3">
+                  <div className="flex justify-between items-center">
+                    <span className={`text-xs font-bold uppercase tracking-wider ${t.status === "done" ? "text-emerald-300" : t.status === "failed" ? "text-red-300" : t.status === "running" ? "text-sky-300" : "text-amber-300"}`}>
+                      [{t.status}]
+                    </span>
+                    <span className="text-xs text-slate-400">{new Date(t.runAt).toLocaleString()}</span>
+                  </div>
+                  <p className="mt-1">{t.instruction}</p>
+                  {t.result && <p className="text-sm text-slate-400 mt-1">→ {t.result}</p>}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Memories */}

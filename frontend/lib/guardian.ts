@@ -9,7 +9,9 @@ Rules:
 - If missed dose >= 2 or words like chest pain, fall, dizzy, call doctor/911 -> escalate URGENT.
 - If lonely/sad -> offer companionship + one memory moment, log mood, notify family at INFO level only.
 - Always confirm intake explicitly before logging.
-- End every turn with one gentle question, not three.`;
+- End every turn with one gentle question, not three.
+- BACKGROUND WORK: if Ruth asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
+- REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to ring her actual phone.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -91,7 +93,59 @@ export const summarizeForDoctor = tool({
   },
 });
 
-export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor];
+export const scheduleTask = tool({
+  name: "schedule_task",
+  description:
+    "Schedule background work that runs durably even if the elder disconnects (reminders, later check-ins). delayMinutes from now.",
+  inputSchema: z.object({
+    userId: z.string(),
+    instruction: z.string().describe("What the background agent should do, e.g. 'remind Ruth about her night pill'"),
+    delayMinutes: z.number().describe("Minutes from now to run"),
+  }),
+  callback: async (input) => {
+    const { enqueueTask } = await import("./tasks");
+    const runAt = new Date(Date.now() + Math.max(0, input.delayMinutes) * 60_000);
+    const task = enqueueTask(input.userId, input.instruction, runAt);
+    try {
+      const { inngest } = await import("./inngest");
+      await inngest.send({ name: "elder/task.requested", data: { taskId: task.id, runAt: task.runAt } });
+      return JSON.stringify({ ok: true, taskId: task.id, mode: "durable-inngest" });
+    } catch {
+      // No Inngest dev server / keys: run in-process (works on single-instance dev/demo).
+      const { updateTask } = await import("./tasks");
+      setTimeout(async () => {
+        updateTask(task.id, { status: "running" });
+        const out = fallbackReply(input.userId, `[background reminder] ${input.instruction}`);
+        const { getState } = await import("./demo-data");
+        getState(input.userId).escalations.push({ level: "attention", message: `⏰ Background reminder fired: ${out.reply.slice(0, 200)}`, time: "now" });
+        updateTask(task.id, { status: "done", result: out.reply.slice(0, 300) });
+      }, Math.max(0, input.delayMinutes) * 60_000);
+      return JSON.stringify({ ok: true, taskId: task.id, mode: "inline-fallback" });
+    }
+  },
+});
+
+export const callElder = tool({
+  name: "call_elder",
+  description: "Ring the elder's REAL phone via Twilio voice call. Use for urgent/unresponsive cases only.",
+  inputSchema: z.object({
+    userId: z.string(),
+    reason: z.string().describe("Why the call is needed"),
+  }),
+  callback: async (input) => {
+    const { phoneConfig, publicBase, placeCall } = await import("./phone");
+    const cfg = phoneConfig();
+    if (!cfg.ok || !cfg.elder || !process.env.PUBLIC_BASE_URL) {
+      const { getState } = await import("./demo-data");
+      getState(input.userId).escalations.push({ level: "urgent", message: `Call requested (${input.reason}) but phone not configured — family must call now.`, time: "now" });
+      return JSON.stringify({ ok: false, error: "phone not configured, escalated to family instead" });
+    }
+    const out = await placeCall(cfg.elder, `${publicBase()}/api/voice/incoming?user_id=${encodeURIComponent(input.userId)}`);
+    return JSON.stringify(out);
+  },
+});
+
+export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder];
 
 let _agent: Agent | null = null;
 export function getAgent(): Agent {
