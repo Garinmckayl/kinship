@@ -37,6 +37,13 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Agent tool `call_elder` lets the agent itself place urgent calls; degrades to family escalation without creds.
 - Env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `ELDER_PHONE_NUMBER`, `VOICE_CALLBACK_SECRET`, `PUBLIC_BASE_URL`.
 
+## WhatsApp voice loop (FREE — works in Ethiopia where Twilio trial can't)
+- Twilio trial can't terminate to +251, so: Meta Cloud API (free) voice notes instead.
+- Agent → Ruth: ElevenLabs MP3 sent as WhatsApp audio (`POST /api/whatsapp/send {secret, to?, text}`).
+- Ruth → agent: text or voice note → `/api/whatsapp/webhook` → voice transcribed via ElevenLabs Scribe → Strands agent replies with voice note.
+- Agent tool `call_elder` tries Twilio → WhatsApp voice → family escalation, in that order.
+- Setup: developers.facebook.com → app → WhatsApp API Setup → test number works instantly. Env: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `ELDER_WHATSAPP_NUMBER` (e.g. 251911234567), `WHATSAPP_VERIFY_TOKEN`.
+
 ## Run locally
 ```bash
 cd frontend && npm install && npm run dev

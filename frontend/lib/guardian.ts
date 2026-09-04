@@ -127,21 +127,31 @@ export const scheduleTask = tool({
 
 export const callElder = tool({
   name: "call_elder",
-  description: "Ring the elder's REAL phone via Twilio voice call. Use for urgent/unresponsive cases only.",
+  description: "Reach the elder's REAL devices (Twilio voice call, else WhatsApp voice note). Use for urgent/unresponsive cases only.",
   inputSchema: z.object({
     userId: z.string(),
-    reason: z.string().describe("Why the call is needed"),
+    reason: z.string().describe("Why contact is needed"),
   }),
   callback: async (input) => {
+    const { getState } = await import("./demo-data");
+    // 1) Real PSTN call where supported.
     const { phoneConfig, publicBase, placeCall } = await import("./phone");
     const cfg = phoneConfig();
-    if (!cfg.ok || !cfg.elder || !process.env.PUBLIC_BASE_URL) {
-      const { getState } = await import("./demo-data");
-      getState(input.userId).escalations.push({ level: "urgent", message: `Call requested (${input.reason}) but phone not configured — family must call now.`, time: "now" });
-      return JSON.stringify({ ok: false, error: "phone not configured, escalated to family instead" });
+    if (cfg.ok && cfg.elder && process.env.PUBLIC_BASE_URL) {
+      const out = await placeCall(cfg.elder, `${publicBase()}/api/voice/incoming?user_id=${encodeURIComponent(input.userId)}`);
+      if (out.ok) return JSON.stringify({ channel: "twilio-call", ...out });
     }
-    const out = await placeCall(cfg.elder, `${publicBase()}/api/voice/incoming?user_id=${encodeURIComponent(input.userId)}`);
-    return JSON.stringify(out);
+    // 2) WhatsApp voice note (free, works in Ethiopia).
+    const { waConfig, sendWaVoice } = await import("./whatsapp");
+    const wa = waConfig();
+    if (wa.ok && wa.elder && process.env.PUBLIC_BASE_URL && process.env.ELEVENLABS_API_KEY) {
+      const audioUrl = `${publicBase()}/api/speak?text=${encodeURIComponent(`Ruth, it's ElderLove. ${input.reason} Please reply to me here.`.slice(0, 500))}`;
+      const sent = await sendWaVoice(wa.elder, audioUrl);
+      if (sent.ok) return JSON.stringify({ ok: true, channel: "whatsapp-voice" });
+    }
+    // 3) Degrade to family escalation, never silent.
+    getState(input.userId).escalations.push({ level: "urgent", message: `Contact requested (${input.reason}) but no channel configured — family must call now.`, time: "now" });
+    return JSON.stringify({ ok: false, error: "no channel configured, escalated to family instead" });
   },
 });
 
