@@ -16,7 +16,9 @@ Rules:
 - Always confirm intake explicitly before logging.
 - End every turn with one gentle question, not three.
 - BACKGROUND WORK: if Ruth asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
-- REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.`;
+- REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
+- APPOINTMENTS: Ruth's doctor visits live in manage_appointments. Book, list, or cancel directly ("book my cardiologist Tuesday at 10"). Confirm date + time back to her simply.
+- HEALTH: vitals (blood pressure, steps, sleep, weight) arrive via log_health_metric or her watch. Reference trends from get_health_trends warmly ("your evenings look steady"); never diagnose.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -171,7 +173,82 @@ export const callElder = tool({
   },
 });
 
-export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder];
+export const manageAppointments = tool({
+  name: "manage_appointments",
+  description: "List, book, or cancel Ruth's doctor appointments. Book: needs title + ISO datetime. Also pushes to Google Calendar when configured.",
+  inputSchema: z.object({
+    userId: z.string(),
+    action: z.enum(["list", "create", "cancel"]),
+    title: z.string().optional().describe("e.g. 'Cardiologist visit'"),
+    doctor: z.string().optional(),
+    location: z.string().optional(),
+    at: z.string().optional().describe("ISO datetime, e.g. 2026-09-16T10:00:00"),
+    notes: z.string().optional(),
+    apptId: z.string().optional().describe("For cancel"),
+  }),
+  callback: async (input) => {
+    const { listAppointments, addAppointment, setAppointment } = await import("./store");
+    if (input.action === "list") {
+      return JSON.stringify(await listAppointments(input.userId));
+    }
+    if (input.action === "cancel" && input.apptId) {
+      await setAppointment(input.apptId, { status: "cancelled" });
+      return JSON.stringify({ ok: true, cancelled: input.apptId });
+    }
+    if (input.action === "create" && input.title && input.at) {
+      const appt = await addAppointment(input.userId, {
+        title: input.title, doctor: input.doctor ?? "", location: input.location ?? "",
+        at: input.at, notes: input.notes ?? "",
+      });
+      let google: unknown = "not-configured";
+      try {
+        const { gcalOn, gcalCreate } = await import("./gcal");
+        if (gcalOn()) {
+          const end = new Date(new Date(input.at).getTime() + 60 * 60_000).toISOString();
+          const g = await gcalCreate({ title: input.title, description: `ElderLove booking for Ruth. ${input.notes ?? ""}`, startISO: input.at, endISO: end, location: input.location ?? "" });
+          google = g;
+          if (g.ok) {
+            const { q } = await import("./db");
+            await q("update appointments set google_event_id=$1 where id=$2", [(g as { eventId?: string }).eventId ?? "", appt.id]);
+          }
+        }
+      } catch (e) {
+        google = `failed: ${String(e).slice(0, 100)}`;
+      }
+      return JSON.stringify({ ok: true, appointment: appt, google });
+    }
+    return JSON.stringify({ ok: false, error: "missing fields (create needs title+at, cancel needs apptId)" });
+  },
+});
+
+export const logHealthMetric = tool({
+  name: "log_health_metric",
+  description: "Log a vital: type like blood_pressure_sys, blood_pressure_dia, steps, sleep_hours, weight_kg, heart_rate.",
+  inputSchema: z.object({
+    userId: z.string(),
+    type: z.string(),
+    value: z.number(),
+    unit: z.string().optional(),
+    source: z.string().optional().describe("manual | watch | agent"),
+  }),
+  callback: async (input) => {
+    const { logHealth } = await import("./store");
+    const m = await logHealth(input.userId, input.type, input.value, input.unit ?? "", input.source ?? "agent");
+    return JSON.stringify({ ok: true, metric: m });
+  },
+});
+
+export const getHealthTrends = tool({
+  name: "get_health_trends",
+  description: "Latest vitals + 7-day averages. Reference warmly, never diagnose.",
+  inputSchema: z.object({ userId: z.string() }),
+  callback: async (input) => {
+    const { healthTrends } = await import("./store");
+    return JSON.stringify(await healthTrends(input.userId));
+  },
+});
+
+export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends];
 
 let _agent: Agent | null = null;
 export function getAgent(): Agent {
@@ -179,6 +256,8 @@ export function getAgent(): Agent {
     _agent = new Agent({
       systemPrompt: SYSTEM_PROMPT,
       tools: ALL_TOOLS,
+      printer: false,
+      contextManager: "auto",
       // Uses Bedrock default model; set AWS creds + BEDROCK_MODEL_ID to override.
     });
   }

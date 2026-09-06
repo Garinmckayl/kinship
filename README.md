@@ -52,6 +52,20 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Urgent/attention escalations also push WhatsApp text to the caregiver automatically.
 - Vercel env add: `DATABASE_URL`, `AUTH_SECRET`, `REPORT_SECRET`, `RESEND_API_KEY`, `CAREGIVER_WHATSAPP_NUMBER`, `CAREGIVER_EMAIL`.
 
+## AgentCore (Bedrock, TypeScript)
+- `agentcore/` = standalone Express guardian (`GET /ping`, `POST /invocations`) per the Strands TS deploy guide, same tools + Postgres. Proven live: `/ping` healthy, `/invocations` answered from Bedrock with tool calls.
+- `agentcore/deploy.sh` pushes to ECR + creates the runtime (us-west-2). Needs docker buildx + IAM perms; runtime costs money — deploy deliberately.
+
+## Chat that doesn't suck
+- Token streaming via `agent.stream()` async iterators (`/api/chat/stream`, `/api/caregiver/stream`, SSE), markdown rendering, auto-scroll, live tool status ("Logging your pill…").Agents use `contextManager: "auto"` (summarize + offload per Strands context-management).
+
+## Beyond meds
+- **Appointments:** `manage_appointments` tool + `/calendar` page (shadcn-style month view) + Google Calendar service-account sync (`GOOGLE_CLIENT_EMAIL/PRIVATE_KEY/CALENDAR_ID`). Ruth books by voice: "book my cardiologist Tuesday at 10".
+- **Health:** vitals table + `/health` page (sparklines, 7-day avgs) + `POST /api/health` ingest (caregiver session or `REPORT_SECRET` — any watch app can push) + `log_health_metric`/`get_health_trends` tools the agent references.
+- **Elder today board:** `/api/today` quick-actions card (meds to log, check-in, reminders, today's doctors).
+- **Caregiver chat:** family dashboard Chat tab — realtime streaming answers from live data, "add Vitamin D at 8am", "remind mom now".
+- shadcn-style `components/ui.tsx` (card, button, badge, input, calendar, tabs) used across new pages.
+
 ## Run locally
 ```bash
 cd frontend && npm install && npm run dev

@@ -185,6 +185,75 @@ export async function listReports(elder = "ruth-78", n = 7) {
   return q("select date,channel,summary,created_at from reports where elder_id=$1 order by created_at desc limit $2", [elder, n]);
 }
 
+// ---------- appointments ----------
+export type Appt = { id: string; title: string; doctor: string; location: string; at: string; notes: string; status: string; google_event_id?: string };
+
+export async function listAppointments(elder = "ruth-78", upcomingOnly = true): Promise<Appt[]> {
+  if (!dbOn()) return [];
+  await ready();
+  return q(
+    upcomingOnly
+      ? "select id,title,doctor,location,at,notes,status,google_event_id from appointments where elder_id=$1 and status='upcoming' and at >= now() - interval '1 day' order by at"
+      : "select id,title,doctor,location,at,notes,status,google_event_id from appointments where elder_id=$1 order by at desc limit 30",
+    [elder]
+  );
+}
+
+export async function addAppointment(elder: string, a: { title: string; doctor: string; location: string; at: string; notes: string }): Promise<Appt> {
+  await ready();
+  const id = randomId("appt");
+  const rows = await q<Appt>("insert into appointments(id,elder_id,title,doctor,location,at,notes) values($1,$2,$3,$4,$5,$6,$7) returning id,title,doctor,location,at,notes,status,google_event_id",
+    [id, elder, a.title, a.doctor, a.location, a.at, a.notes]);
+  return rows[0];
+}
+
+export async function setAppointment(id: string, patch: Partial<Pick<Appt, "status" | "title" | "at" | "notes">>): Promise<Appt | null> {
+  await ready();
+  const cur = await q<Appt>("select id,title,doctor,location,at,notes,status,google_event_id from appointments where id=$1", [id]);
+  if (!cur.length) return null;
+  const m = { ...cur[0], ...patch };
+  const rows = await q<Appt>("update appointments set title=$1,at=$2,notes=$3,status=$4 where id=$5 returning id,title,doctor,location,at,notes,status,google_event_id",
+    [m.title, m.at, m.notes, m.status, id]);
+  return rows[0];
+}
+
+export async function deleteAppointment(id: string) {
+  await ready();
+  await q("delete from appointments where id=$1", [id]);
+}
+
+// ---------- health metrics ----------
+export type Metric = { type: string; value: number; unit: string; at: string; source: string };
+
+export async function logHealth(elder: string, type: string, value: number, unit = "", source = "manual"): Promise<Metric> {
+  await ready();
+  const rows = await q<Metric>("insert into health_metrics(elder_id,type,value,unit,source) values($1,$2,$3,$4,$5) returning type,value,unit,at,source",
+    [elder, type, value, unit, source]);
+  return rows[0];
+}
+
+export async function listHealth(elder = "ruth-78", type?: string, n = 30): Promise<Metric[]> {
+  if (!dbOn()) return [];
+  await ready();
+  return type
+    ? q("select type,value,unit,at,source from health_metrics where elder_id=$1 and type=$2 order by at desc limit $3", [elder, type, n])
+    : q("select type,value,unit,at,source from health_metrics where elder_id=$1 order by at desc limit $2", [elder, n]);
+}
+
+export async function healthTrends(elder = "ruth-78") {
+  if (!dbOn()) return { latest: {}, weekAvg: {}, readings7d: 0 };
+  await ready();
+  const latest = await q<{ type: string; value: number; unit: string; at: string }>(
+    "select distinct on (type) type,value,unit,at from health_metrics where elder_id=$1 order by type,at desc", [elder]);
+  const avg = await q<{ type: string; avg: number; n: number }>(
+    "select type,avg(value),count(*) n from health_metrics where elder_id=$1 and at >= now() - interval '7 days' group by type", [elder]);
+  const latestMap: Record<string, { value: number; unit: string; at: string }> = {};
+  for (const r of latest) latestMap[r.type] = { value: r.value, unit: r.unit, at: new Date(r.at).toISOString() };
+  const avgMap: Record<string, { avg: number; n: number }> = {};
+  for (const r of avg) avgMap[r.type] = { avg: Math.round(Number(r.avg) * 10) / 10, n: Number(r.n) };
+  return { latest: latestMap, weekAvg: avgMap, readings7d: avg.reduce((s, r) => s + Number(r.n), 0) };
+}
+
 // ---------- users (auth) ----------
 export async function createUser(name: string, email: string, passwordHash: string, role: string) {
   if (!dbOn()) throw new Error("database not configured (set DATABASE_URL)");

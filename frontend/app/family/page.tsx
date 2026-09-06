@@ -1,8 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { BorderBeam } from "border-beam";
 import { AgentOrb } from "@/components/AgentOrb";
+import { Markdown } from "@/components/Markdown";
+import { BeamInput } from "@/components/BeamInput";
+import { Tabs } from "@/components/ui";
 import { BellIcon, CheckIcon, ClockIcon, HeartIcon, LogoutIcon, PillIcon, PlusIcon, TrashIcon } from "@/components/icons";
 
 const API = "/api";
@@ -44,6 +47,11 @@ export default function FamilyPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
+  const [tab, setTab] = useState("Overview");
+  const [cMsgs, setCMsgs] = useState<{ role: "cg" | "agent"; text: string }[]>([]);
+  const [cInput, setCInput] = useState("");
+  const cScroll = useRef<HTMLDivElement>(null);
+  const cBusy = useRef(false);
 
   useEffect(() => {
     fetch(`${API}/auth/me`).then((r) => (r.ok ? r.json() : null)).then((d) => setMe(d?.user ?? null)).catch(() => {}).finally(() => setAuthChecked(true));
@@ -91,6 +99,61 @@ export default function FamilyPage() {
     if (res.ok) fetch(`${API}/reports`).then((r) => r.json()).then((x) => setReports(x.reports ?? [])).catch(() => {});
   }
 
+  useEffect(() => {
+    cScroll.current?.scrollTo({ top: cScroll.current.scrollHeight, behavior: "smooth" });
+  }, [cMsgs, tab]);
+
+  // Caregiver realtime chat: streaming answers from live parent data.
+  async function sendC() {
+    const text = cInput.trim();
+    if (!text || cBusy.current) return;
+    cBusy.current = true;
+    setCMsgs((m) => [...m, { role: "cg", text }, { role: "agent", text: "" }]);
+    setCInput("");
+    const patch = (t: string) =>
+      setCMsgs((m) => {
+        const c = [...m];
+        c[c.length - 1] = { role: "agent", text: t };
+        return c;
+      });
+    try {
+      const res = await fetch(`${API}/caregiver/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      if (!res.ok || !res.body) throw new Error("failed");
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      let full = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() ?? "";
+        for (const p of parts) {
+          const line = p.trim();
+          if (!line.startsWith("data:")) continue;
+          const ev = JSON.parse(line.slice(5));
+          if (typeof ev.t === "string") {
+            full += ev.t;
+            patch(full);
+          } else if (ev.done) {
+            patch(ev.full ?? full);
+          } else if (ev.error) {
+            throw new Error(ev.error);
+          }
+        }
+      }
+    } catch {
+      patch("Couldn't reach the assistant. Try again.");
+    } finally {
+      cBusy.current = false;
+    }
+  }
+
   const urgent = s.escalations.find((e) => e.level === "urgent");
   const pct = adherencePct(s.adherence_today);
 
@@ -127,7 +190,37 @@ export default function FamilyPage() {
             </button>
           )}
         </header>
+        <div className="flex gap-2 text-sm">
+          <Link href="/calendar" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Doctor calendar</Link>
+          <Link href="/health" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Health</Link>
+          <Link href="/elder" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Elder view</Link>
+        </div>
 
+        <Tabs tabs={["Overview", "Chat"]} active={tab} onChange={setTab} />
+
+        {tab === "Chat" ? (
+          <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+            <div ref={cScroll} className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 mb-4">
+              {cMsgs.length === 0 && (
+                <p className="text-slate-400">
+                  Ask anything about Ruth — meds, mood, alerts, appointments, health.
+                  Try "add Vitamin D 1000 IU at 8am" or "remind mom to drink water now".
+                </p>
+              )}
+              {cMsgs.map((m, i) =>
+                m.role === "cg" ? (
+                  <div key={i} className="ml-12 bg-indigo-500 rounded-2xl p-3 text-right">{m.text}</div>
+                ) : (
+                  <div key={i} className="bg-slate-950/60 ring-1 ring-white/10 rounded-2xl p-3">
+                    <Markdown text={m.text || "…"} />
+                  </div>
+                )
+              )}
+            </div>
+            <BeamInput value={cInput} onChange={setCInput} onSend={sendC} onMic={() => {}} placeholder="Ask about Ruth…" />
+          </section>
+        ) : (
+        <>
         {/* Stat cards */}
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5 text-center">
@@ -266,6 +359,8 @@ export default function FamilyPage() {
             ))}
           </div>
         </section>
+        </>
+        )}
       </div>
     </main>
   );

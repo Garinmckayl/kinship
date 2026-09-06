@@ -1,0 +1,125 @@
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Card, CardTitle, Btn, Badge, Input, Field, CalendarMonth } from "@/components/ui";
+
+type Appt = { id: string; title: string; doctor: string; location: string; at: string; notes: string; status: string };
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+export default function CalendarPage() {
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
+  const [day, setDay] = useState(now.getDate());
+  const [appts, setAppts] = useState<Appt[]>([]);
+  const [form, setForm] = useState({ title: "", doctor: "", location: "", at: "", notes: "" });
+  const [authed, setAuthed] = useState(false);
+
+  const load = () =>
+    fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (d) { setAppts(d.appointments ?? []); setAuthed(true); }
+    }).catch(() => {});
+
+  useEffect(() => { load(); }, []);
+
+  const marks: Record<number, number> = {};
+  for (const a of appts) {
+    const d = new Date(a.at);
+    if (d.getFullYear() === year && d.getMonth() === month) marks[d.getDate()] = (marks[d.getDate()] ?? 0) + 1;
+  }
+  const dayAppts = appts.filter((a) => {
+    const d = new Date(a.at);
+    return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+  });
+  const upcoming = [...appts].sort((a, b) => +new Date(a.at) - +new Date(b.at)).slice(0, 5);
+
+  async function add() {
+    if (!form.title || !form.at) return;
+    const res = await fetch("/api/appointments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    if (res.ok) {
+      const d = await res.json();
+      setAppts((a) => [...a, d.appointment]);
+      setForm({ title: "", doctor: "", location: "", at: "", notes: "" });
+    }
+  }
+
+  async function cancel(id: string) {
+    const res = await fetch(`/api/appointments/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "cancelled" }) });
+    if (res.ok) load();
+  }
+
+  if (!authed) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white grid place-items-center px-5">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold">Doctor calendar</h1>
+          <p className="text-slate-300">Caregiver login required.</p>
+          <Link href="/login" className="inline-block px-8 py-3 rounded-2xl bg-indigo-600 font-bold">Log in</Link>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+      <div className="max-w-3xl mx-auto px-5 py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Doctor calendar</h1>
+          <Link href="/family" className="text-indigo-300 text-sm">← Dashboard</Link>
+        </div>
+
+        <Card>
+          <div className="flex items-center justify-between mb-3">
+            <Btn variant="ghost" onClick={() => { const m = month - 1; if (m < 0) { setYear(year - 1); setMonth(11); } else setMonth(m); }}>←</Btn>
+            <p className="font-bold text-lg">{MONTHS[month]} {year}</p>
+            <Btn variant="ghost" onClick={() => { const m = month + 1; if (m > 11) { setYear(year + 1); setMonth(0); } else setMonth(m); }}>→</Btn>
+          </div>
+          <CalendarMonth year={year} month={month} marks={marks} selected={day} onPick={setDay} />
+        </Card>
+
+        <Card>
+          <CardTitle>Selected day — {MONTHS[month]} {day}</CardTitle>
+          {dayAppts.length === 0 ? <p className="text-slate-400">Nothing scheduled. Ruth can just ask: "book my cardiologist Tuesday at 10".</p> : (
+            <div className="space-y-2">
+              {dayAppts.map((a) => (
+                <div key={a.id} className="bg-slate-950/60 ring-1 ring-white/10 rounded-2xl p-3 flex items-center gap-3">
+                  <div className="flex-1">
+                    <p className="font-bold">{a.title} {a.doctor && <span className="font-normal text-slate-300">· {a.doctor}</span>}</p>
+                    <p className="text-sm text-slate-400">{new Date(a.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} {a.location && `· ${a.location}`}</p>
+                  </div>
+                  <Badge tone={a.status === "cancelled" ? "red" : "green"}>{a.status}</Badge>
+                  {a.status !== "cancelled" && <Btn variant="ghost" onClick={() => cancel(a.id)}>Cancel</Btn>}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <CardTitle>Book appointment</CardTitle>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <Field label="Title"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Cardiologist visit" /></Field>
+            <Field label="Doctor"><Input value={form.doctor} onChange={(e) => setForm({ ...form, doctor: e.target.value })} placeholder="Dr. Alemu" /></Field>
+            <Field label="Date & time"><Input value={form.at} onChange={(e) => setForm({ ...form, at: e.target.value })} type="datetime-local" /></Field>
+            <Field label="Location"><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Tikur Anbessa, Room 4" /></Field>
+          </div>
+          <div className="mt-3"><Btn onClick={add}>Book</Btn></div>
+          <p className="text-xs text-slate-500 mt-2">Pushes to Google Calendar when GOOGLE_* env is set. Ruth can also book by voice.</p>
+        </Card>
+
+        <Card>
+          <CardTitle>Upcoming</CardTitle>
+          <div className="space-y-2">
+            {upcoming.map((a) => (
+              <p key={a.id} className="text-slate-200">
+                <b>{new Date(a.at).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}</b> · {a.title} {a.doctor && `(${a.doctor})`}
+              </p>
+            ))}
+            {upcoming.length === 0 && <p className="text-slate-400">Nothing upcoming.</p>}
+          </div>
+        </Card>
+      </div>
+    </main>
+  );
+}

@@ -4,7 +4,19 @@ import { BorderBeam } from "border-beam";
 import { AgentOrb, PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
 import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
-import { BellIcon, ChatIcon, CheckIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
+import { Markdown } from "@/components/Markdown";
+import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
+
+const TOOL_LABELS: Record<string, string> = {
+  get_med_schedule: "Checking your schedule…",
+  confirm_intake: "Logging your pill…",
+  log_mood: "Noting how you feel…",
+  retrieve_memory: "Finding a warm memory…",
+  notify_family: "Updating your family…",
+  summarize_for_doctor: "Preparing your health summary…",
+  schedule_task: "Setting that reminder…",
+  call_elder: "Reaching your phone…",
+};
 
 const API = "/api";
 type Msg = { role: "agent" | "elder"; text: string };
@@ -19,10 +31,18 @@ export default function ElderPage() {
   const [callMode, setCallMode] = useState<CallMode>("off");
   const [seconds, setSeconds] = useState(0);
   const [wakeOn, setWakeOn] = useState(false);
+  const [toolNote, setToolNote] = useState("");
+  const [today, setToday] = useState<{
+    meds: { id: string; name: string; dosage: string; time: string; taken: boolean }[];
+    checkedInToday: boolean; tasksPending: number;
+    appointmentsToday: { title: string; at: string }[]; done: boolean;
+  } | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recogRef = useRef<any>(null);
   const wakeRecRef = useRef<any>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const streamingRef = useRef(false);
   const callActiveRef = useRef(false);
   callActiveRef.current = callMode === "active";
   const phaseRef = useRef<AgentPhase>("idle");
@@ -37,35 +57,87 @@ export default function ElderPage() {
   }, []);
 
   useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs, toolNote, phase]);
+
+  useEffect(() => {
     if (callMode !== "active") return;
     const t = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(t);
   }, [callMode]);
+
+  useEffect(() => {
+    const load = () => fetch(`${API}/today`).then((r) => r.json()).then(setToday).catch(() => {});
+    load();
+    const t = setInterval(load, 30000);
+    return () => clearInterval(t);
+  }, [phase]);
 
   function stopAudio() {
     audioRef.current?.pause();
     audioRef.current = null;
   }
 
+  // Streaming chat: tokens render live, tool activity shows, full reply drives voice.
   async function send(text: string) {
-    if (!text.trim()) return;
+    if (!text.trim() || streamingRef.current) return;
+    streamingRef.current = true;
     stopAudio();
     setMsgs((m) => [...m, { role: "elder", text }]);
     setInput("");
     setPhase("connecting");
+    setToolNote("");
+    setMsgs((m) => [...m, { role: "agent", text: "" }]);
+    const patchLast = (t: string) =>
+      setMsgs((m) => {
+        const c = [...m];
+        c[c.length - 1] = { role: "agent", text: t };
+        return c;
+      });
     try {
-      const res = await fetch(`${API}/chat`, {
+      const res = await fetch(`${API}/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: "ruth-78", message: text }),
       });
-      const data = await res.json();
-      const reply = data.reply ?? "I'm here with you.";
-      setMsgs((m) => [...m, { role: "agent", text: reply }]);
-      await speak(reply);
+      if (!res.ok || !res.body) throw new Error("stream failed");
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      let full = "";
+      setPhase("thinking");
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() ?? "";
+        for (const p of parts) {
+          const line = p.trim();
+          if (!line.startsWith("data:")) continue;
+          const ev = JSON.parse(line.slice(5));
+          if (typeof ev.t === "string") {
+            full += ev.t;
+            patchLast(full);
+          } else if (typeof ev.tool === "string") {
+            setToolNote(TOOL_LABELS[ev.tool] ?? "Working…");
+          } else if (ev.done) {
+            full = ev.full ?? full;
+            patchLast(full);
+          } else if (ev.error) {
+            throw new Error(ev.error);
+          }
+        }
+      }
+      setToolNote("");
+      await speak(full || "I'm here with you.");
     } catch {
-      setMsgs((m) => [...m, { role: "agent", text: "(offline) Logged with love. Your family is notified only if needed. 💜" }]);
+      patchLast("(offline) Logged with love. Your family is notified only if needed.");
+      setToolNote("");
       setPhase("idle");
+    } finally {
+      streamingRef.current = false;
+      fetch(`${API}/today`).then((r) => r.json()).then(setToday).catch(() => {});
     }
   }
 
@@ -267,12 +339,53 @@ export default function ElderPage() {
           </button>
         </div>
 
+        {/* Today: quick actions */}
+        {today && (
+          <div className="mt-6 bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-bold text-xl">Today</p>
+              {today.done ? (
+                <span className="text-emerald-300 font-bold">All done — rest well</span>
+              ) : (
+                <span className="text-amber-300 font-bold">
+                  {today.meds.filter((m) => !m.taken).length} to go
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              {today.meds.map((m) => (
+                <button key={m.id} disabled={m.taken} onClick={() => send(`Yes, I took my ${m.name}`)}
+                  className={`w-full flex items-center gap-3 rounded-2xl p-3 text-left ring-1 ring-white/10 ${m.taken ? "bg-emerald-500/10 opacity-70" : "bg-slate-950/60 hover:bg-slate-900"}`}>
+                  <span className={`w-9 h-9 rounded-full grid place-items-center font-bold ${m.taken ? "bg-emerald-500" : "bg-white/10"}`}>
+                    {m.taken ? <CheckIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5" />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="font-bold text-lg">{m.name}</span> <span className="text-slate-300">{m.dosage}</span>
+                    <span className="block text-sm text-slate-400">{m.time}{m.taken ? " · taken" : " · tap to log"}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3 text-sm">
+              <span className={`px-3 py-1 rounded-full ${today.checkedInToday ? "bg-emerald-500/20 text-emerald-300" : "bg-white/10 text-slate-300"}`}>
+                {today.checkedInToday ? "Checked in" : "Morning check-in pending"}
+              </span>
+              {today.tasksPending > 0 && <span className="px-3 py-1 rounded-full bg-white/10 text-slate-300">{today.tasksPending} reminder(s) working</span>}
+              {today.appointmentsToday.map((a, i) => (
+                <span key={i} className="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300">
+                  Doctor: {a.title} {new Date(a.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Conversation */}
-        <div className="mt-8 space-y-3">
-          {msgs.slice(-6).map((m, i) =>
+        <div ref={scrollRef} className="mt-8 space-y-3 max-h-[42vh] overflow-y-auto pr-1">
+          {msgs.map((m, i) =>
             m.role === "agent" ? (
-              <div key={i} className="bg-white/10 backdrop-blur rounded-3xl p-5 text-2xl leading-relaxed ring-1 ring-white/10">
-                {m.text}
+              <div key={i} className="bg-white/10 backdrop-blur rounded-3xl p-5 ring-1 ring-white/10">
+                <Markdown text={m.text || "…"} large />
               </div>
             ) : (
               <div key={i} className="ml-16 bg-indigo-500 rounded-3xl p-4 text-xl text-right">
@@ -280,6 +393,7 @@ export default function ElderPage() {
               </div>
             )
           )}
+          {toolNote && <p className="text-indigo-300 text-lg animate-pulse">{toolNote}</p>}
         </div>
       </div>
 

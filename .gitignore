@@ -5,3 +5,5 @@ out/
 .DS_Store
 .env*.local
 agent/__pycache__/
+agentcore/dist/
+agentcore/node_modules/

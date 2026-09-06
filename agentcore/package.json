@@ -1,0 +1,24 @@
+{
+  "name": "elderlove-agentcore",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@opentelemetry/api": "^1.9.0",
+    "@strands-agents/sdk": "^1.16.0",
+    "@aws-sdk/client-bedrock-agentcore": "latest",
+    "express": "^4.18.2",
+    "pg": "^8.13.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20",
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.3.3"
+  }
+}

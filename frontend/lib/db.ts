@@ -93,6 +93,27 @@ create table if not exists reports (
   summary text not null,
   created_at timestamptz default now()
 );
+create table if not exists appointments (
+  id text primary key,
+  elder_id text not null,
+  title text not null,
+  doctor text default '',
+  location text default '',
+  at timestamptz not null,
+  notes text default '',
+  status text default 'upcoming',
+  google_event_id text default '',
+  created_at timestamptz default now()
+);
+create table if not exists health_metrics (
+  id serial primary key,
+  elder_id text not null,
+  type text not null,
+  value double precision not null,
+  unit text default '',
+  at timestamptz default now(),
+  source text default 'manual'
+);
 `;
 
 let readyP: Promise<void> | null = null;
