@@ -82,12 +82,27 @@ app.get("/ping", (_req: Request, res: Response) =>
 );
 app.post("/invocations", express.raw({ type: "*/*" }), async (req: Request, res: Response) => {
   try {
-    const raw = new TextDecoder().decode(req.body as Buffer);
+    // AgentCore may deliver Buffer, string, or a parsed/wrapped object — normalize.
+    const b = req.body as unknown;
+    let raw: string;
+    if (Buffer.isBuffer(b)) raw = new TextDecoder().decode(b);
+    else if (typeof b === "string") raw = b;
+    else raw = JSON.stringify(b ?? {});
     let prompt = raw;
     try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed.message === "string") {
-        prompt = `[user ${parsed.user_id ?? "ruth-78"}] ${parsed.message}`;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const inner = (parsed.input ?? parsed) as Record<string, unknown>;
+      if (typeof inner.message === "string") {
+        prompt = `[user ${String(inner.user_id ?? "ruth-78")}] ${inner.message}`;
+      } else if (typeof parsed.payload === "string") {
+        // base64-wrapped payload variant
+        const dec = Buffer.from(parsed.payload, "base64").toString("utf8");
+        try {
+          const p2 = JSON.parse(dec) as Record<string, unknown>;
+          prompt = typeof p2.message === "string" ? `[user ${String(p2.user_id ?? "ruth-78")}] ${p2.message}` : dec;
+        } catch {
+          prompt = dec;
+        }
       }
     } catch { /* plain-text prompt */ }
     const result = await agent.invoke(prompt);

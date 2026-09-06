@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:22 AS builder
 WORKDIR /app
 COPY package.json package-lock.json* .npmrc ./
-RUN npm install --omit=dev
+RUN npm install
 COPY tsconfig.json index.ts ./
 RUN npx tsc
 

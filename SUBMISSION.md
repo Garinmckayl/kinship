@@ -14,7 +14,7 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 - [ ] Bonus: builder.aws.com post titled with "Agents for Humans" (bonus points)
 
 ## Score boosters (from judging criteria)
-- [ ] **AgentCore deployed** — service + Dockerfile + deploy.sh ready; needs approval (costs $ while live) + buildx machine. Explicitly strengthens Technical Implementation.
+- [x] **AgentCore deployed** — `arn:aws:bedrock-agentcore:us-west-2:451870923073:runtime/elderlove_guardian-2ee2NC41zV` (READY, invocation-tested). ECR: `elderlove-guardian:latest`. NOTE: bills while live — teardown after judging if desired.
 - [ ] **$50 AWS credits** — claim via Resources tab form.
 - [ ] Vercel env vars set (DATABASE_URL, AUTH_SECRET, AWS ×3, ELEVENLABS ×2, PUBLIC_BASE_URL, REPORT_SECRET, ...)
 
