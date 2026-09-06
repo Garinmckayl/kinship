@@ -187,6 +187,7 @@ export async function listReports(elder = "ruth-78", n = 7) {
 
 // ---------- users (auth) ----------
 export async function createUser(name: string, email: string, passwordHash: string, role: string) {
+  if (!dbOn()) throw new Error("database not configured (set DATABASE_URL)");
   await ready();
   const rows = await q<{ id: number; name: string; email: string; role: string }>(
     "insert into users(name,email,password_hash,role) values($1,$2,$3,$4) returning id,name,email,role",
@@ -196,6 +197,7 @@ export async function createUser(name: string, email: string, passwordHash: stri
 }
 
 export async function getUserByEmail(email: string) {
+  if (!dbOn()) throw new Error("database not configured (set DATABASE_URL)");
   await ready();
   const rows = await q<{ id: number; name: string; email: string; role: string; password_hash: string }>(
     "select id,name,email,role,password_hash from users where email=$1", [email]

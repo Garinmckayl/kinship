@@ -9,6 +9,8 @@ export async function POST(req: Request) {
     res.headers.set("Set-Cookie", sessionCookie(mintSession(u)));
     return res;
   } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : "signup failed" }, { status: 400 });
+    const msg = e instanceof Error ? e.message : "signup failed";
+    const status = msg.includes("database not configured") ? 503 : 400;
+    return NextResponse.json({ error: msg }, { status });
   }
 }
