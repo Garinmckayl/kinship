@@ -52,6 +52,11 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Urgent/attention escalations also push WhatsApp text to the caregiver automatically.
 - Vercel env add: `DATABASE_URL`, `AUTH_SECRET`, `REPORT_SECRET`, `RESEND_API_KEY`, `CAREGIVER_WHATSAPP_NUMBER`, `CAREGIVER_EMAIL`.
 
+## Life-saving loops (why this wins "for humans")
+- **Silence is the emergency.** Every elder message is a heartbeat. Inngest `welfare-check` cron (30 min) fires when Ruth goes quiet past `WELFARE_QUIET_MINUTES` (6h default): attention nudge → urgent + caregiver WhatsApp + direct voice ping past 2×. Nights are sleep, not silence. Manual trigger: `POST /api/welfare/check` (REPORT_SECRET).
+- **Sent ≠ saved.** Every attention/urgent alert needs a family "I'm on it" tap (`PATCH /api/escalations/[id]`); unconfirmed alerts re-fire via WhatsApp every 30 min until someone owns them.
+- **Double-dose guard.** `confirm_intake` refuses same-day re-logs, stops Ruth firmly, and writes the prevented attempt to the family trail. Proven live: adherence stayed 1/3, family notified.
+
 ## AgentCore (Bedrock, TypeScript)
 - `agentcore/` = standalone Express guardian (`GET /ping`, `POST /invocations`) per the Strands TS deploy guide, same tools + Postgres. Proven live: `/ping` healthy, `/invocations` answered from Bedrock with tool calls.
 - `agentcore/deploy.sh` pushes to ECR + creates the runtime (us-west-2). Needs docker buildx + IAM perms; runtime costs money — deploy deliberately.

@@ -13,7 +13,7 @@ Rules:
 - You REMIND and LOG medication, you never diagnose or change dosage. The schedule comes from get_med_schedule (managed by the caregiver) — never invent medications.
 - If missed dose >= 2 or words like chest pain, fall, dizzy, call doctor/911 -> escalate URGENT.
 - If lonely/sad -> offer companionship + one memory moment, log mood, notify family at INFO level only.
-- Always confirm intake explicitly before logging.
+- Always confirm intake explicitly before logging. If confirm_intake returns alreadyTaken, STOP her immediately: she already took it today and another dose could harm her. To record a prevented double-dose, ALWAYS call confirm_intake with that medId anyway — it safely refuses and alerts the family.
 - End every turn with one gentle question, not three.
 - BACKGROUND WORK: if Ruth asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
@@ -35,12 +35,19 @@ export const getMedSchedule = tool({
 
 export const confirmIntake = tool({
   name: "confirm_intake",
-  description: "Log that elder confirmed taking a medication.",
+  description: "Log that elder confirmed taking a medication. NEVER log the same med twice in one day — if alreadyTaken, STOP her firmly and kindly.",
   inputSchema: z.object({
     userId: z.string(),
     medId: z.string().describe("Medication id from schedule"),
   }),
   callback: async (input) => {
+    const taken = await takenMedIds(input.userId);
+    if (taken.includes(input.medId)) {
+      const meds = await listMeds(input.userId);
+      const med = meds.find((m) => m.id === input.medId);
+      await addEscalation(input.userId, "attention", `Double-dose prevented: Ruth tried to log ${med?.name ?? input.medId} again — stopped her.`);
+      return JSON.stringify({ ok: false, alreadyTaken: true, takenToday: taken });
+    }
     const takenCount = await storeConfirmIntake(input.userId, input.medId, "agent");
     return JSON.stringify({ ok: true, takenCount });
   },
@@ -322,12 +329,21 @@ function messageToText(msg: unknown): string {
   }
 }
 
-export async function chat(userId: string, message: string) {
+export async function chat(userId: string, message: string, opts: { heartbeat?: boolean } = {}) {
+  const hb = opts.heartbeat !== false;
   // If no AWS creds, skip Bedrock and use fallback instantly.
   if (!process.env.AWS_REGION && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
+    if (hb) {
+      const { heartbeat } = await import("./store");
+      await heartbeat(userId, "chat").catch(() => {});
+    }
     return fallbackReply(userId, message);
   }
   try {
+    if (hb) {
+      const { heartbeat } = await import("./store");
+      await heartbeat(userId, "chat").catch(() => {});
+    }
     const agent = getAgent();
     const result = await agent.invoke(`[user ${userId}] ${message}`);
     const text = messageToText((result as { lastMessage?: unknown }).lastMessage ?? result);

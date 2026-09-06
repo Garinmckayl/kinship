@@ -29,7 +29,7 @@ export const processElderTask = inngest.createFunction(
       if (!task) return { ok: false, error: "task not found" };
       await updateTask(taskId, { status: "running" });
       try {
-        const out = await chat(task.userId, `[background task — Ruth may be offline, act via tools and escalate if needed] ${task.instruction}`);
+        const out = await chat(task.userId, `[background task — Ruth may be offline, act via tools and escalate if needed] ${task.instruction}`, { heartbeat: false });
         await updateTask(taskId, { status: "done", result: out.reply.slice(0, 500) });
         return { ok: true };
       } catch (e) {
@@ -76,4 +76,19 @@ export const dailyReport = inngest.createFunction(
   }
 );
 
-export const functions = [processElderTask, morningCheckin, dailyReport];
+// Welfare sweep every 30 min: silence is the emergency.
+export const welfareCheck = inngest.createFunction(
+  {
+    id: "welfare-check",
+    retries: 1,
+    triggers: [{ cron: "*/30 * * * *" }],
+  },
+  async ({ step }) => {
+    await step.run("sweep", async () => {
+      const { welfareSweep } = await import("./welfare");
+      return welfareSweep("ruth-78");
+    });
+  }
+);
+
+export const functions = [processElderTask, morningCheckin, dailyReport, welfareCheck];

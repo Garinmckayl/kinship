@@ -106,22 +106,53 @@ export async function addMemory(elder: string, title: string, note: string) {
 }
 
 // ---------- escalations ----------
-export async function addEscalation(elder: string, level: string, message: string): Promise<Escalation> {
+export type EscalationRow = Escalation & { id?: number; acked?: boolean };
+
+export async function addEscalation(elder: string, level: string, message: string): Promise<EscalationRow> {
   const e: Escalation = { level, message, time: fmtTime(new Date()) };
   if (!dbOn()) {
     getState(elder).escalations.push(e);
     return e;
   }
   await ready();
-  await q("insert into escalations(elder_id,level,message) values($1,$2,$3)", [elder, level, message]);
-  return e;
+  const rows = await q<{ id: number }>("insert into escalations(elder_id,level,message) values($1,$2,$3) returning id", [elder, level, message]);
+  return { ...e, id: rows[0].id, acked: false };
 }
 
-export async function listEscalations(elder = "ruth-78", n = 10): Promise<Escalation[]> {
+export async function listEscalations(elder = "ruth-78", n = 10): Promise<EscalationRow[]> {
   if (!dbOn()) return [...getState(elder).escalations].reverse().slice(0, n);
   await ready();
-  const rows = await q<{ level: string; message: string; at: string }>("select level,message,at from escalations where elder_id=$1 order by at desc limit $2", [elder, n]);
-  return rows.map((r) => ({ level: r.level, message: r.message, time: fmtTime(r.at) }));
+  const rows = await q<{ id: number; level: string; message: string; at: string; acked: boolean }>("select id,level,message,at,acked from escalations where elder_id=$1 order by at desc limit $2", [elder, n]);
+  return rows.map((r) => ({ id: r.id, level: r.level, message: r.message, time: fmtTime(r.at), acked: r.acked }));
+}
+
+export async function ackEscalation(id: number) {
+  await ready();
+  await q("update escalations set acked=true where id=$1", [id]);
+}
+
+export async function unackedUrgentOlderThan(minutes: number, elder = "ruth-78") {
+  await ready();
+  return q<{ id: number; level: string; message: string; at: string }>(
+    "select id,level,message,at from escalations where elder_id=$1 and acked=false and level in ('attention','urgent') and at < now() - ($2 || ' minutes')::interval order by at",
+    [elder, String(minutes)]
+  );
+}
+
+// ---------- heartbeats (is she still there?) ----------
+export async function heartbeat(elder: string, kind = "chat") {
+  if (!dbOn()) return;
+  await ready();
+  await q("insert into heartbeats(elder_id,kind) values($1,$2)", [elder, kind]);
+}
+
+export async function lastHeartbeat(elder = "ruth-78"): Promise<{ at: string; minutesAgo: number } | null> {
+  if (!dbOn()) return null;
+  await ready();
+  const rows = await q<{ at: string }>("select at from heartbeats where elder_id=$1 order by at desc limit 1", [elder]);
+  if (!rows.length) return null;
+  const at = new Date(rows[0].at);
+  return { at: at.toISOString(), minutesAgo: Math.round((Date.now() - at.getTime()) / 60000) };
 }
 
 // ---------- background tasks ----------

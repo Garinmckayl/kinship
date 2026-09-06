@@ -16,7 +16,8 @@ type Status = {
   adherence_today: string;
   mood: string;
   last_checkin: string;
-  escalations: { level: string; message: string; time: string }[];
+  last_activity: { at: string; minutesAgo: number } | null;
+  escalations: { id?: number; level: string; message: string; time: string; acked?: boolean }[];
   memories: { title: string; note: string }[];
 };
 
@@ -29,6 +30,7 @@ const FALLBACK: Status = {
   adherence_today: "2 / 3 taken",
   mood: "a little lonely",
   last_checkin: "9:02 AM",
+  last_activity: null,
   escalations: [{ level: "info", message: "Morning Lisinopril confirmed.", time: "9:02 AM" }],
   memories: [{ title: "1959 wedding photo", note: "Ruth smiled recalling dancing with Henry." }],
 };
@@ -92,12 +94,18 @@ export default function FamilyPage() {
     if (res.ok) setMeds((ms) => ms.filter((x) => x.id !== id));
   }
 
-  async function sendReportNow() {
-    setReportMsg("Sending…");
+  async function sendReportNow() {    setReportMsg("Sending…");
     const res = await fetch(`${API}/reports/generate`, { method: "POST" });
     const d = await res.json().catch(() => ({}));
     setReportMsg(res.ok ? `Sent via ${d.channels?.join(", ") ?? "saved"}` : d.error ?? "Failed");
     if (res.ok) fetch(`${API}/reports`).then((r) => r.json()).then((x) => setReports(x.reports ?? [])).catch(() => {});
+  }
+
+  // A sent alert isn't a saved life — an acknowledged one is.
+  async function ack(id?: number) {
+    if (!id) return;
+    const res = await fetch(`${API}/escalations/${id}`, { method: "PATCH" });
+    if (res.ok) setS((prev) => ({ ...prev, escalations: prev.escalations.map((e) => (e.id === id ? { ...e, acked: true } : e)) }));
   }
 
   useEffect(() => {
@@ -286,14 +294,28 @@ export default function FamilyPage() {
 
         {/* Escalations */}
         <section>
-          <h2 className="font-bold text-xl mb-3 flex items-center gap-2"><BellIcon className="w-5 h-5" /> Alerts</h2>
+          <h2 className="font-bold text-xl mb-1 flex items-center gap-2"><BellIcon className="w-5 h-5" /> Alerts</h2>
+          <p className="text-sm text-slate-400 mb-3">
+            {s.last_activity
+              ? `Last sign of Ruth: ${s.last_activity.minutesAgo < 1 ? "just now" : `${s.last_activity.minutesAgo} min ago`}. Silence is the emergency — unconfirmed alerts re-fire.`
+              : "Activity tracking starts on her next message."}
+          </p>
           <div className="space-y-3">
             {s.escalations.map((e, i) => {
+              const needsAck = (e.level === "urgent" || e.level === "attention") && !e.acked && e.id;
               const card = (
                 <div className={`rounded-3xl p-4 ${e.level === "urgent" ? "bg-red-950/70" : e.level === "attention" ? "bg-amber-950/50" : "bg-white/5"} ring-1 ring-white/10`}>
-                  <span className={`text-xs font-bold uppercase tracking-wider ${e.level === "urgent" ? "text-red-300" : e.level === "attention" ? "text-amber-300" : "text-slate-300"}`}>
-                    [{e.level}] · {e.time}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-xs font-bold uppercase tracking-wider ${e.level === "urgent" ? "text-red-300" : e.level === "attention" ? "text-amber-300" : "text-slate-300"}`}>
+                      [{e.level}] · {e.time}{e.acked ? " · confirmed" : ""}
+                    </span>
+                    {needsAck ? (
+                      <button onClick={() => ack(e.id)}
+                        className="px-3 py-1.5 rounded-xl bg-white text-slate-950 text-xs font-bold hover:bg-emerald-100">
+                        I'm on it
+                      </button>
+                    ) : null}
+                  </div>
                   <p className="mt-1 text-lg">{e.message}</p>
                 </div>
               );

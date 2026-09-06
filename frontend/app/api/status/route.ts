@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { listMeds, takenMedIds, lastMood, listEscalations, listMemories } from "@/lib/store";
+import { listMeds, takenMedIds, lastMood, listEscalations, listMemories, lastHeartbeat } from "@/lib/store";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const userId = url.searchParams.get("user_id") ?? "ruth-78";
-  const [meds, taken, mood, escalations, memories] = await Promise.all([
-    listMeds(userId), takenMedIds(userId), lastMood(userId), listEscalations(userId, 10), listMemories(userId),
+  const [meds, taken, mood, escalations, memories, hb] = await Promise.all([
+    listMeds(userId), takenMedIds(userId), lastMood(userId), listEscalations(userId, 10), listMemories(userId), lastHeartbeat(userId),
   ]);
   const active = meds.filter((m) => m.active);
   return NextResponse.json({
@@ -13,6 +13,7 @@ export async function GET(req: Request) {
     adherence_today: `${taken.length} / ${active.length} taken`,
     mood,
     last_checkin: "just now",
+    last_activity: hb,
     escalations,
     memories: memories.slice(0, 3),
   });

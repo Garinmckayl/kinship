@@ -114,6 +114,12 @@ create table if not exists health_metrics (
   at timestamptz default now(),
   source text default 'manual'
 );
+create table if not exists heartbeats (
+  id serial primary key,
+  elder_id text not null,
+  kind text default 'chat',
+  at timestamptz default now()
+);
 `;
 
 let readyP: Promise<void> | null = null;
@@ -125,6 +131,8 @@ export function ready(): Promise<void> {
 async function init() {
   if (!dbOn()) return;
   await getPool().query(SCHEMA);
+  // Migrations for tables created before these columns existed.
+  await getPool().query("alter table escalations add column if not exists acked boolean default false");
   await seedDemo();
 }
 
