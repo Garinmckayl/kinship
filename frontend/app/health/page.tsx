@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardTitle, Btn, Badge, Input, Field } from "@/components/ui";
+import { Nav } from "@/components/Nav";
 
 type Metric = { type: string; value: number; unit: string; at: string; source: string };
 type Trends = { latest: Record<string, { value: number; unit: string; at: string }>; weekAvg: Record<string, { avg: number; n: number }>; readings7d: number };
@@ -50,11 +51,14 @@ export default function HealthPage() {
 
   if (!authed) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white grid place-items-center px-5">
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+        <Nav />
+        <div className="grid place-items-center px-5 py-20">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold">Health</h1>
           <p className="text-slate-300">Caregiver login required.</p>
           <Link href="/login" className="inline-block px-8 py-3 rounded-2xl bg-indigo-600 font-bold">Log in</Link>
+        </div>
         </div>
       </main>
     );
@@ -62,7 +66,8 @@ export default function HealthPage() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
-      <div className="max-w-3xl mx-auto px-5 py-8 space-y-6">
+      <Nav />
+      <div className="max-w-3xl lg:max-w-5xl mx-auto px-5 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Health</h1>
           <Link href="/family" className="text-indigo-300 text-sm">← Dashboard</Link>

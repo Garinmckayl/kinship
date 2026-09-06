@@ -24,5 +24,7 @@ export const HeartIcon = base(<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 
 export const XIcon = base(<path d="M18 6 6 18M6 6l12 12" />);
 export const SendIcon = base(<><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></>);
 export const ClockIcon = base(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>);
+export const CalendarIcon = base(<><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></>);
+export const PulseIcon = base(<path d="M22 12h-4l-3 9L9 3l-3 9H2" />);
 export const LogoutIcon = base(<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>);
 export const TrashIcon = base(<><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></>);

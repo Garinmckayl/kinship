@@ -6,6 +6,7 @@ import { AgentOrb } from "@/components/AgentOrb";
 import { Markdown } from "@/components/Markdown";
 import { BeamInput } from "@/components/BeamInput";
 import { Tabs } from "@/components/ui";
+import { Nav } from "@/components/Nav";
 import { BellIcon, CheckIcon, ClockIcon, HeartIcon, LogoutIcon, PillIcon, PlusIcon, TrashIcon } from "@/components/icons";
 
 const API = "/api";
@@ -159,7 +160,9 @@ export default function FamilyPage() {
 
   if (authChecked && !me) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white grid place-items-center px-5">
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+        <Nav />
+      <div className="grid place-items-center px-5 py-20">
         <div className="text-center space-y-4 max-w-md">
           <HeartIcon className="w-12 h-12 mx-auto text-rose-400" />
           <h1 className="text-3xl font-bold">Caregiver area</h1>
@@ -169,13 +172,15 @@ export default function FamilyPage() {
             <Link href="/signup" className="px-8 py-3 rounded-2xl bg-white/10 ring-1 ring-white/20 font-bold">Sign up</Link>
           </div>
         </div>
+      </div>
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
-      <div className="max-w-3xl mx-auto px-5 py-8 space-y-6">
+      <Nav />
+      <div className="max-w-3xl lg:max-w-5xl mx-auto px-5 py-8 space-y-6">
         <header className="flex items-center gap-4">
           <AgentOrb phase={urgent ? "speaking" : "idle"} scale={1} dark speed={urgent ? 1.6 : 1} />
           <div className="flex-1">

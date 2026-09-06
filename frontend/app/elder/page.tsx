@@ -5,6 +5,7 @@ import { AgentOrb, PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
 import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
 import { Markdown } from "@/components/Markdown";
+import { Nav } from "@/components/Nav";
 import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
 
 const TOOL_LABELS: Record<string, string> = {
@@ -299,6 +300,7 @@ export default function ElderPage() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+      <Nav />
       {callMode === "ringing" && <IncomingCall onAccept={acceptCall} onDecline={() => setCallMode("off")} />}
       {callMode === "active" && (
         <CallScreen
@@ -313,9 +315,9 @@ export default function ElderPage() {
         />
       )}
 
-      <div className="max-w-xl mx-auto px-4 pt-10 pb-40">
-        {/* Orb hero */}
-        <div className="flex flex-col items-center text-center gap-3">
+      <div className="max-w-xl lg:max-w-6xl mx-auto px-4 pt-6 lg:pt-10 pb-40">
+        <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 lg:items-start">
+        <div className="flex flex-col items-center text-center gap-3 lg:sticky lg:top-24">
           <BorderBeam size="pulse-outside" colorVariant="ocean" theme="dark">
             <div className="rounded-full bg-indigo-500/10 px-8 py-6">
               <AgentOrb phase={phase} scale={2.5} dark />
@@ -339,6 +341,7 @@ export default function ElderPage() {
           </button>
         </div>
 
+        <div className="min-w-0">
         {/* Today: quick actions */}
         {today && (
           <div className="mt-6 bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
@@ -395,11 +398,13 @@ export default function ElderPage() {
           )}
           {toolNote && <p className="text-indigo-300 text-lg animate-pulse">{toolNote}</p>}
         </div>
+        </div>
+        </div>
       </div>
 
       {/* Bottom dock */}
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
-        <div className="max-w-xl mx-auto space-y-3">
+        <div className="max-w-xl lg:max-w-4xl mx-auto space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <button onClick={() => send("Yes, I took my morning pill")} className="py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold flex items-center justify-center gap-2">
               <CheckIcon className="w-6 h-6" /> Yes

@@ -2,12 +2,14 @@
 import Link from "next/link";
 import { BorderBeam } from "border-beam";
 import { AgentOrb } from "@/components/AgentOrb";
+import { Nav } from "@/components/Nav";
 import { BellIcon, HeartIcon, PhoneIcon, PillIcon } from "@/components/icons";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center space-y-8">
+      <Nav />
+      <div className="max-w-4xl lg:max-w-6xl mx-auto px-6 py-16 text-center space-y-8">
         <div className="flex justify-center">
           <div className="rounded-full bg-indigo-500/10 p-8 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
             <AgentOrb phase="idle" scale={3} dark />
