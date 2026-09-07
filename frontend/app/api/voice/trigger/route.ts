@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { phoneConfig, publicBase, placeCall } from "@/lib/phone";
 
-// POST { secret, to? } — make Ruth's real phone ring. Protected by VOICE_CALLBACK_SECRET.
+// POST { secret, to? } — make Eleanor's real phone ring. Protected by VOICE_CALLBACK_SECRET.
 export async function POST(req: Request) {
   const required = process.env.VOICE_CALLBACK_SECRET;
   if (!required) return NextResponse.json({ error: "calling disabled (set VOICE_CALLBACK_SECRET)" }, { status: 503 });
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const to = String(body.to ?? cfg.elder ?? "");
   if (!to) return NextResponse.json({ error: "no destination (set ELDER_PHONE_NUMBER or pass to)" }, { status: 400 });
 
-  const out = await placeCall(to, `${base}/api/voice/incoming?user_id=ruth-78`);
+  const out = await placeCall(to, `${base}/api/voice/incoming?user_id=eleanor-79`);
   if (!out.ok) return NextResponse.json({ error: out.error }, { status: 502 });
   return NextResponse.json({ ok: true, callSid: out.sid });
 }

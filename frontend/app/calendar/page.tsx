@@ -85,7 +85,7 @@ export default function CalendarPage() {
 
         <Card>
           <CardTitle>Selected day — {MONTHS[month]} {day}</CardTitle>
-          {dayAppts.length === 0 ? <p className="text-slate-400">Nothing scheduled. Ruth can just ask: "book my cardiologist Tuesday at 10".</p> : (
+          {dayAppts.length === 0 ? <p className="text-slate-400">Nothing scheduled. Eleanor can just ask: "book my cardiologist Tuesday at 10".</p> : (
             <div className="space-y-2">
               {dayAppts.map((a) => (
                 <div key={a.id} className="bg-slate-950/60 ring-1 ring-white/10 rounded-2xl p-3 flex items-center gap-3">
@@ -110,7 +110,7 @@ export default function CalendarPage() {
             <Field label="Location"><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Tikur Anbessa, Room 4" /></Field>
           </div>
           <div className="mt-3"><Btn onClick={add}>Book</Btn></div>
-          <p className="text-xs text-slate-500 mt-2">Pushes to Google Calendar when GOOGLE_* env is set. Ruth can also book by voice.</p>
+          <p className="text-xs text-slate-500 mt-2">Pushes to Google Calendar when GOOGLE_* env is set. Eleanor can also book by voice.</p>
         </Card>
 
         <Card>

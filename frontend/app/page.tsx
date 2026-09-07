@@ -29,7 +29,7 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
           <BorderBeam size="md" colorVariant="ocean" theme="dark">
             <Link href="/elder" className="flex items-center gap-2 px-10 py-5 rounded-2xl bg-indigo-600 text-white text-2xl font-bold">
-              <PhoneIcon className="w-7 h-7" /> Answer as Ruth
+              <PhoneIcon className="w-7 h-7" /> Answer as Eleanor
             </Link>
           </BorderBeam>
           <BorderBeam size="md" colorVariant="sunset" theme="dark">
@@ -54,7 +54,7 @@ export default function Home() {
             );
           })}
         </div>
-        <p className="text-slate-500 text-sm pt-4">Demo persona: Ruth, 78, lives alone, 3 meds · Single codebase: Next.js PWA + Strands TS SDK</p>
+        <p className="text-slate-500 text-sm pt-4">Demo persona: Eleanor, 79, lives alone, 3 meds · Single codebase: Next.js PWA + Strands TS SDK</p>
       </div>
     </main>
   );

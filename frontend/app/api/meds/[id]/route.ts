@@ -12,6 +12,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       ...(body.time !== undefined ? { time: String(body.time) } : {}),
       ...(body.label !== undefined ? { label: String(body.label) } : {}),
       ...(body.active !== undefined ? { active: !!body.active } : {}),
+      ...(body.pills_left !== undefined ? { pills_left: Number(body.pills_left) } : {}),
     });
     if (!med) return NextResponse.json({ error: "not found" }, { status: 404 });
     return NextResponse.json({ med });

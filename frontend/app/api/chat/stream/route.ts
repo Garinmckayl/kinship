@@ -3,7 +3,7 @@ import { sseStream, sseFallback, sseResponse } from "@/lib/stream";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const userId = String(body.user_id ?? body.userId ?? "ruth-78");
+  const userId = String(body.user_id ?? body.userId ?? "eleanor-79");
   const message = String(body.message ?? "");
   if (!message) return Response.json({ error: "message required" }, { status: 400 });
 

@@ -5,9 +5,9 @@ export const MEDS = [
 ];
 
 export const MEMORIES = [
-  { id: "m1", title: "1959 wedding photo", note: "Dancing with Henry at the town hall. Ruth lights up talking about the band." },
-  { id: "m2", title: "Grandson Leo's graduation", note: "Leo graduated 2023. Ruth keeps the photo by the TV." },
-  { id: "m3", title: "Garden roses", note: "Ruth grew prize roses for 20 years. Smell of roses calms her." },
+  { id: "m1", title: "1959 wedding photo", note: "Dancing with Henry at the town hall. Eleanor lights up talking about the band." },
+  { id: "m2", title: "Grandson Leo's graduation", note: "Leo graduated 2023. Eleanor keeps the photo by the TV." },
+  { id: "m3", title: "Garden roses", note: "Eleanor grew prize roses for 20 years. Smell of roses calms her." },
 ];
 
 type Escalation = { level: string; message: string; time: string };
@@ -16,7 +16,7 @@ type UserState = { intakes: Record<string, string>; moods: { mood: string; note:
 // In-memory store for demo (swap to DynamoDB / Bedrock AgentCore session store in prod).
 // NOTE: serverlessFF — resets on cold start. Fine for hackathon demo.
 export const STATE: Record<string, UserState> = {
-  "ruth-78": {
+  "eleanor-79": {
     intakes: {},
     moods: [],
     escalations: [{ level: "info", message: "Morning Lisinopril confirmed.", time: "9:02 AM" }],

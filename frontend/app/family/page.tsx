@@ -26,13 +26,13 @@ type BgTask = { id: string; instruction: string; runAt: string; status: string; 
 type Report = { date: string; channel: string; summary: string };
 
 const FALLBACK: Status = {
-  elder: "Ruth, 78",
+  elder: "Eleanor, 79",
   adherence_today: "2 / 3 taken",
   mood: "a little lonely",
   last_checkin: "9:02 AM",
   last_activity: null,
   escalations: [{ level: "info", message: "Morning Lisinopril confirmed.", time: "9:02 AM" }],
-  memories: [{ title: "1959 wedding photo", note: "Ruth smiled recalling dancing with Henry." }],
+  memories: [{ title: "1959 wedding photo", note: "Eleanor smiled recalling dancing with Henry." }],
 };
 
 function adherencePct(s: string) {
@@ -59,9 +59,9 @@ export default function FamilyPage() {
   useEffect(() => {
     fetch(`${API}/auth/me`).then((r) => (r.ok ? r.json() : null)).then((d) => setMe(d?.user ?? null)).catch(() => {}).finally(() => setAuthChecked(true));
     const load = () => {
-      fetch(`${API}/status?user_id=ruth-78`).then((r) => r.json()).then(setS).catch(() => {});
+      fetch(`${API}/status?user_id=eleanor-79`).then((r) => r.json()).then(setS).catch(() => {});
       fetch(`${API}/meds`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setMeds(d.meds ?? [])).catch(() => {});
-      fetch(`${API}/tasks?user_id=ruth-78`).then((r) => r.json()).then((d) => setTasks(d.tasks ?? [])).catch(() => {});
+      fetch(`${API}/tasks?user_id=eleanor-79`).then((r) => r.json()).then((d) => setTasks(d.tasks ?? [])).catch(() => {});
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
     };
     load();
@@ -174,7 +174,7 @@ export default function FamilyPage() {
         <div className="text-center space-y-4 max-w-md">
           <HeartIcon className="w-12 h-12 mx-auto text-rose-400" />
           <h1 className="text-3xl font-bold">Caregiver area</h1>
-          <p className="text-slate-300">Log in to manage Ruth's medications, see reports and alerts.</p>
+          <p className="text-slate-300">Log in to manage Eleanor's medications, see reports and alerts.</p>
           <div className="flex gap-3 justify-center">
             <Link href="/login" className="px-8 py-3 rounded-2xl bg-indigo-600 font-bold">Log in</Link>
             <Link href="/signup" className="px-8 py-3 rounded-2xl bg-white/10 ring-1 ring-white/20 font-bold">Sign up</Link>
@@ -216,7 +216,7 @@ export default function FamilyPage() {
             <div ref={cScroll} className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 mb-4">
               {cMsgs.length === 0 && (
                 <p className="text-slate-400">
-                  Ask anything about Ruth — meds, mood, alerts, appointments, health.
+                  Ask anything about Eleanor — meds, mood, alerts, appointments, health.
                   Try "add Vitamin D 1000 IU at 8am" or "remind mom to drink water now".
                 </p>
               )}
@@ -230,7 +230,7 @@ export default function FamilyPage() {
                 )
               )}
             </div>
-            <BeamInput value={cInput} onChange={setCInput} onSend={sendC} onMic={() => {}} placeholder="Ask about Ruth…" />
+            <BeamInput value={cInput} onChange={setCInput} onSend={sendC} onMic={() => {}} placeholder="Ask about Eleanor…" />
           </section>
         ) : (
         <>
@@ -260,7 +260,7 @@ export default function FamilyPage() {
         <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
           <h2 className="font-bold text-xl mb-3 flex items-center gap-2"><PillIcon className="w-5 h-5" /> Medications</h2>
           <div className="space-y-2 mb-4">
-            {meds.length === 0 && <p className="text-slate-400">No medications yet — add Ruth's schedule below.</p>}
+            {meds.length === 0 && <p className="text-slate-400">No medications yet — add Eleanor's schedule below.</p>}
             {meds.map((m) => (
               <div key={m.id} className={`flex items-center gap-3 rounded-2xl p-3 ring-1 ring-white/10 ${m.active ? "bg-slate-950/60" : "bg-slate-950/30 opacity-50"}`}>
                 <button onClick={() => toggleMed(m)} title={m.active ? "Pause" : "Resume"}
@@ -297,7 +297,7 @@ export default function FamilyPage() {
           <h2 className="font-bold text-xl mb-1 flex items-center gap-2"><BellIcon className="w-5 h-5" /> Alerts</h2>
           <p className="text-sm text-slate-400 mb-3">
             {s.last_activity
-              ? `Last sign of Ruth: ${s.last_activity.minutesAgo < 1 ? "just now" : `${s.last_activity.minutesAgo} min ago`}. Silence is the emergency — unconfirmed alerts re-fire.`
+              ? `Last sign of Eleanor: ${s.last_activity.minutesAgo < 1 ? "just now" : `${s.last_activity.minutesAgo} min ago`}. Silence is the emergency — unconfirmed alerts re-fire.`
               : "Activity tracking starts on her next message."}
           </p>
           <div className="space-y-3">
@@ -331,9 +331,9 @@ export default function FamilyPage() {
         {/* Background tasks */}
         <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
           <h2 className="font-bold text-xl mb-1">Background agent</h2>
-          <p className="text-slate-400 text-sm mb-3">Keeps working even if Ruth closes the app.</p>
+          <p className="text-slate-400 text-sm mb-3">Keeps working even if Eleanor closes the app.</p>
           {tasks.length === 0 ? (
-            <p className="text-slate-400">No background tasks. Ruth can say "remind me in 30 minutes".</p>
+            <p className="text-slate-400">No background tasks. Eleanor can say "remind me in 30 minutes".</p>
           ) : (
             <div className="space-y-2">
               {tasks.map((t) => (

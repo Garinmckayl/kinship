@@ -1,4 +1,4 @@
-// Real phone calls via Twilio (PSTN — Ruth's actual phone rings).
+// Real phone calls via Twilio (PSTN — Eleanor's actual phone rings).
 // Zero new deps: raw REST + TwiML. Without creds every entrypoint degrades
 // gracefully (503 / honest tool message) instead of crashing the demo.
 export function phoneConfig() {

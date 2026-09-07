@@ -29,7 +29,7 @@ export const processElderTask = inngest.createFunction(
       if (!task) return { ok: false, error: "task not found" };
       await updateTask(taskId, { status: "running" });
       try {
-        const out = await chat(task.userId, `[background task — Ruth may be offline, act via tools and escalate if needed] ${task.instruction}`, { heartbeat: false });
+        const out = await chat(task.userId, `[background task — Eleanor may be offline, act via tools and escalate if needed] ${task.instruction}`, { heartbeat: false });
         await updateTask(taskId, { status: "done", result: out.reply.slice(0, 500) });
         return { ok: true };
       } catch (e) {
@@ -51,8 +51,8 @@ export const morningCheckin = inngest.createFunction(
     await step.run("enqueue-checkin", async () => {
       const { enqueueTask } = await import("./store");
       const task = await enqueueTask(
-        "ruth-78",
-        "Morning check-in: warmly greet Ruth, confirm Lisinopril intake, sense mood, share one memory. Escalate to family only if something is wrong.",
+        "eleanor-79",
+        "Morning check-in: warmly greet Eleanor, confirm Lisinopril intake, sense mood, share one memory. Escalate to family only if something is wrong.",
         new Date()
       );
       await inngest.send({ name: "elder/task.requested", data: { taskId: task.id } });
@@ -71,7 +71,7 @@ export const dailyReport = inngest.createFunction(
   async ({ step }) => {
     await step.run("build-and-send-report", async () => {
       const { sendDailyReport } = await import("./notify");
-      return sendDailyReport("ruth-78");
+      return sendDailyReport("eleanor-79");
     });
   }
 );
@@ -86,7 +86,7 @@ export const welfareCheck = inngest.createFunction(
   async ({ step }) => {
     await step.run("sweep", async () => {
       const { welfareSweep } = await import("./welfare");
-      return welfareSweep("ruth-78");
+      return welfareSweep("eleanor-79");
     });
   }
 );

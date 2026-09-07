@@ -3,18 +3,18 @@ import { z } from "zod";
 import { getMedSchedule, summarizeForDoctor, scheduleTask } from "./guardian";
 import { listMeds, takenMedIds, lastMood, listEscalations, listTasks, listAppointments, healthTrends, addMed, addEscalation } from "./store";
 
-// Family-facing agent: answers anything about Ruth from live data,
-// manages meds, and nudges Ruth in realtime.
-const CAREGIVER_PROMPT = `You are ElderLove's family assistant, talking to Ruth's caregiver.
+// Family-facing agent: answers anything about Eleanor from live data,
+// manages meds, and nudges Eleanor in realtime.
+const CAREGIVER_PROMPT = `You are ElderLove's family assistant, talking to Eleanor's caregiver.
 Rules:
 - Answer ONLY from tool data (medications, adherence, mood, alerts, appointments, health). Never invent readings or doses.
-- You can add medications (add_medication), ping Ruth right now (remind_parent_now), or schedule later nudges (schedule_task).
+- You can add medications (add_medication), ping Eleanor right now (remind_parent_now), or schedule later nudges (schedule_task).
 - Be concise, warm, specific with times and numbers. Today is ${new Date().toISOString().slice(0, 10)}.`;
 
 export async function parentSnapshot(): Promise<string> {
   const [meds, taken, mood, escalations, tasks, appts, health] = await Promise.all([
-    listMeds("ruth-78"), takenMedIds("ruth-78"), lastMood("ruth-78"),
-    listEscalations("ruth-78", 5), listTasks("ruth-78"), listAppointments("ruth-78"), healthTrends("ruth-78"),
+    listMeds("eleanor-79"), takenMedIds("eleanor-79"), lastMood("eleanor-79"),
+    listEscalations("eleanor-79", 5), listTasks("eleanor-79"), listAppointments("eleanor-79"), healthTrends("eleanor-79"),
   ]);
   const active = meds.filter((m) => m.active);
   return JSON.stringify({
@@ -29,30 +29,30 @@ export async function parentSnapshot(): Promise<string> {
 
 export const parentStatus = tool({
   name: "parent_status",
-  description: "Full live snapshot of Ruth: adherence, mood, recent alerts, tasks, appointments, health trends.",
+  description: "Full live snapshot of Eleanor: adherence, mood, recent alerts, tasks, appointments, health trends.",
   inputSchema: z.object({}),
   callback: async () => parentSnapshot(),
 });
 
 export const addMedication = tool({
   name: "add_medication",
-  description: "Add a medication to Ruth's schedule.",
+  description: "Add a medication to Eleanor's schedule.",
   inputSchema: z.object({
     name: z.string(), dosage: z.string().optional(), time: z.string().describe("HH:MM 24h"), label: z.string().optional(),
   }),
   callback: async (input) => {
     if (!/^\d{2}:\d{2}$/.test(input.time)) return JSON.stringify({ ok: false, error: "time must be HH:MM" });
-    const med = await addMed("ruth-78", { name: input.name, dosage: input.dosage ?? "", time: input.time, label: input.label ?? "" });
+    const med = await addMed("eleanor-79", { name: input.name, dosage: input.dosage ?? "", time: input.time, label: input.label ?? "" });
     return JSON.stringify({ ok: true, med });
   },
 });
 
 export const remindParentNow = tool({
   name: "remind_parent_now",
-  description: "Ping Ruth RIGHT NOW (dashboard escalation + WhatsApp text if configured).",
-  inputSchema: z.object({ message: z.string().describe("What to tell Ruth") }),
+  description: "Ping Eleanor RIGHT NOW (dashboard escalation + WhatsApp text if configured).",
+  inputSchema: z.object({ message: z.string().describe("What to tell Eleanor") }),
   callback: async (input) => {
-    await addEscalation("ruth-78", "attention", `Caregiver ping: ${input.message}`);
+    await addEscalation("eleanor-79", "attention", `Caregiver ping: ${input.message}`);
     let whatsapp = "skipped";
     const to = process.env.ELDER_WHATSAPP_NUMBER;
     if (to) {

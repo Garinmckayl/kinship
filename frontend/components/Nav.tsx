@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { HeartIcon, PhoneIcon, CalendarIcon, PulseIcon, ChatIcon } from "./icons";
 
 const LINKS = [
-  { href: "/elder", label: "Ruth", Icon: PhoneIcon },
+  { href: "/elder", label: "Eleanor", Icon: PhoneIcon },
   { href: "/calendar", label: "Calendar", Icon: CalendarIcon },
   { href: "/health", label: "Health", Icon: PulseIcon },
   { href: "/family", label: "Family", Icon: ChatIcon },

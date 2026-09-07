@@ -3,13 +3,13 @@ import { listMeds, takenMedIds, lastMood, listEscalations, listMemories, lastHea
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const userId = url.searchParams.get("user_id") ?? "ruth-78";
+  const userId = url.searchParams.get("user_id") ?? "eleanor-79";
   const [meds, taken, mood, escalations, memories, hb] = await Promise.all([
     listMeds(userId), takenMedIds(userId), lastMood(userId), listEscalations(userId, 10), listMemories(userId), lastHeartbeat(userId),
   ]);
   const active = meds.filter((m) => m.active);
   return NextResponse.json({
-    elder: "Ruth, 78",
+    elder: "Eleanor, 79",
     adherence_today: `${taken.length} / ${active.length} taken`,
     mood,
     last_checkin: "just now",

@@ -9,6 +9,6 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const secretOk = process.env.REPORT_SECRET && body.secret === process.env.REPORT_SECRET;
   if (!u && !secretOk) return NextResponse.json({ error: "login or secret required" }, { status: 403 });
-  const out = await sendDailyReport("ruth-78");
+  const out = await sendDailyReport("eleanor-79");
   return NextResponse.json({ ok: true, channels: out.channels, summary: out.summary });
 }

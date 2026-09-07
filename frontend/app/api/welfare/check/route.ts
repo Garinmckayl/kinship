@@ -7,5 +7,5 @@ export async function POST(req: Request) {
   if (!process.env.REPORT_SECRET || body.secret !== process.env.REPORT_SECRET) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
-  return NextResponse.json(await welfareSweep("ruth-78"));
+  return NextResponse.json(await welfareSweep("eleanor-79"));
 }

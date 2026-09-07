@@ -3,13 +3,13 @@ import { sendWaText } from "./whatsapp";
 
 // Daily caregiver report: adherence, mood, escalations, background tasks.
 // Sent via WhatsApp text and/or email (Resend). Always saved to DB.
-export async function buildDailySummary(elder = "ruth-78"): Promise<string> {
+export async function buildDailySummary(elder = "eleanor-79"): Promise<string> {
   const [meds, taken, moods, escalations, tasks] = await Promise.all([
     listMeds(elder), takenMedIds(elder), listMoods(elder, 5), listEscalations(elder, 10), listTasks(elder),
   ]);
   const active = meds.filter((m) => m.active);
   const lines = [
-    `ElderLove daily report — Ruth, ${new Date().toLocaleDateString()}`,
+    `ElderLove daily report — Eleanor, ${new Date().toLocaleDateString()}`,
     ``,
     `Medication: ${taken.length}/${active.length} taken`,
     ...active.map((m) => `  ${taken.includes(m.id) ? "✓" : "✗"} ${m.time} — ${m.name} ${m.dosage}`),
@@ -38,7 +38,7 @@ export async function sendEmailResend(to: string, subject: string, text: string)
   return { ok: true as const };
 }
 
-export async function sendDailyReport(elder = "ruth-78") {
+export async function sendDailyReport(elder = "eleanor-79") {
   const summary = await buildDailySummary(elder);
   const date = new Date().toISOString().slice(0, 10);
   const channels: string[] = [];
@@ -50,7 +50,7 @@ export async function sendDailyReport(elder = "ruth-78") {
   }
   const emailTo = process.env.CAREGIVER_EMAIL;
   if (emailTo) {
-    const sent = await sendEmailResend(emailTo, `ElderLove daily report — Ruth ${date}`, summary);
+    const sent = await sendEmailResend(emailTo, `ElderLove daily report — Eleanor ${date}`, summary);
     channels.push(`email:${sent.ok ? "sent" : "failed"}`);
   }
   if (!channels.length) channels.push("saved-only");

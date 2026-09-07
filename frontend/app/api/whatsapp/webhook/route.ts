@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   return NextResponse.json({ error: "verification failed" }, { status: 403 });
 }
 
-// Inbound Ruth message -> agent -> reply (voice note if publicly reachable, text otherwise).
+// Inbound Eleanor message -> agent -> reply (voice note if publicly reachable, text otherwise).
 export async function POST(req: Request) {
   const cfg = waConfig();
   if (!cfg.ok) return NextResponse.json({ error: cfg.error }, { status: 503 });
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const msg = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   if (!msg || msg.from === undefined) return NextResponse.json({ ok: true, ignored: true });
   const from: string = String(msg.from);
-  const userId = "ruth-78";
+  const userId = "eleanor-79";
 
   let heard = "";
   if (msg.type === "text") {
@@ -33,12 +33,12 @@ export async function POST(req: Request) {
     const mediaId = String(msg.audio?.id ?? "");
     const dl = await downloadWaMedia(mediaId);
     if (!dl.ok) {
-      await sendWaText(from, "Ruth, I got your voice note but couldn't hear it clearly. Could you try again? 💜");
+      await sendWaText(from, "Eleanor, I got your voice note but couldn't hear it clearly. Could you try again? 💜");
       return NextResponse.json({ ok: true });
     }
     const tr = await transcribeVoice(dl.bytes, dl.mime);
     if (!tr.ok) {
-      await sendWaText(from, "Ruth, I got your voice note but couldn't understand it. Could you type it for me? 💜");
+      await sendWaText(from, "Eleanor, I got your voice note but couldn't understand it. Could you type it for me? 💜");
       return NextResponse.json({ ok: true });
     }
     heard = tr.text;
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
   }
   if (!heard.trim()) return NextResponse.json({ ok: true });
 
-  let reply = "Thank you Ruth, I've noted that. 💜";
+  let reply = "Thank you Eleanor, I've noted that. 💜";
   try {
     const out = await chat(userId, `[whatsapp — keep reply under 40 words, simple sentences] ${heard}`);
     reply = out.reply;

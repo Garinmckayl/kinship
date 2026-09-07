@@ -120,6 +120,13 @@ create table if not exists heartbeats (
   kind text default 'chat',
   at timestamptz default now()
 );
+create table if not exists symptoms (
+  id serial primary key,
+  elder_id text not null,
+  complaint text not null,
+  detail text default '',
+  at timestamptz default now()
+);
 `;
 
 let readyP: Promise<void> | null = null;
@@ -131,8 +138,16 @@ export function ready(): Promise<void> {
 async function init() {
   if (!dbOn()) return;
   await getPool().query(SCHEMA);
-  // Migrations for tables created before these columns existed.
+  // Migrations for pre-existing tables/rows.
   await getPool().query("alter table escalations add column if not exists acked boolean default false");
+  await getPool().query("alter table medications add column if not exists pills_left int default 30");
+  // One-time persona rename: ruth-78 -> eleanor-79. Parent first (FK), then children.
+  await getPool().query("insert into elders(id,name,age) values('eleanor-79','Eleanor',79) on conflict (id) do nothing");
+  const tables = ["medications", "intakes", "moods", "memories", "escalations", "tasks", "reports", "appointments", "health_metrics", "heartbeats", "symptoms"];
+  for (const t of tables) {
+    await getPool().query(`update ${t} set elder_id='eleanor-79' where elder_id='ruth-78'`).catch(() => {});
+  }
+  await getPool().query("delete from elders where id='ruth-78'").catch(() => {});
   await seedDemo();
 }
 
@@ -145,18 +160,18 @@ async function seedDemo() {
       await hashPassword("demo1234"),
     ]);
   }
-  const ex = await q("select id from elders where id='ruth-78'");
+  const ex = await q("select id from elders where id='eleanor-79'");
   if (ex.length === 0) {
-    await q("insert into elders(id,name,age) values('ruth-78','Ruth',78)");
+    await q("insert into elders(id,name,age) values('eleanor-79','Eleanor',79)");
     for (const m of MEDS) {
       const parts = m.name.split(" ");
-      await q("insert into medications(id,elder_id,name,dosage,time,label) values($1,'ruth-78',$2,$3,$4,$5)", [
+      await q("insert into medications(id,elder_id,name,dosage,time,label) values($1,'eleanor-79',$2,$3,$4,$5)", [
         m.id, parts[0], parts.slice(1).join(" "), m.time, m.label,
       ]);
     }
     for (const m of MEMORIES) {
-      await q("insert into memories(elder_id,title,note) values('ruth-78',$1,$2)", [m.title, m.note]);
+      await q("insert into memories(elder_id,title,note) values('eleanor-79',$1,$2)", [m.title, m.note]);
     }
-    await q("insert into escalations(elder_id,level,message) values('ruth-78','info','Morning Lisinopril confirmed.')");
+    await q("insert into escalations(elder_id,level,message) values('eleanor-79','info','Morning Lisinopril confirmed.')");
   }
 }

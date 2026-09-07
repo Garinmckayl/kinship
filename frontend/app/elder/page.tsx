@@ -25,7 +25,7 @@ type CallMode = "off" | "ringing" | "active";
 
 export default function ElderPage() {
   const [msgs, setMsgs] = useState<Msg[]>([
-    { role: "agent", text: "Good morning Ruth 💜 Did you take your Lisinopril? Tap Yes or just talk to me." },
+    { role: "agent", text: "Good morning Eleanor 💜 Did you take your Lisinopril? Tap Yes or just talk to me." },
   ]);
   const [input, setInput] = useState("");
   const [phase, setPhase] = useState<AgentPhase>("idle");
@@ -99,7 +99,7 @@ export default function ElderPage() {
       const res = await fetch(`${API}/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: "ruth-78", message: text }),
+        body: JSON.stringify({ user_id: "eleanor-79", message: text }),
       });
       if (!res.ok || !res.body) throw new Error("stream failed");
       const reader = res.body.getReader();
@@ -205,7 +205,7 @@ export default function ElderPage() {
     }
   }
 
-  // Hands-free wake word: Ruth just says "ElderLove…" from her chair.
+  // Hands-free wake word: Eleanor just says "ElderLove…" from her chair.
   // Browser keyword spotting (free, today). Pro path: Porcupine WASM for iOS reliability.
   function chime() {
     try {
@@ -323,7 +323,7 @@ export default function ElderPage() {
               <AgentOrb phase={phase} scale={2.5} dark />
             </div>
           </BorderBeam>
-          <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Ruth <HeartIcon className="w-8 h-8 text-rose-400" /></h1>
+          <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Eleanor <HeartIcon className="w-8 h-8 text-rose-400" /></h1>
           <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “ElderLove” — I'm listening" : PHASE_LABEL[phase]}</p>
           <div className="flex gap-3 mt-2">
             <button

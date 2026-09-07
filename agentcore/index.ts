@@ -93,13 +93,13 @@ app.post("/invocations", express.raw({ type: "*/*" }), async (req: Request, res:
       const parsed = JSON.parse(raw) as Record<string, unknown>;
       const inner = (parsed.input ?? parsed) as Record<string, unknown>;
       if (typeof inner.message === "string") {
-        prompt = `[user ${String(inner.user_id ?? "ruth-78")}] ${inner.message}`;
+        prompt = `[user ${String(inner.user_id ?? "eleanor-79")}] ${inner.message}`;
       } else if (typeof parsed.payload === "string") {
         // base64-wrapped payload variant
         const dec = Buffer.from(parsed.payload, "base64").toString("utf8");
         try {
           const p2 = JSON.parse(dec) as Record<string, unknown>;
-          prompt = typeof p2.message === "string" ? `[user ${String(p2.user_id ?? "ruth-78")}] ${p2.message}` : dec;
+          prompt = typeof p2.message === "string" ? `[user ${String(p2.user_id ?? "eleanor-79")}] ${p2.message}` : dec;
         } catch {
           prompt = dec;
         }

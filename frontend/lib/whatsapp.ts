@@ -1,6 +1,6 @@
 // WhatsApp voice loop via Meta Cloud API (FREE — no PSTN, works in Ethiopia).
-// Agent -> Ruth: ElevenLabs MP3 sent as WhatsApp audio message (voice note).
-// Ruth -> agent: text or voice note (voice transcribed via ElevenLabs Scribe).
+// Agent -> Eleanor: ElevenLabs MP3 sent as WhatsApp audio message (voice note).
+// Eleanor -> agent: text or voice note (voice transcribed via ElevenLabs Scribe).
 // Zero new deps: raw Graph API fetch. Without creds everything 503s gracefully.
 const API_V = "v22.0";
 

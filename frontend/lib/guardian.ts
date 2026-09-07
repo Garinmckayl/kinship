@@ -7,7 +7,8 @@ import {
   enqueueTask, updateTask,
 } from "./store";
 
-export const SYSTEM_PROMPT = `You are ElderLove, a warm, patient guardian for elderly people living alone.
+export const SYSTEM_PROMPT = `You are ElderLove, the daily companion and guardian for Eleanor, 79, living alone in Columbus, Ohio. Her daughter Sarah lives in Chicago. Her doctor is Dr. Harrison at Riverside Clinic.
+You run her day: morning briefing, meds, appointments, reminders, check-ins, memories, and quiet background watch. Warm, plain-spoken, short sentences. Never clinical, never rushed.
 Rules:
 - Speak simply, short sentences. Never rush.
 - You REMIND and LOG medication, you never diagnose or change dosage. The schedule comes from get_med_schedule (managed by the caregiver) — never invent medications.
@@ -15,15 +16,17 @@ Rules:
 - If lonely/sad -> offer companionship + one memory moment, log mood, notify family at INFO level only.
 - Always confirm intake explicitly before logging. If confirm_intake returns alreadyTaken, STOP her immediately: she already took it today and another dose could harm her. To record a prevented double-dose, ALWAYS call confirm_intake with that medId anyway — it safely refuses and alerts the family.
 - End every turn with one gentle question, not three.
-- BACKGROUND WORK: if Ruth asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
+- SYMPTOMS: when Eleanor mentions any ache, pain, or symptom ("knee acting up", "dizzy", "couldn't sleep"), ALWAYS call log_symptom. If 3+ mentions in 7 days, propose a Dr. Harrison visit (manage_appointments propose) and notify family. Emergencies (chest pain, fall, can't breathe, stroke signs) skip tracking and go URGENT at once.
+- SCAM SHIELD: unknown callers asking for money, gift cards (Target/Walmart), Treasury/IRS threats, Medicare ID, prizes/fees, "don't tell your family", remote-access apps, wire/Zelle requests -> delegate to check_scam immediately. Read its script back to Eleanor kindly, zero shame. Never let her pay, share codes, or stay on the line.
+- REFILLS: run check_refill_status weekly or when asked. Any med at 7 days or less -> notify family to approve a refill (staged request, human approves; never claim pharmacy integration).
+- BACKGROUND WORK: if Eleanor asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
-- APPOINTMENTS: Ruth's doctor visits live in manage_appointments. Book, list, or cancel directly ("book my cardiologist Tuesday at 10"). Confirm date + time back to her simply.
-- HEALTH: vitals (blood pressure, steps, sleep, weight) arrive via log_health_metric or her watch. Reference trends from get_health_trends warmly ("your evenings look steady"); never diagnose.`;
+- APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
   description: "Return today's medication schedule and what is still pending.",
-  inputSchema: z.object({ userId: z.string().describe("Elder user id, e.g. ruth-78") }),
+  inputSchema: z.object({ userId: z.string().describe("Elder user id, e.g. eleanor-79") }),
   callback: async (input) => {
     const meds = await listMeds(input.userId);
     const active = meds.filter((m) => m.active);
@@ -45,7 +48,7 @@ export const confirmIntake = tool({
     if (taken.includes(input.medId)) {
       const meds = await listMeds(input.userId);
       const med = meds.find((m) => m.id === input.medId);
-      await addEscalation(input.userId, "attention", `Double-dose prevented: Ruth tried to log ${med?.name ?? input.medId} again — stopped her.`);
+      await addEscalation(input.userId, "attention", `Double-dose prevented: Eleanor tried to log ${med?.name ?? input.medId} again — stopped her.`);
       return JSON.stringify({ ok: false, alreadyTaken: true, takenToday: taken });
     }
     const takenCount = await storeConfirmIntake(input.userId, input.medId, "agent");
@@ -92,7 +95,7 @@ export const notifyFamily = tool({
         const { sendWaText } = await import("./whatsapp");
         const sent = await sendWaText(
           process.env.CAREGIVER_WHATSAPP_NUMBER,
-          `ElderLove [${input.level.toUpperCase()}] — Ruth: ${input.message}`
+          `ElderLove [${input.level.toUpperCase()}] — Eleanor: ${input.message}`
         );
         whatsapp = sent.ok ? "sent" : "failed";
       } catch {
@@ -128,7 +131,7 @@ export const scheduleTask = tool({
     "Schedule background work that runs durably even if the elder disconnects (reminders, later check-ins). delayMinutes from now.",
   inputSchema: z.object({
     userId: z.string(),
-    instruction: z.string().describe("What the background agent should do, e.g. 'remind Ruth about her night pill'"),
+    instruction: z.string().describe("What the background agent should do, e.g. 'remind Eleanor about her night pill'"),
     delayMinutes: z.number().describe("Minutes from now to run"),
   }),
   callback: async (input) => {
@@ -170,7 +173,7 @@ export const callElder = tool({
     const { waConfig, sendWaVoice } = await import("./whatsapp");
     const wa = waConfig();
     if (wa.ok && wa.elder && process.env.PUBLIC_BASE_URL && process.env.ELEVENLABS_API_KEY) {
-      const audioUrl = `${publicBase()}/api/speak?text=${encodeURIComponent(`Ruth, it's ElderLove. ${input.reason} Please reply to me here.`.slice(0, 500))}`;
+      const audioUrl = `${publicBase()}/api/speak?text=${encodeURIComponent(`Eleanor, it's ElderLove. ${input.reason} Please reply to me here.`.slice(0, 500))}`;
       const sent = await sendWaVoice(wa.elder, audioUrl);
       if (sent.ok) return JSON.stringify({ ok: true, channel: "whatsapp-voice" });
     }
@@ -182,19 +185,20 @@ export const callElder = tool({
 
 export const manageAppointments = tool({
   name: "manage_appointments",
-  description: "List, book, or cancel Ruth's doctor appointments. Book: needs title + ISO datetime. Also pushes to Google Calendar when configured.",
+  description: "Human-in-the-loop booking: PROPOSE first (creates a proposal + pings Eleanor/family), only CONFIRM after Eleanor says yes. Never book without her yes. Cancel anytime.",
   inputSchema: z.object({
     userId: z.string(),
-    action: z.enum(["list", "create", "cancel"]),
+    action: z.enum(["list", "propose", "confirm", "cancel", "create"]),
     title: z.string().optional().describe("e.g. 'Cardiologist visit'"),
     doctor: z.string().optional(),
     location: z.string().optional(),
     at: z.string().optional().describe("ISO datetime, e.g. 2026-09-16T10:00:00"),
     notes: z.string().optional(),
-    apptId: z.string().optional().describe("For cancel"),
+    apptId: z.string().optional().describe("For confirm/cancel"),
   }),
   callback: async (input) => {
     const { listAppointments, addAppointment, setAppointment } = await import("./store");
+    const { addEscalation } = await import("./store");
     if (input.action === "list") {
       return JSON.stringify(await listAppointments(input.userId));
     }
@@ -202,31 +206,45 @@ export const manageAppointments = tool({
       await setAppointment(input.apptId, { status: "cancelled" });
       return JSON.stringify({ ok: true, cancelled: input.apptId });
     }
-    if (input.action === "create" && input.title && input.at) {
+    if (input.action === "confirm" && input.apptId) {
+      const appt = await setAppointment(input.apptId, { status: "upcoming" });
+      if (!appt) return JSON.stringify({ ok: false, error: "not found" });
+      await pushToGoogle(appt);
+      await addEscalation(input.userId, "info", `Appointment confirmed: ${appt.title} with ${appt.doctor || "doctor"} on ${new Date(appt.at).toLocaleString()}.`);
+      return JSON.stringify({ ok: true, appointment: appt });
+    }
+    if ((input.action === "propose" || input.action === "create") && input.title && input.at) {
       const appt = await addAppointment(input.userId, {
         title: input.title, doctor: input.doctor ?? "", location: input.location ?? "",
         at: input.at, notes: input.notes ?? "",
       });
-      let google: unknown = "not-configured";
-      try {
-        const { gcalOn, gcalCreate } = await import("./gcal");
-        if (gcalOn()) {
-          const end = new Date(new Date(input.at).getTime() + 60 * 60_000).toISOString();
-          const g = await gcalCreate({ title: input.title, description: `ElderLove booking for Ruth. ${input.notes ?? ""}`, startISO: input.at, endISO: end, location: input.location ?? "" });
-          google = g;
-          if (g.ok) {
-            const { q } = await import("./db");
-            await q("update appointments set google_event_id=$1 where id=$2", [(g as { eventId?: string }).eventId ?? "", appt.id]);
-          }
-        }
-      } catch (e) {
-        google = `failed: ${String(e).slice(0, 100)}`;
+      if (input.action === "create") {
+        // Direct create (caregiver path): book immediately.
+        await setAppointment(appt.id, { status: "upcoming" });
+        await pushToGoogle({ ...appt, status: "upcoming" });
+        return JSON.stringify({ ok: true, appointment: { ...appt, status: "upcoming" } });
       }
-      return JSON.stringify({ ok: true, appointment: appt, google });
+      // Propose: human must confirm. Ping Eleanor's world, don't book.
+      await setAppointment(appt.id, { status: "proposed" });
+      await addEscalation(input.userId, "attention", `Appointment proposed, awaiting Eleanor's yes: ${appt.title} on ${new Date(appt.at).toLocaleString()}.`);
+      return JSON.stringify({ ok: true, proposed: { ...appt, status: "proposed" }, needsHumanYes: true });
     }
-    return JSON.stringify({ ok: false, error: "missing fields (create needs title+at, cancel needs apptId)" });
+    return JSON.stringify({ ok: false, error: "missing fields (propose needs title+at, confirm/cancel needs apptId)" });
   },
 });
+
+async function pushToGoogle(appt: { title: string; notes: string; at: string; location: string; id: string; status?: string }) {
+  try {
+    const { gcalOn, gcalCreate } = await import("./gcal");
+    if (!gcalOn()) return;
+    const end = new Date(new Date(appt.at).getTime() + 60 * 60_000).toISOString();
+    const g = await gcalCreate({ title: appt.title, description: `ElderLove booking for Eleanor. ${appt.notes ?? ""}`, startISO: appt.at, endISO: end, location: appt.location ?? "" });
+    if (g.ok) {
+      const { q } = await import("./db");
+      await q("update appointments set google_event_id=$1 where id=$2", [(g as { eventId?: string }).eventId ?? "", appt.id]);
+    }
+  } catch {}
+}
 
 export const logHealthMetric = tool({
   name: "log_health_metric",
@@ -255,7 +273,37 @@ export const getHealthTrends = tool({
   },
 });
 
-export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends];
+export const logSymptom = tool({
+  name: "log_symptom",
+  description: "Log ANY ache/pain/symptom Eleanor mentions in passing (knee, dizzy, sleep, appetite...). Returns 7-day mention count — at 3+, propose a Dr. Harrison visit and notify family.",
+  inputSchema: z.object({
+    userId: z.string(),
+    complaint: z.string().describe("Short label, e.g. 'right knee pain'"),
+    detail: z.string().optional().describe("What she said, verbatim-ish"),
+  }),
+  callback: async (input) => {
+    const { logSymptom: save, symptomMentions, listSymptoms } = await import("./store");
+    await save(input.userId, input.complaint, input.detail ?? "");
+    const n = await symptomMentions(input.userId, input.complaint, 7);
+    const history = await listSymptoms(input.userId, 5);
+    return JSON.stringify({ ok: true, mentions7d: n, suggestVisit: n >= 3, recent: history });
+  },
+});
+
+export const checkRefillStatus = tool({
+  name: "check_refill_status",
+  description: "Honest pill-supply math (1/day from logged intakes). Returns days-left per med; <=7 days needs a family-approved refill request. Never claim pharmacy integration.",
+  inputSchema: z.object({ userId: z.string() }),
+  callback: async (input) => {
+    const { refillStatus } = await import("./store");
+    const rows = await refillStatus(input.userId);
+    return JSON.stringify({ meds: rows, needsRefill: rows.filter((r) => r.low) });
+  },
+});
+
+import { checkScam, flagScam } from "./scam";
+
+export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam];
 
 let _agent: Agent | null = null;
 export function getAgent(): Agent {
@@ -297,7 +345,7 @@ export async function fallbackReply(userId: string, message: string): Promise<{ 
     await addEscalation(userId, "info", "Elder felt lonely — companionship + memory shared.");
     const mems = await listMemories(userId);
     const mem = mems[0];
-    return { reply: `I'm here with you, Ruth. Tell me — ${mem.note} What is your favorite part of that memory?`, speak: true };
+    return { reply: `I'm here with you, Eleanor. Tell me — ${mem.note} What is your favorite part of that memory?`, speak: true };
   }
   if (m.includes("no") || m.includes("not yet") || m.includes("forget")) {
     await storeLogMood(userId, "ok", "missed reminder");

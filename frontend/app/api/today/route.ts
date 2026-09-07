@@ -4,7 +4,7 @@ import { listMeds, takenMedIds, listMoods, listTasks, listAppointments } from "@
 // Elder "today" board: meds w/ taken flags, check-in state, pending tasks, today's appointments.
 export async function GET() {
   const [meds, taken, moods, tasks, appts] = await Promise.all([
-    listMeds("ruth-78"), takenMedIds("ruth-78"), listMoods("ruth-78", 3), listTasks("ruth-78"), listAppointments("ruth-78"),
+    listMeds("eleanor-79"), takenMedIds("eleanor-79"), listMoods("eleanor-79", 3), listTasks("eleanor-79"), listAppointments("eleanor-79"),
   ]);
   const today = new Date().toISOString().slice(0, 10);
   const active = meds.filter((m) => m.active).sort((a, b) => a.time.localeCompare(b.time));

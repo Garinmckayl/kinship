@@ -5,7 +5,7 @@ import { randomId } from "./crypto";
 // Unified persistence: Postgres when DATABASE_URL is set, in-memory demo
 // store otherwise. All agent tools + routes go through here.
 
-export type Med = { id: string; name: string; dosage: string; time: string; label: string; active: boolean };
+export type Med = { id: string; name: string; dosage: string; time: string; label: string; active: boolean; pills_left?: number };
 export type Escalation = { level: string; message: string; time: string };
 export type BgTask = { id: string; userId: string; instruction: string; runAt: string; status: string; result?: string };
 
@@ -17,29 +17,29 @@ function fmtTime(d: Date | string) {
 }
 
 // ---------- medications ----------
-export async function listMeds(elder = "ruth-78"): Promise<Med[]> {
-  if (!dbOn()) return MEDS.map((m) => ({ id: m.id, name: m.name.split(" ")[0], dosage: m.name.split(" ").slice(1).join(" "), time: m.time, label: m.label, active: true }));
+export async function listMeds(elder = "eleanor-79"): Promise<Med[]> {
+  if (!dbOn()) return MEDS.map((m) => ({ id: m.id, name: m.name.split(" ")[0], dosage: m.name.split(" ").slice(1).join(" "), time: m.time, label: m.label, active: true, pills_left: 30 }));
   await ready();
-  const rows = await q<Med>("select id,name,dosage,time,label,active from medications where elder_id=$1 order by time", [elder]);
+  const rows = await q<Med>("select id,name,dosage,time,label,active,pills_left from medications where elder_id=$1 order by time", [elder]);
   return rows;
 }
 
-export async function addMed(elder: string, m: { name: string; dosage: string; time: string; label: string }): Promise<Med> {
+export async function addMed(elder: string, m: { name: string; dosage: string; time: string; label: string; pills_left?: number }): Promise<Med> {
   await ready();
   const id = randomId("med");
-  const rows = await q<Med>("insert into medications(id,elder_id,name,dosage,time,label) values($1,$2,$3,$4,$5,$6) returning id,name,dosage,time,label,active", [
-    id, elder, m.name.trim(), m.dosage.trim(), m.time, m.label.trim(),
+  const rows = await q<Med>("insert into medications(id,elder_id,name,dosage,time,label,pills_left) values($1,$2,$3,$4,$5,$6,$7) returning id,name,dosage,time,label,active,pills_left", [
+    id, elder, m.name.trim(), m.dosage.trim(), m.time, m.label.trim(), m.pills_left ?? 30,
   ]);
   return rows[0];
 }
 
-export async function updateMed(id: string, patch: Partial<Pick<Med, "name" | "dosage" | "time" | "label" | "active">>): Promise<Med | null> {
+export async function updateMed(id: string, patch: Partial<Pick<Med, "name" | "dosage" | "time" | "label" | "active" | "pills_left">>): Promise<Med | null> {
   await ready();
-  const cur = await q<Med>("select id,name,dosage,time,label,active from medications where id=$1", [id]);
+  const cur = await q<Med>("select id,name,dosage,time,label,active,pills_left from medications where id=$1", [id]);
   if (!cur.length) return null;
   const m = { ...cur[0], ...patch };
-  const rows = await q<Med>("update medications set name=$1,dosage=$2,time=$3,label=$4,active=$5 where id=$6 returning id,name,dosage,time,label,active", [
-    m.name, m.dosage, m.time, m.label, m.active, id,
+  const rows = await q<Med>("update medications set name=$1,dosage=$2,time=$3,label=$4,active=$5,pills_left=$6 where id=$7 returning id,name,dosage,time,label,active,pills_left", [
+    m.name, m.dosage, m.time, m.label, m.active, m.pills_left ?? 30, id,
   ]);
   return rows[0];
 }
@@ -50,7 +50,7 @@ export async function deleteMed(id: string) {
 }
 
 // ---------- intakes / adherence (today) ----------
-export async function takenMedIds(elder = "ruth-78"): Promise<string[]> {
+export async function takenMedIds(elder = "eleanor-79"): Promise<string[]> {
   if (!dbOn()) return Object.keys(getState(elder).intakes);
   await ready();
   const rows = await q<{ med_id: string }>("select med_id from intakes where elder_id=$1 and taken_at::date = current_date", [elder]);
@@ -64,7 +64,43 @@ export async function confirmIntake(elder: string, medId: string, source = "chat
   }
   await ready();
   await q("insert into intakes(elder_id,med_id,source) values($1,$2,$3)", [elder, medId, source]);
+  await q("update medications set pills_left = greatest(0, pills_left - 1) where id=$1", [medId]);
   return (await takenMedIds(elder)).length;
+}
+
+// ---------- symptoms (passive catching) ----------
+export async function logSymptom(elder: string, complaint: string, detail = "") {
+  if (!dbOn()) return { complaint, detail, at: new Date().toISOString() };
+  await ready();
+  const rows = await q("insert into symptoms(elder_id,complaint,detail) values($1,$2,$3) returning complaint,detail,at", [elder, complaint, detail]);
+  return rows[0];
+}
+
+export async function symptomMentions(elder: string, complaint: string, days = 7): Promise<number> {
+  if (!dbOn()) return 1;
+  await ready();
+  const rows = await q<{ n: string }>(
+    "select count(*) n from symptoms where elder_id=$1 and lower(complaint)=lower($2) and at >= now() - ($3 || ' days')::interval",
+    [elder, complaint, String(days)]
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
+export async function listSymptoms(elder = "eleanor-79", n = 10) {
+  if (!dbOn()) return [];
+  await ready();
+  return q("select complaint,detail,at from symptoms where elder_id=$1 order by at desc limit $2", [elder, n]);
+}
+
+// ---------- refills (honest math: 1 pill/day from logged intakes) ----------
+export async function refillStatus(elder = "eleanor-79") {
+  const meds = (await listMeds(elder)).filter((m) => m.active);
+  return meds.map((m) => ({
+    id: m.id, name: `${m.name} ${m.dosage}`.trim(),
+    pillsLeft: m.pills_left ?? 30,
+    daysLeft: m.pills_left ?? 30,
+    low: (m.pills_left ?? 30) <= 7,
+  }));
 }
 
 // ---------- moods ----------
@@ -77,7 +113,7 @@ export async function logMood(elder: string, mood: string, note = "") {
   await q("insert into moods(elder_id,mood,note) values($1,$2,$3)", [elder, mood, note]);
 }
 
-export async function lastMood(elder = "ruth-78"): Promise<string> {
+export async function lastMood(elder = "eleanor-79"): Promise<string> {
   if (!dbOn()) {
     const ms = getState(elder).moods;
     return ms.length ? ms[ms.length - 1].mood : "ok";
@@ -87,14 +123,14 @@ export async function lastMood(elder = "ruth-78"): Promise<string> {
   return rows[0]?.mood ?? "ok";
 }
 
-export async function listMoods(elder = "ruth-78", n = 5): Promise<{ mood: string; note?: string; at?: string }[]> {
+export async function listMoods(elder = "eleanor-79", n = 5): Promise<{ mood: string; note?: string; at?: string }[]> {
   if (!dbOn()) return getState(elder).moods.slice(-n);
   await ready();
   return q("select mood,note,at from moods where elder_id=$1 order by at desc limit $2", [elder, n]);
 }
 
 // ---------- memories ----------
-export async function listMemories(elder = "ruth-78"): Promise<{ title: string; note: string }[]> {
+export async function listMemories(elder = "eleanor-79"): Promise<{ title: string; note: string }[]> {
   if (!dbOn()) return MEMORIES;
   await ready();
   return q("select title,note from memories where elder_id=$1 order by id", [elder]);
@@ -119,7 +155,7 @@ export async function addEscalation(elder: string, level: string, message: strin
   return { ...e, id: rows[0].id, acked: false };
 }
 
-export async function listEscalations(elder = "ruth-78", n = 10): Promise<EscalationRow[]> {
+export async function listEscalations(elder = "eleanor-79", n = 10): Promise<EscalationRow[]> {
   if (!dbOn()) return [...getState(elder).escalations].reverse().slice(0, n);
   await ready();
   const rows = await q<{ id: number; level: string; message: string; at: string; acked: boolean }>("select id,level,message,at,acked from escalations where elder_id=$1 order by at desc limit $2", [elder, n]);
@@ -131,7 +167,7 @@ export async function ackEscalation(id: number) {
   await q("update escalations set acked=true where id=$1", [id]);
 }
 
-export async function unackedUrgentOlderThan(minutes: number, elder = "ruth-78") {
+export async function unackedUrgentOlderThan(minutes: number, elder = "eleanor-79") {
   await ready();
   return q<{ id: number; level: string; message: string; at: string }>(
     "select id,level,message,at from escalations where elder_id=$1 and acked=false and level in ('attention','urgent') and at < now() - ($2 || ' minutes')::interval order by at",
@@ -146,7 +182,7 @@ export async function heartbeat(elder: string, kind = "chat") {
   await q("insert into heartbeats(elder_id,kind) values($1,$2)", [elder, kind]);
 }
 
-export async function lastHeartbeat(elder = "ruth-78"): Promise<{ at: string; minutesAgo: number } | null> {
+export async function lastHeartbeat(elder = "eleanor-79"): Promise<{ at: string; minutesAgo: number } | null> {
   if (!dbOn()) return null;
   await ready();
   const rows = await q<{ at: string }>("select at from heartbeats where elder_id=$1 order by at desc limit 1", [elder]);
@@ -210,7 +246,7 @@ export async function saveReport(elder: string, dateISO: string, channel: string
   await q("insert into reports(elder_id,date,channel,summary) values($1,$2,$3,$4)", [elder, dateISO, channel, summary]);
 }
 
-export async function listReports(elder = "ruth-78", n = 7) {
+export async function listReports(elder = "eleanor-79", n = 7) {
   if (!dbOn()) return [];
   await ready();
   return q("select date,channel,summary,created_at from reports where elder_id=$1 order by created_at desc limit $2", [elder, n]);
@@ -219,12 +255,12 @@ export async function listReports(elder = "ruth-78", n = 7) {
 // ---------- appointments ----------
 export type Appt = { id: string; title: string; doctor: string; location: string; at: string; notes: string; status: string; google_event_id?: string };
 
-export async function listAppointments(elder = "ruth-78", upcomingOnly = true): Promise<Appt[]> {
+export async function listAppointments(elder = "eleanor-79", upcomingOnly = true): Promise<Appt[]> {
   if (!dbOn()) return [];
   await ready();
   return q(
     upcomingOnly
-      ? "select id,title,doctor,location,at,notes,status,google_event_id from appointments where elder_id=$1 and status='upcoming' and at >= now() - interval '1 day' order by at"
+      ? "select id,title,doctor,location,at,notes,status,google_event_id from appointments where elder_id=$1 and status in ('upcoming','proposed') and at >= now() - interval '1 day' order by at"
       : "select id,title,doctor,location,at,notes,status,google_event_id from appointments where elder_id=$1 order by at desc limit 30",
     [elder]
   );
@@ -263,7 +299,7 @@ export async function logHealth(elder: string, type: string, value: number, unit
   return rows[0];
 }
 
-export async function listHealth(elder = "ruth-78", type?: string, n = 30): Promise<Metric[]> {
+export async function listHealth(elder = "eleanor-79", type?: string, n = 30): Promise<Metric[]> {
   if (!dbOn()) return [];
   await ready();
   return type
@@ -271,7 +307,7 @@ export async function listHealth(elder = "ruth-78", type?: string, n = 30): Prom
     : q("select type,value,unit,at,source from health_metrics where elder_id=$1 order by at desc limit $2", [elder, n]);
 }
 
-export async function healthTrends(elder = "ruth-78") {
+export async function healthTrends(elder = "eleanor-79") {
   if (!dbOn()) return { latest: {}, weekAvg: {}, readings7d: 0 };
   await ready();
   const latest = await q<{ type: string; value: number; unit: string; at: string }>(

@@ -30,7 +30,7 @@ export default function SignupPage() {
         <div className="text-center space-y-2">
           <HeartIcon className="w-10 h-10 mx-auto text-rose-400" />
           <h1 className="text-3xl font-bold">Create caregiver account</h1>
-          <p className="text-slate-400">Watch over Ruth from anywhere.</p>
+          <p className="text-slate-400">Watch over Eleanor from anywhere.</p>
         </div>
         <BorderBeam size="md" colorVariant="sunset" theme="dark">
           <div className="bg-slate-950/90 rounded-2xl p-6 space-y-4">

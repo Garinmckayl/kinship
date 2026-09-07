@@ -76,7 +76,7 @@ export default function HealthPage() {
         <Card>
           <CardTitle>Vitals overview</CardTitle>
           {!trends || Object.keys(trends.latest).length === 0 ? (
-            <p className="text-slate-400">No readings yet. Log below, connect a watch to <code>POST /api/health</code> (REPORT_SECRET as ingest key), or let Ruth tell the agent: "my blood pressure is 130 over 85".</p>
+            <p className="text-slate-400">No readings yet. Log below, connect a watch to <code>POST /api/health</code> (REPORT_SECRET as ingest key), or let Eleanor tell the agent: "my blood pressure is 130 over 85".</p>
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
               {Object.entries(trends.latest).map(([t, v]) => (
