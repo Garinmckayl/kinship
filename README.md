@@ -3,7 +3,7 @@
 > Agents for Humans Hackathon — **Everyday Agents** track.
 > Proactive Strands agent (TypeScript SDK) that handles meds, loneliness, memory & escalation in the background. Only pings family when it matters.
 
-Demo persona: **Ruth, 78, lives alone, 3 meds.**
+Demo persona: **Eleanor, 79, lives alone, 3 meds.**
 
 Single codebase: Next.js PWA + Strands TS SDK in `frontend/` — no separate Python backend.
 
@@ -44,6 +44,14 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Agent tool `call_elder` tries Twilio → WhatsApp voice → family escalation, in that order.
 - Setup: developers.facebook.com → app → WhatsApp API Setup → test number works instantly. Env: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `ELDER_WHATSAPP_NUMBER` (e.g. 251911234567), `WHATSAPP_VERIFY_TOKEN`.
 
+## ElevenAgents live voice (the real agent path)
+- The elder surface includes the official @elevenlabs/react SDK. It uses ElevenAgents WebRTC for low-latency turn-taking, interruption/barge-in, real microphone audio, typed messages, dynamic variables, client tools, and native ElevenLabs conversation IDs.
+- Public browser agent: set NEXT_PUBLIC_ELEVENLABS_AGENT_ID. Private caregiver agent: set ELEVENLABS_AGENT_ID + ELEVENLABS_API_KEY; the authenticated GET /api/eleven/signed-url route mints the credential without exposing the key.
+- Configure these ElevenAgents webhook tools to point at the deployed app (Bearer header = ELEVENLABS_TOOL_SECRET): /api/eleven/tools/parent-status, /api/eleven/tools/request-appointment, and /api/eleven/tools/pharmacy-refill. Appointment requests are proposals only; the caregiver must approve in /calendar before Google sync.
+- Configure the ElevenLabs post-call transcription webhook as /api/eleven/webhook with HMAC secret ELEVENLABS_WEBHOOK_SECRET. Completed voice turns are written into the durable chat_messages thread, while ElevenLabs retains its native transcript/analysis history.
+- Recommended agent prompt: “You are Kinship, Eleanor’s warm voice companion. Use live tools for current status. Never claim an appointment is booked; stage it and ask a caregiver to approve. Never give medical diagnosis or dosage changes. If a scam is suspected, stop the conversation, protect Eleanor, and alert the caregiver.” Add dynamic variables {{elder_name}}, {{medication_focus}}, {{adherence_today}}, and {{caregiver_decision_url}}.
+
+The official platform supports knowledge, authenticated webhook tools, dynamic variables, telephony/Twilio, real-time events, post-call webhooks, testing/evals, analytics, and data retention. Kinship uses the SDK, tool, personalization, telephony, and post-call surfaces in the live path: https://elevenlabs.io/docs/eleven-agents/overview.
 ## Data: Postgres (Neon) + auth + meds
 - `lib/store.ts` persists everything (meds, intakes, moods, memories, escalations, tasks, reports, chat messages, approval-gated appointments, users). No `DATABASE_URL` → in-memory demo mode, nothing breaks.
 - Auth: signup/login/logout/me with scrypt + JWT httpOnly cookie (`lib/auth.ts`). `/family` requires a caregiver session. Demo login: `caregiver@demo.local` / `demo1234` (auto-seeded).
@@ -90,7 +98,7 @@ cd frontend && npm install && npm run dev
 
 ## Deploy (Vercel)
 - Import `Garinmckayl/elderai`, root directory `frontend`.
-- Env vars: AWS creds, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, Inngest keys, Twilio vars, `PUBLIC_BASE_URL=https://<your-app>.vercel.app`.
+- Env vars: AWS creds, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (or private `ELEVENLABS_AGENT_ID`), `ELEVENLABS_TOOL_SECRET`, `ELEVENLABS_WEBHOOK_SECRET`, Inngest keys, Twilio vars, `PUBLIC_BASE_URL=https://<your-app>.vercel.app`.
 - Inngest syncs via `/api/inngest` automatically.
 
 ## Safety

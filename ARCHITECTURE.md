@@ -12,7 +12,11 @@ flowchart TB
         CHAT["/api/chat + /stream (SSE)"]
         CG["/api/caregiver/stream"]
         REST["status · today · meds<br/>appointments · health · tasks<br/>reports · welfare/check"]
-        VOICE["speak (ElevenLabs) · voice/* (Twilio)<br/>whatsapp/* (Meta Cloud API)"]
+        VOICE["ElevenAgents React WebRTC + dynamic vars<br/>signed URL · webhook tools · post-call transcript<br/>speak fallback · Twilio/WhatsApp"]
+    end
+
+    subgraph ELEVEN["ElevenAgents"]
+        EL["Real-time ASR · turn-taking · TTS<br/>barge-in · dynamic variables · client/webhook tools<br/>Twilio native integration · post-call analysis"]
     end
 
     subgraph AGENTS["Strands TS agents (Bedrock Sonnet 4.6)"]
@@ -33,6 +37,8 @@ flowchart TB
     end
 
     E --> CHAT
+    E --> EL
+    EL --> VOICE
     F --> CG
     C --> REST
     E --> VOICE
@@ -53,7 +59,8 @@ flowchart TB
 4. Double-dose guard: same-day re-log refused, Ruth stopped firmly, attempt written to family trail.
 5. Evening digest: adherence/mood/alerts/tasks → WhatsApp + email + saved report.
 6. Human-in-the-loop decisions: agent requests an appointment → caregiver sees the decision queue → explicit approval is required before booking or Google Calendar sync.
-7. Conversation continuity: web, phone, WhatsApp, and fallback replies write to `chat_messages`; the UI restores the local elder thread and the authenticated caregiver thread.
+7. Conversation continuity: web, ElevenAgents voice, phone, WhatsApp, and fallback replies write to `chat_messages`; Eleven post-call webhooks backfill the durable voice transcript, while the UI restores the local elder thread and authenticated caregiver thread.
+8. Voice safety boundary: ElevenAgents can request a refill or appointment, but appointment tools only create `proposed`; caregiver approval is the only path to calendar sync.
 
 **Fallbacks (demo never dies):** no AWS creds → rule-based replies + word-chunked SSE;
 no DB → in-memory store; no Twilio → WhatsApp voice; no WhatsApp → dashboard escalation.

@@ -17,17 +17,17 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 
 `[0:00-0:25]` “Every elder companion app is a clinical nagging machine. Kinship gives seniors agency, safety, and a real voice.”
 
-`[0:25-1:15]` On `/elder`, say: “Kinship, my blood pressure pills are down to the last three.” Show the fast reply and interruption/barge-in.
+`[0:25-1:15]` On `/elder`, click **Start live voice**. Say: “Kinship, my blood pressure pills are down to the last three.” Interrupt Kinship mid-sentence. Call out that this is ElevenAgents WebRTC with native turn-taking and barge-in, not browser speech synthesis.
 
 `[1:15-2:00]` Open `/demo` and run the pharmacy worker. Call out the DTMF 1 → DTMF 2 → prescription number → confirmation trace. The caregiver output reads: “Lisinopril refill placed at CVS on 4th Ave. Confirmed ready for pickup Thursday 2:00 PM.”
 
 `[2:00-2:35]` Run the pill-tray audit, then trigger the scam interceptor. Read the safety hold and the “caller blocked / no funds transferred” output.
 
-`[2:35-2:50]` In Family view, show the saved caregiver thread and a staged appointment. Tap **Approve & sync** to demonstrate human-in-the-loop control.
+`[2:35-2:50]` In Family view, show the saved caregiver thread and the appointment proposal created by the voice agent’s webhook tool. Tap **Approve & sync** to demonstrate human-in-the-loop control.
 
 `[2:50-3:00]` Close on: “Dignity for elders. Absolute peace of mind for their children.”
 
-The default path is deterministic and credential-free. Say “mock demo” when presenting the pharmacy and bank actions; only present live external actions when the corresponding opt-in environment flags are enabled.
+The fallback path is deterministic and credential-free, but the competition path is live when configured: public ElevenAgents ID for browser voice, ElevenLabs webhook tools for actions, HMAC post-call transcript ingestion, and native Twilio phone integration. Say “mock demo” when presenting the pharmacy and bank actions; only present live external actions when the corresponding opt-in environment flags are enabled.
 
 ## Score boosters (from judging criteria)
 - [x] **AgentCore deployed** — `arn:aws:bedrock-agentcore:us-west-2:451870923073:runtime/elderlove_guardian-2ee2NC41zV` (READY, invocation-tested). ECR: `elderlove-guardian:latest`. NOTE: bills while live — teardown after judging if desired.

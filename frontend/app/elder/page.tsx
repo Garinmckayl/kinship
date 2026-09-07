@@ -7,6 +7,7 @@ import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
 import { Markdown } from "@/components/Markdown";
 import { Nav } from "@/components/Nav";
+import { ElevenAgentPanel } from "@/components/ElevenAgentPanel";
 import { attachMotion, fakePulse, stopMotion } from "@/components/voiceMotion";
 import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
 
@@ -92,6 +93,15 @@ export default function ElderPage() {
     const t = setInterval(load, 30000);
     return () => clearInterval(t);
   }, [phase]);
+
+  function handleElevenMessage(role: "agent" | "elder", text: string) {
+    setMsgs((current) => {
+      const last = current[current.length - 1];
+      if (last?.role === role && last.text === text) return current;
+      return [...current, { role, text }];
+    });
+    setToolNote("");
+  }
 
   function stopAudio() {
     audioRef.current?.pause();
@@ -365,6 +375,21 @@ export default function ElderPage() {
         </div>
 
         <div className="min-w-0">
+        <ElevenAgentPanel
+          dynamicContext={{
+            medication_focus: today?.meds.filter((m) => !m.taken).map((m) => `${m.name} ${m.dosage}`).join(", ") || "No medication due data yet",
+            adherence_today: today ? `${today.meds.filter((m) => m.taken).length}/${today.meds.length} doses logged` : "unknown",
+            pending_appointments: today?.appointmentsToday.length ?? 0,
+            caregiver_decision_url: typeof window === "undefined" ? "/family?focus=decisions" : `${window.location.origin}/family?focus=decisions`,
+          }}
+          onMessage={handleElevenMessage}
+          onPhase={(next) => setPhase(next)}
+          onTool={(name) => {
+            if (name.startsWith("connected:")) setToolNote("Live ElevenAgents session connected");
+            else if (name.startsWith("error:")) setToolNote(name.slice(6));
+            else setToolNote(name);
+          }}
+        />
         {/* Today: quick actions */}
         {today && (
           <div className="mt-6 bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">

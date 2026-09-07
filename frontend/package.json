@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@elevenlabs/react": "^1.15.2",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@strands-agents/sdk": "^1.16.0",
     "border-beam": "^1.3.0",
