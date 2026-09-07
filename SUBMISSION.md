@@ -13,6 +13,20 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 - [ ] Live demo link (Vercel URL — scores Technical points)
 - [ ] Bonus: builder.aws.com post titled with "Agents for Humans" (bonus points)
 
+## Three-minute demo script
+
+`[0:00-0:25]` “Every elder companion app is a clinical nagging machine. Kinship gives seniors agency, safety, and a real voice.”
+
+`[0:25-1:15]` On `/elder`, say: “Kinship, my blood pressure pills are down to the last three.” Show the fast reply and interruption/barge-in.
+
+`[1:15-2:00]` Open `/demo` and run the pharmacy worker. Call out the DTMF 1 → DTMF 2 → prescription number → confirmation trace. The caregiver output reads: “Lisinopril refill placed at CVS on 4th Ave. Confirmed ready for pickup Thursday 2:00 PM.”
+
+`[2:00-2:35]` Run the pill-tray audit, then trigger the scam interceptor. Read the safety hold and the “caller blocked / no funds transferred” output.
+
+`[2:35-3:00]` Run the temporal graph, switch to `/family`, and close on: “Dignity for elders. Absolute peace of mind for their children.”
+
+The default path is deterministic and credential-free. Say “mock demo” when presenting the pharmacy and bank actions; only present live external actions when the corresponding opt-in environment flags are enabled.
+
 ## Score boosters (from judging criteria)
 - [x] **AgentCore deployed** — `arn:aws:bedrock-agentcore:us-west-2:451870923073:runtime/elderlove_guardian-2ee2NC41zV` (READY, invocation-tested). ECR: `elderlove-guardian:latest`. NOTE: bills while live — teardown after judging if desired.
 - [ ] **$50 AWS credits** — claim via Resources tab form.

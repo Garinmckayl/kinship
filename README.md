@@ -71,6 +71,17 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - **Caregiver chat:** family dashboard Chat tab — realtime streaming answers from live data, "add Vitamin D at 8am", "remind mom now".
 - shadcn-style `components/ui.tsx` (card, button, badge, input, calendar, tabs) used across new pages.
 
+## Limit-pushing Demo Lab
+
+Open `/demo` for the judge-facing surface:
+
+- **Pharmacy phone-tree buster:** mock-first DTMF trace for CVS on 4th Ave, prescription `RX-4472`, confirmation `CVS-THU-0200`; an optional live Twilio leg uses `LIVE_PHARMACY_DEMO=1`, `PHARMACY_PHONE_NUMBER`, and `PHARMACY_DTMF_DIGITS`.
+- **Pill-tray vision:** browser camera capture with a deterministic safe fallback; with Bedrock credentials and `VISION_MODEL_ID`, the server sends the image through the Strands SDK multimodal `ImageBlock` path.
+- **Scam interceptor:** mock audio-intercept protocol blocks the caller, queues an FTC-style report, simulates a linked-card freeze, and creates an urgent caregiver alert. External bank/report webhooks require both their URL and an explicit `live: true` request; caregiver WhatsApp also requires `ALLOW_DEMO_OUTBOUND=1`.
+- **Temporal graph:** a visible entity-relationship-time chain connects the knee memory, a weather signal, and a proactive heating-pad action.
+
+Every card reports whether it ran in `mock`, `demo-vision`, `bedrock-vision`, or live integration mode.
+
 ## Run locally
 ```bash
 cd frontend && npm install && npm run dev
