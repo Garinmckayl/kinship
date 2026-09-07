@@ -7,6 +7,7 @@ import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
 import { Markdown } from "@/components/Markdown";
 import { Nav } from "@/components/Nav";
+import { attachMotion, fakePulse, stopMotion } from "@/components/voiceMotion";
 import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
 
 const TOOL_LABELS: Record<string, string> = {
@@ -78,6 +79,7 @@ export default function ElderPage() {
   function stopAudio() {
     audioRef.current?.pause();
     audioRef.current = null;
+    stopMotion();
   }
 
   // Streaming chat: tokens render live, tool activity shows, full reply drives voice.
@@ -161,6 +163,7 @@ export default function ElderPage() {
           if (callActiveRef.current) voiceInput();
         };
         await audio.play();
+        attachMotion(audio);
         return;
       }
     } catch {}
@@ -173,9 +176,11 @@ export default function ElderPage() {
       u.rate = 0.9;
       u.onend = () => {
         setPhase("idle");
+        stopMotion();
         if (callActiveRef.current) voiceInput();
       };
       speechSynthesis.speak(u);
+      fakePulse();
     } catch {
       setPhase("idle");
     }
