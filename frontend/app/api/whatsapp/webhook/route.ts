@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   let reply = "Thank you Eleanor, I've noted that. 💜";
   try {
-    const out = await chat(userId, `[whatsapp — keep reply under 40 words, simple sentences] ${heard}`);
+    const out = await chat(userId, `[whatsapp — keep reply under 40 words, simple sentences] ${heard}`, { channel: "whatsapp" });
     reply = out.reply;
   } catch {}
 

@@ -21,7 +21,7 @@ flowchart TB
     end
 
     subgraph DATA["Postgres (Neon)"]
-        DB[("meds · intakes · moods<br/>memories · escalations(+ack)<br/>heartbeats · tasks · reports<br/>appointments · health_metrics · users")]
+        DB[("meds · intakes · moods<br/>memories · escalations(+ack)<br/>heartbeats · tasks · reports · chat_messages<br/>appointments: proposed → approved<br/>health_metrics · users")]
     end
 
     subgraph BG["Background (Inngest)"]
@@ -52,6 +52,8 @@ flowchart TB
 3. Alert acknowledgment: unconfirmed attention/urgent re-fires until a human taps "I'm on it".
 4. Double-dose guard: same-day re-log refused, Ruth stopped firmly, attempt written to family trail.
 5. Evening digest: adherence/mood/alerts/tasks → WhatsApp + email + saved report.
+6. Human-in-the-loop decisions: agent requests an appointment → caregiver sees the decision queue → explicit approval is required before booking or Google Calendar sync.
+7. Conversation continuity: web, phone, WhatsApp, and fallback replies write to `chat_messages`; the UI restores the local elder thread and the authenticated caregiver thread.
 
 **Fallbacks (demo never dies):** no AWS creds → rule-based replies + word-chunked SSE;
 no DB → in-memory store; no Twilio → WhatsApp voice; no WhatsApp → dashboard escalation.

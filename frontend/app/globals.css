@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
+:root { color-scheme: dark; }
 body { font-family: system-ui, -apple-system, sans-serif; }
 
 @keyframes novaFade {
@@ -22,3 +22,16 @@ body { font-family: system-ui, -apple-system, sans-serif; }
   50% { transform: scale(1.015) translateY(-3px); }
 }
 .nova-speak { animation: novaSpeak 0.9s ease-in-out infinite; }
+
+/* Kinship visual system: quiet midnight canvas, soft glass surfaces, clear action color. */
+html { background: #070a14; }
+body {
+  color: #f8fafc;
+  background-color: #070a14;
+  background-image: radial-gradient(circle at 15% -10%, rgba(99,102,241,0.22), transparent 32rem), radial-gradient(circle at 90% 10%, rgba(217,70,239,0.10), transparent 28rem), linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-size: auto, auto, 42px 42px, 42px 42px;
+  background-attachment: fixed;
+}
+::selection { background: rgba(129,140,248,0.55); color: white; }
+button, a, input { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid rgba(165,180,252,0.9); outline-offset: 3px; }

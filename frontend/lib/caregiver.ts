@@ -1,14 +1,15 @@
 import { Agent, tool } from "@strands-agents/sdk";
 import { z } from "zod";
 import { getMedSchedule, summarizeForDoctor, scheduleTask } from "./guardian";
-import { listMeds, takenMedIds, lastMood, listEscalations, listTasks, listAppointments, healthTrends, addMed, addEscalation } from "./store";
+import { listMeds, takenMedIds, lastMood, listEscalations, listTasks, listAppointments, healthTrends, addMed, addAppointment, addEscalation } from "./store";
 
 // Family-facing agent: answers anything about Eleanor from live data,
 // manages meds, and nudges Eleanor in realtime.
 const CAREGIVER_PROMPT = `You are ElderLove's family assistant, talking to Eleanor's caregiver.
 Rules:
 - Answer ONLY from tool data (medications, adherence, mood, alerts, appointments, health). Never invent readings or doses.
-- You can add medications (add_medication), ping Eleanor right now (remind_parent_now), or schedule later nudges (schedule_task).
+- You can add medications (add_medication), request an appointment (request_appointment), ping Eleanor right now (remind_parent_now), or schedule later nudges (schedule_task).
+- APPOINTMENT SAFETY: request_appointment always creates a proposed appointment. Never claim it is booked or synced until a caregiver explicitly taps Approve in the decision queue.
 - Be concise, warm, specific with times and numbers. Today is ${new Date().toISOString().slice(0, 10)}.`;
 
 export async function parentSnapshot(): Promise<string> {
@@ -47,6 +48,20 @@ export const addMedication = tool({
   },
 });
 
+export const requestAppointment = tool({
+  name: "request_appointment",
+  description: "Stage a doctor appointment for caregiver approval. Never book or sync it directly.",
+  inputSchema: z.object({
+    title: z.string(), doctor: z.string().optional(), location: z.string().optional(), at: z.string().describe("ISO datetime"), notes: z.string().optional(),
+  }),
+  callback: async (input) => {
+    if (!input.at || Number.isNaN(new Date(input.at).getTime())) return JSON.stringify({ ok: false, error: "at must be a valid ISO datetime" });
+    const appt = await addAppointment("eleanor-79", { title: input.title, doctor: input.doctor ?? "", location: input.location ?? "", at: input.at, notes: input.notes ?? "" }, "proposed");
+    await addEscalation("eleanor-79", "attention", "Approval needed: " + appt.title + " on " + new Date(appt.at).toLocaleString() + ". Nothing was booked yet.");
+    return JSON.stringify({ ok: true, appointment: appt, needsCaregiverApproval: true, nextStep: "Caregiver must approve from the decision queue before calendar sync." });
+  },
+});
+
 export const remindParentNow = tool({
   name: "remind_parent_now",
   description: "Ping Eleanor RIGHT NOW (dashboard escalation + WhatsApp text if configured).",
@@ -70,7 +85,7 @@ export function getCaregiverAgent(): Agent {
   if (!_cg) {
     _cg = new Agent({
       systemPrompt: CAREGIVER_PROMPT,
-      tools: [parentStatus, getMedSchedule, summarizeForDoctor, addMedication, remindParentNow, scheduleTask],
+      tools: [parentStatus, getMedSchedule, summarizeForDoctor, addMedication, requestAppointment, remindParentNow, scheduleTask],
       printer: false,
       contextManager: "auto",
     });

@@ -8,12 +8,48 @@ import { randomId } from "./crypto";
 export type Med = { id: string; name: string; dosage: string; time: string; label: string; active: boolean; pills_left?: number };
 export type Escalation = { level: string; message: string; time: string };
 export type BgTask = { id: string; userId: string; instruction: string; runAt: string; status: string; result?: string };
+export type ChatMessage = {
+  id: string | number;
+  threadId: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  channel: string;
+  createdAt: string;
+};
 
 const MEM_TASKS: BgTask[] = [];
+const MEM_CHAT: ChatMessage[] = [];
 
 function fmtTime(d: Date | string) {
   const dt = typeof d === "string" ? new Date(d) : d;
   return dt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+// ---------- durable chat history ----------
+export async function saveChatMessage(threadId: string, role: ChatMessage["role"], content: string, channel = "chat"): Promise<ChatMessage> {
+  const createdAt = new Date().toISOString();
+  if (!dbOn()) {
+    const row = { id: randomId("msg"), threadId, role, content, channel, createdAt };
+    MEM_CHAT.push(row);
+    return row;
+  }
+  await ready();
+  const rows = await q<{ id: string; thread_id: string; role: ChatMessage["role"]; content: string; channel: string; created_at: string }>(
+    "insert into chat_messages(thread_id,role,content,channel) values($1,$2,$3,$4) returning id,thread_id,role,content,channel,created_at",
+    [threadId, role, content, channel]
+  );
+  const row = rows[0];
+  return { id: row.id, threadId: row.thread_id, role: row.role, content: row.content, channel: row.channel, createdAt: new Date(row.created_at).toISOString() };
+}
+
+export async function listChatMessages(threadId: string, limit = 80): Promise<ChatMessage[]> {
+  if (!dbOn()) return MEM_CHAT.filter((m) => m.threadId === threadId).slice(-limit);
+  await ready();
+  const rows = await q<{ id: string; thread_id: string; role: ChatMessage["role"]; content: string; channel: string; created_at: string }>(
+    "select id,thread_id,role,content,channel,created_at from chat_messages where thread_id=$1 order by created_at desc limit $2",
+    [threadId, limit]
+  );
+  return rows.reverse().map((row) => ({ id: row.id, threadId: row.thread_id, role: row.role, content: row.content, channel: row.channel, createdAt: new Date(row.created_at).toISOString() }));
 }
 
 // ---------- medications ----------
@@ -254,9 +290,13 @@ export async function listReports(elder = "eleanor-79", n = 7) {
 
 // ---------- appointments ----------
 export type Appt = { id: string; title: string; doctor: string; location: string; at: string; notes: string; status: string; google_event_id?: string };
+const MEM_APPTS: (Appt & { elderId?: string })[] = [];
 
 export async function listAppointments(elder = "eleanor-79", upcomingOnly = true): Promise<Appt[]> {
-  if (!dbOn()) return [];
+  if (!dbOn()) {
+    const rows = MEM_APPTS.filter((a) => a.elderId === elder || !a.elderId);
+    return rows.filter((a) => !upcomingOnly || (a.status === "upcoming" || a.status === "proposed") && new Date(a.at).getTime() >= Date.now() - 86_400_000).sort((a, b) => +new Date(a.at) - +new Date(b.at));
+  }
   await ready();
   return q(
     upcomingOnly
@@ -266,15 +306,33 @@ export async function listAppointments(elder = "eleanor-79", upcomingOnly = true
   );
 }
 
-export async function addAppointment(elder: string, a: { title: string; doctor: string; location: string; at: string; notes: string }): Promise<Appt> {
-  await ready();
+export async function addAppointment(elder: string, a: { title: string; doctor: string; location: string; at: string; notes: string }, status = "upcoming"): Promise<Appt> {
   const id = randomId("appt");
-  const rows = await q<Appt>("insert into appointments(id,elder_id,title,doctor,location,at,notes) values($1,$2,$3,$4,$5,$6,$7) returning id,title,doctor,location,at,notes,status,google_event_id",
-    [id, elder, a.title, a.doctor, a.location, a.at, a.notes]);
+  if (!dbOn()) {
+    const appt = { id, elderId: elder, title: a.title, doctor: a.doctor, location: a.location, at: a.at, notes: a.notes, status };
+    MEM_APPTS.unshift(appt);
+    return appt;
+  }
+  await ready();
+  const rows = await q<Appt>("insert into appointments(id,elder_id,title,doctor,location,at,notes,status) values($1,$2,$3,$4,$5,$6,$7,$8) returning id,title,doctor,location,at,notes,status,google_event_id",
+    [id, elder, a.title, a.doctor, a.location, a.at, a.notes, status]);
   return rows[0];
 }
 
+export async function getAppointment(id: string): Promise<Appt | null> {
+  if (!dbOn()) return MEM_APPTS.find((a) => a.id === id) ?? null;
+  await ready();
+  const rows = await q<Appt>("select id,title,doctor,location,at,notes,status,google_event_id from appointments where id=$1", [id]);
+  return rows[0] ?? null;
+}
+
 export async function setAppointment(id: string, patch: Partial<Pick<Appt, "status" | "title" | "at" | "notes">>): Promise<Appt | null> {
+  if (!dbOn()) {
+    const appt = MEM_APPTS.find((a) => a.id === id);
+    if (!appt) return null;
+    Object.assign(appt, patch);
+    return appt;
+  }
   await ready();
   const cur = await q<Appt>("select id,title,doctor,location,at,notes,status,google_event_id from appointments where id=$1", [id]);
   if (!cur.length) return null;
@@ -285,6 +343,11 @@ export async function setAppointment(id: string, patch: Partial<Pick<Appt, "stat
 }
 
 export async function deleteAppointment(id: string) {
+  if (!dbOn()) {
+    const index = MEM_APPTS.findIndex((a) => a.id === id);
+    if (index >= 0) MEM_APPTS.splice(index, 1);
+    return;
+  }
   await ready();
   await q("delete from appointments where id=$1", [id]);
 }

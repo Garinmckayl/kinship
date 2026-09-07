@@ -24,6 +24,7 @@ type Status = {
 type Med = { id: string; name: string; dosage: string; time: string; label: string; active: boolean };
 type BgTask = { id: string; instruction: string; runAt: string; status: string; result?: string };
 type Report = { date: string; channel: string; summary: string };
+type AppointmentPreview = { status: string };
 
 const FALLBACK: Status = {
   elder: "Eleanor, 79",
@@ -48,6 +49,7 @@ export default function FamilyPage() {
   const [meds, setMeds] = useState<Med[]>([]);
   const [tasks, setTasks] = useState<BgTask[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState(0);
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
@@ -57,12 +59,18 @@ export default function FamilyPage() {
   const cBusy = useRef(false);
 
   useEffect(() => {
-    fetch(`${API}/auth/me`).then((r) => (r.ok ? r.json() : null)).then((d) => setMe(d?.user ?? null)).catch(() => {}).finally(() => setAuthChecked(true));
+    fetch(API + "/auth/me").then((r) => (r.ok ? r.json() : null)).then((d) => {
+      setMe(d?.user ?? null);
+      if (d?.user) fetch(API + "/caregiver/history").then((r) => (r.ok ? r.json() : null)).then((h) => {
+        if (h?.messages?.length) setCMsgs(h.messages.map((m: { role: string; content: string }) => ({ role: m.role === "user" ? "cg" : "agent", text: m.content })));
+      }).catch(() => {});
+    }).catch(() => {}).finally(() => setAuthChecked(true));
     const load = () => {
       fetch(`${API}/status?user_id=eleanor-79`).then((r) => r.json()).then(setS).catch(() => {});
       fetch(`${API}/meds`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setMeds(d.meds ?? [])).catch(() => {});
       fetch(`${API}/tasks?user_id=eleanor-79`).then((r) => r.json()).then((d) => setTasks(d.tasks ?? [])).catch(() => {});
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
+      fetch(API + "/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => setPendingApprovals((d?.appointments ?? []).filter((a: AppointmentPreview) => a.status === "proposed").length)).catch(() => {});
     };
     load();
     const t = setInterval(load, 10000);
@@ -204,15 +212,27 @@ export default function FamilyPage() {
           )}
         </header>
         <div className="flex gap-2 text-sm">
-          <Link href="/calendar" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Doctor calendar</Link>
+          <Link href="/calendar" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">{pendingApprovals > 0 ? <span className="flex items-center gap-2">Decision queue <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-xs font-black">{pendingApprovals}</span></span> : "Doctor calendar"}</Link>
           <Link href="/health" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Health</Link>
           <Link href="/elder" className="px-4 py-2 rounded-xl bg-white/5 ring-1 ring-white/10 hover:bg-white/10">Elder view</Link>
         </div>
 
         <Tabs tabs={["Overview", "Chat"]} active={tab} onChange={setTab} />
 
+        {tab === "Overview" && pendingApprovals > 0 && (
+          <div className="flex items-center gap-4 rounded-2xl bg-amber-400/10 ring-1 ring-amber-300/30 px-4 py-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-300 text-slate-950 grid place-items-center font-black">{pendingApprovals}</div>
+            <div className="flex-1"><p className="font-bold text-amber-100">Human decision needed</p><p className="text-sm text-amber-100/70">A proposed appointment is waiting for your approval. Kinship has not booked or synced it.</p></div>
+            <Link href="/calendar" className="px-3 py-2 rounded-xl bg-amber-300 text-slate-950 text-sm font-black">Review</Link>
+          </div>
+        )}
+
         {tab === "Chat" ? (
           <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div><p className="text-xs uppercase tracking-[0.22em] text-indigo-300 font-bold">Private caregiver thread</p><p className="text-sm text-slate-400 mt-1">Conversation is saved and can be continued after a refresh.</p></div>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">saved</span>
+            </div>
             <div ref={cScroll} className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 mb-4">
               {cMsgs.length === 0 && (
                 <p className="text-slate-400">

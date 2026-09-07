@@ -4,7 +4,7 @@ import {
   listMeds, takenMedIds, confirmIntake as storeConfirmIntake,
   logMood as storeLogMood, listMoods, listMemories,
   addEscalation, listEscalations,
-  enqueueTask, updateTask,
+  enqueueTask, updateTask, saveChatMessage, listChatMessages,
 } from "./store";
 
 export const SYSTEM_PROMPT = `You are ElderLove, the daily companion and guardian for Eleanor, 79, living alone in Columbus, Ohio. Her daughter Sarah lives in Chicago. Her doctor is Dr. Harrison at Riverside Clinic.
@@ -377,15 +377,23 @@ function messageToText(msg: unknown): string {
   }
 }
 
-export async function chat(userId: string, message: string, opts: { heartbeat?: boolean } = {}) {
+export async function chat(userId: string, message: string, opts: { heartbeat?: boolean; channel?: string } = {}) {
   const hb = opts.heartbeat !== false;
+  const channel = opts.channel ?? "chat";
+  await saveChatMessage(userId, "user", message, channel).catch(() => {});
+  const history = await listChatMessages(userId, 14).catch(() => []);
+  const recent = history.slice(0, -1).slice(-12).map((m) => (m.role === "user" ? "Eleanor" : "Kinship") + ": " + m.content).join("\n");
+  const prompt = recent ? "[user " + userId + "] Recent conversation:\n" + recent + "\nCurrent message: " + message : "[user " + userId + "] " + message;
+  const finish = async (reply: string) => { if (reply.trim()) await saveChatMessage(userId, "assistant", reply, channel).catch(() => {}); };
   // If no AWS creds, skip Bedrock and use fallback instantly.
   if (!process.env.AWS_REGION && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
     if (hb) {
       const { heartbeat } = await import("./store");
       await heartbeat(userId, "chat").catch(() => {});
     }
-    return fallbackReply(userId, message);
+    const out = await fallbackReply(userId, message);
+    await finish(out.reply);
+    return out;
   }
   try {
     if (hb) {
@@ -393,11 +401,14 @@ export async function chat(userId: string, message: string, opts: { heartbeat?: 
       await heartbeat(userId, "chat").catch(() => {});
     }
     const agent = getAgent();
-    const result = await agent.invoke(`[user ${userId}] ${message}`);
+    const result = await agent.invoke(prompt);
     const text = messageToText((result as { lastMessage?: unknown }).lastMessage ?? result);
+    await finish(text);
     return { reply: text, speak: true };
   } catch (e) {
     console.error("Strands error, falling back:", e);
-    return fallbackReply(userId, message);
+    const out = await fallbackReply(userId, message);
+    await finish(out.reply);
+    return out;
   }
 }

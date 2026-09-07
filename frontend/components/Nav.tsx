@@ -14,19 +14,19 @@ const LINKS = [
 export function Nav() {
   const path = usePathname();
   return (
-    <header className="sticky top-0 z-40 backdrop-blur bg-[#0f0d2e]/80 border-b border-white/10">
+    <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#080b18]/80 border-b border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.2)]">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
         <Link href="/" className="flex items-center gap-2 font-black text-xl">
           <HeartIcon className="w-6 h-6 text-rose-400" />
-          <span className="hidden sm:inline">ElderLove</span>
+          <span className="hidden sm:inline tracking-tight">ElderLove</span><span className="hidden xl:inline text-xs font-semibold text-indigo-300/80 border-l border-white/15 pl-2">KINSHIP GUARDIAN</span>
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
           {LINKS.map(({ href, label, Icon }) => {
             const active = path === href;
             return (
               <Link key={href} href={href}
                 className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-sm sm:text-base font-semibold transition ${
-                  active ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white hover:bg-white/10"
+                  active ? "bg-white/10 text-white ring-1 ring-indigo-300/30 shadow-[0_0_20px_rgba(99,102,241,0.16)]" : "text-slate-300 hover:text-white hover:bg-white/10"
                 }`}>
                 <Icon className="w-5 h-5" />
                 {label}

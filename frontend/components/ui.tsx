@@ -3,7 +3,7 @@
 // shadcn-style primitives (new-york aesthetic, dark palette, zero extra deps).
 
 export function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-3xl bg-white/5 ring-1 ring-white/10 p-5 ${className ?? ""}`}>{children}</div>;
+  return <div className={`rounded-3xl bg-gradient-to-b from-white/[0.09] to-white/[0.035] ring-1 ring-white/10 shadow-[0_20px_70px_rgba(0,0,0,0.18)] p-5 ${className ?? ""}`}>{children}</div>;
 }
 
 export function CardTitle({ children }: { children: React.ReactNode }) {
@@ -12,10 +12,10 @@ export function CardTitle({ children }: { children: React.ReactNode }) {
 
 type BtnVariant = "primary" | "secondary" | "ghost" | "danger";
 const BTN: Record<BtnVariant, string> = {
-  primary: "bg-indigo-600 hover:bg-indigo-500 text-white",
+  primary: "bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-400 hover:to-violet-400 text-white shadow-[0_8px_24px_rgba(99,102,241,0.28)]",
   secondary: "bg-white/10 hover:bg-white/15 text-white ring-1 ring-white/15",
   ghost: "text-slate-300 hover:text-white hover:bg-white/5",
-  danger: "bg-red-500 hover:bg-red-400 text-white",
+  danger: "bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-400 hover:to-red-400 text-white shadow-[0_8px_24px_rgba(244,63,94,0.25)]",
 };
 
 export function Btn({ children, onClick, variant, className, type }: {
@@ -23,7 +23,7 @@ export function Btn({ children, onClick, variant, className, type }: {
 }) {
   return (
     <button type={type ?? "button"} onClick={onClick}
-      className={`px-4 py-2 rounded-xl font-semibold transition ${BTN[variant ?? "primary"]} ${className ?? ""}`}>
+      className={`px-4 py-2 rounded-xl font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 ${BTN[variant ?? "primary"]} ${className ?? ""}`}>
       {children}
     </button>
   );
@@ -46,7 +46,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input {...props}
-      className={`w-full bg-white/5 ring-1 ring-white/10 rounded-xl px-3 py-2 outline-none placeholder:text-slate-500 text-white ${props.className ?? ""}`} />
+      className={`w-full bg-slate-950/35 ring-1 ring-white/10 focus:ring-2 focus:ring-indigo-400/70 rounded-xl px-3 py-2 outline-none placeholder:text-slate-500 text-white transition ${props.className ?? ""}`} />
   );
 }
 
@@ -85,10 +85,10 @@ export function CalendarMonth({ year, month, marks, selected, onPick }: {
 
 export function Tabs({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
   return (
-    <div className="flex gap-1 bg-white/5 ring-1 ring-white/10 rounded-2xl p-1">
+    <div className="flex gap-1 bg-slate-950/35 ring-1 ring-white/10 rounded-2xl p-1 shadow-inner">
       {tabs.map((t) => (
         <button key={t} onClick={() => onChange(t)}
-          className={`flex-1 px-3 py-2 rounded-xl text-sm font-bold transition ${active === t ? "bg-indigo-600 text-white" : "text-slate-300 hover:text-white"}`}>
+          className={`flex-1 px-3 py-2 rounded-xl text-sm font-bold transition ${active === t ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"}`}>
           {t}
         </button>
       ))}

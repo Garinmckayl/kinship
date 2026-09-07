@@ -6,6 +6,6 @@ export async function POST(req: Request) {
   const userId = body.user_id ?? body.userId ?? "eleanor-79";
   const message = body.message ?? "";
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400 });
-  const out = await chat(userId, message);
+  const out = await chat(userId, message, { channel: "elder-web" });
   return NextResponse.json(out);
 }

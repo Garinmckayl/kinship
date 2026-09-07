@@ -31,7 +31,7 @@ function toolOf(ev: AnyEvent): string | null {
   }
 }
 
-export function sseStream(agent: Agent, prompt: string): ReadableStream<Uint8Array> {
+export function sseStream(agent: Agent, prompt: string, onComplete?: (text: string) => void | Promise<void>): ReadableStream<Uint8Array> {
   const enc = new TextEncoder();
   const send = (obj: unknown, c: ReadableStreamDefaultController<Uint8Array>) =>
     c.enqueue(enc.encode(`data: ${JSON.stringify(obj)}\n\n`));
@@ -51,6 +51,7 @@ export function sseStream(agent: Agent, prompt: string): ReadableStream<Uint8Arr
             if (tool) send({ tool }, c);
           }
         }
+        try { await onComplete?.(full); } catch (persistError) { console.error("SSE persistence failed:", persistError); }
         send({ done: true, full }, c);
       } catch (e) {
         send({ error: String(e).slice(0, 300) }, c);
@@ -62,7 +63,7 @@ export function sseStream(agent: Agent, prompt: string): ReadableStream<Uint8Arr
 }
 
 // Word-chunked fallback stream (no AWS creds): identical SSE protocol.
-export function sseFallback(text: string, ms = 25): ReadableStream<Uint8Array> {
+export function sseFallback(text: string, ms = 25, onComplete?: (text: string) => void | Promise<void>): ReadableStream<Uint8Array> {
   const enc = new TextEncoder();
   return new ReadableStream<Uint8Array>({
     async start(c) {
@@ -70,6 +71,7 @@ export function sseFallback(text: string, ms = 25): ReadableStream<Uint8Array> {
         c.enqueue(enc.encode(`data: ${JSON.stringify({ t: w })}\n\n`));
         await new Promise((r) => setTimeout(r, ms));
       }
+      try { await onComplete?.(text); } catch (persistError) { console.error("SSE persistence failed:", persistError); }
       c.enqueue(enc.encode(`data: ${JSON.stringify({ done: true, full: text })}\n\n`));
       c.close();
     },

@@ -16,6 +16,7 @@ export default function CalendarPage() {
   const [appts, setAppts] = useState<Appt[]>([]);
   const [form, setForm] = useState({ title: "", doctor: "", location: "", at: "", notes: "" });
   const [authed, setAuthed] = useState(false);
+  const [notice, setNotice] = useState("");
 
   const load = () =>
     fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => {
@@ -38,11 +39,21 @@ export default function CalendarPage() {
   async function add() {
     if (!form.title || !form.at) return;
     const res = await fetch("/api/appointments", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    const d = await res.json().catch(() => ({}));
     if (res.ok) {
-      const d = await res.json();
       setAppts((a) => [...a, d.appointment]);
       setForm({ title: "", doctor: "", location: "", at: "", notes: "" });
-    }
+      setNotice("Request staged. A caregiver must approve it before it is booked or synced.");
+    } else setNotice(d.error ?? "Could not stage appointment request.");
+  }
+
+  async function approve(id: string) {
+    const res = await fetch(`/api/appointments/${id}/approve`, { method: "POST" });
+    const d = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setNotice("Approved. The appointment is now booked and " + (d.calendar === "synced" ? "synced to Google Calendar." : "saved in Kinship."));
+      load();
+    } else setNotice(d.error ?? "Approval failed.");
   }
 
   async function cancel(id: string) {
@@ -93,8 +104,8 @@ export default function CalendarPage() {
                     <p className="font-bold">{a.title} {a.doctor && <span className="font-normal text-slate-300">· {a.doctor}</span>}</p>
                     <p className="text-sm text-slate-400">{new Date(a.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} {a.location && `· ${a.location}`}</p>
                   </div>
-                  <Badge tone={a.status === "cancelled" ? "red" : "green"}>{a.status}</Badge>
-                  {a.status !== "cancelled" && <Btn variant="ghost" onClick={() => cancel(a.id)}>Cancel</Btn>}
+                  <Badge tone={a.status === "cancelled" ? "red" : a.status === "proposed" ? "amber" : "green"}>{a.status === "proposed" ? "approval needed" : a.status}</Badge>
+                  {a.status === "proposed" ? <Btn onClick={() => approve(a.id)}>Approve & sync</Btn> : a.status !== "cancelled" && <Btn variant="ghost" onClick={() => cancel(a.id)}>Cancel</Btn>}
                 </div>
               ))}
             </div>
@@ -102,15 +113,17 @@ export default function CalendarPage() {
         </Card>
 
         <Card>
-          <CardTitle>Book appointment</CardTitle>
+          <CardTitle>Request an appointment</CardTitle>
+          <p className="text-sm text-amber-200/80 mb-4">Human approval required. This stays proposed until a caregiver taps Approve & sync.</p>
           <div className="grid sm:grid-cols-2 gap-3">
             <Field label="Title"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Cardiologist visit" /></Field>
             <Field label="Doctor"><Input value={form.doctor} onChange={(e) => setForm({ ...form, doctor: e.target.value })} placeholder="Dr. Alemu" /></Field>
             <Field label="Date & time"><Input value={form.at} onChange={(e) => setForm({ ...form, at: e.target.value })} type="datetime-local" /></Field>
             <Field label="Location"><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Tikur Anbessa, Room 4" /></Field>
           </div>
-          <div className="mt-3"><Btn onClick={add}>Book</Btn></div>
-          <p className="text-xs text-slate-500 mt-2">Pushes to Google Calendar when GOOGLE_* env is set. Eleanor can also book by voice.</p>
+          <div className="mt-3"><Btn onClick={add}>Send for approval</Btn></div>
+          {notice && <p className="text-sm text-emerald-200 mt-3">{notice}</p>}
+          <p className="text-xs text-slate-500 mt-2">Nothing reaches Google Calendar until a caregiver explicitly approves it. Eleanor can also request one by voice.</p>
         </Card>
 
         <Card>

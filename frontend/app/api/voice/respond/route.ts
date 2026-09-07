@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   let reply = "Thank you Eleanor, I've noted that.";
   try {
-    const out = await chat(userId, `[phone call — keep reply under 40 words, simple sentences] ${heard}`);
+    const out = await chat(userId, `[phone call — keep reply under 40 words, simple sentences] ${heard}`, { channel: "phone" });
     reply = out.reply;
   } catch {}
 

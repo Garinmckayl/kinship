@@ -45,7 +45,7 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Setup: developers.facebook.com → app → WhatsApp API Setup → test number works instantly. Env: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `ELDER_WHATSAPP_NUMBER` (e.g. 251911234567), `WHATSAPP_VERIFY_TOKEN`.
 
 ## Data: Postgres (Neon) + auth + meds
-- `lib/store.ts` persists everything (meds, intakes, moods, memories, escalations, tasks, reports, users). No `DATABASE_URL` → in-memory demo mode, nothing breaks.
+- `lib/store.ts` persists everything (meds, intakes, moods, memories, escalations, tasks, reports, chat messages, approval-gated appointments, users). No `DATABASE_URL` → in-memory demo mode, nothing breaks.
 - Auth: signup/login/logout/me with scrypt + JWT httpOnly cookie (`lib/auth.ts`). `/family` requires a caregiver session. Demo login: `caregiver@demo.local` / `demo1234` (auto-seeded).
 - Medication management: caregiver adds/pauses/removes meds in the dashboard (`/api/meds`); the agent reads the live schedule — no hardcoded pills.
 - Daily report: 8pm ET Inngest cron → WhatsApp text (`CAREGIVER_WHATSAPP_NUMBER`) + email via Resend (`RESEND_API_KEY`, `CAREGIVER_EMAIL`) + saved to DB. Manual: `POST /api/reports/generate` (caregiver session or `REPORT_SECRET`).
@@ -65,7 +65,7 @@ Works with zero AWS creds via rule-based fallback (judges click + it just works)
 - Token streaming via `agent.stream()` async iterators (`/api/chat/stream`, `/api/caregiver/stream`, SSE), markdown rendering, auto-scroll, live tool status ("Logging your pill…").Agents use `contextManager: "auto"` (summarize + offload per Strands context-management).
 
 ## Beyond meds
-- **Appointments:** `manage_appointments` tool + `/calendar` page (shadcn-style month view) + Google Calendar service-account sync (`GOOGLE_CLIENT_EMAIL/PRIVATE_KEY/CALENDAR_ID`). Ruth books by voice: "book my cardiologist Tuesday at 10".
+- **Appointments:** `manage_appointments` + `request_appointment` stage proposals; `/calendar` exposes a caregiver decision queue. Only explicit caregiver approval promotes a proposal to `upcoming` and triggers Google Calendar sync (`GOOGLE_CLIENT_EMAIL/PRIVATE_KEY/CALENDAR_ID`).
 - **Health:** vitals table + `/health` page (sparklines, 7-day avgs) + `POST /api/health` ingest (caregiver session or `REPORT_SECRET` — any watch app can push) + `log_health_metric`/`get_health_trends` tools the agent references.
 - **Elder today board:** `/api/today` quick-actions card (meds to log, check-in, reminders, today's doctors).
 - **Caregiver chat:** family dashboard Chat tab — realtime streaming answers from live data, "add Vitamin D at 8am", "remind mom now".

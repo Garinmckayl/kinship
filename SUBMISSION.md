@@ -23,7 +23,9 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 
 `[2:00-2:35]` Run the pill-tray audit, then trigger the scam interceptor. Read the safety hold and the “caller blocked / no funds transferred” output.
 
-`[2:35-3:00]` Run the temporal graph, switch to `/family`, and close on: “Dignity for elders. Absolute peace of mind for their children.”
+`[2:35-2:50]` In Family view, show the saved caregiver thread and a staged appointment. Tap **Approve & sync** to demonstrate human-in-the-loop control.
+
+`[2:50-3:00]` Close on: “Dignity for elders. Absolute peace of mind for their children.”
 
 The default path is deterministic and credential-free. Say “mock demo” when presenting the pharmacy and bank actions; only present live external actions when the corresponding opt-in environment flags are enabled.
 

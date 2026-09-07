@@ -22,6 +22,7 @@ const TOOL_LABELS: Record<string, string> = {
 };
 
 const API = "/api";
+const LOCAL_HISTORY_KEY = "elderlove:conversation:eleanor-79";
 type Msg = { role: "agent" | "elder"; text: string };
 type CallMode = "off" | "ringing" | "active";
 
@@ -52,6 +53,22 @@ export default function ElderPage() {
   phaseRef.current = phase;
   const wakeOnRef = useRef(false);
   wakeOnRef.current = wakeOn;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_HISTORY_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as Msg[];
+        if (Array.isArray(parsed) && parsed.length) setMsgs(parsed);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (msgs.length > 1) {
+      try { localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(msgs.slice(-80))); } catch {}
+    }
+  }, [msgs]);
 
   useEffect(() => {
     return () => {
@@ -390,6 +407,10 @@ export default function ElderPage() {
         )}
 
         {/* Conversation */}
+        <div className="flex items-center justify-between mt-8 mb-2">
+          <div><p className="text-xs uppercase tracking-[0.22em] text-indigo-300 font-bold">Your conversation</p><p className="text-sm text-slate-400">Saved on this device and in Kinship history.</p></div>
+          <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">saved</span>
+        </div>
         <div ref={scrollRef} className="mt-8 space-y-3 max-h-[42vh] overflow-y-auto pr-1">
           {msgs.map((m, i) =>
             m.role === "agent" ? (

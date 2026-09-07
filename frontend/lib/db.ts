@@ -127,6 +127,15 @@ create table if not exists symptoms (
   detail text default '',
   at timestamptz default now()
 );
+create table if not exists chat_messages (
+  id bigserial primary key,
+  thread_id text not null,
+  role text not null,
+  content text not null,
+  channel text default 'chat',
+  created_at timestamptz default now()
+);
+create index if not exists chat_messages_thread_time_idx on chat_messages(thread_id, created_at);
 `;
 
 let readyP: Promise<void> | null = null;
