@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { BorderBeam } from "border-beam";
-import { AgentOrb, PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
+import { PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
+import { NovaFace } from "@/components/NovaFace";
 import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
 import { Markdown } from "@/components/Markdown";
@@ -319,8 +320,8 @@ export default function ElderPage() {
         <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 lg:items-start">
         <div className="flex flex-col items-center text-center gap-3 lg:sticky lg:top-24">
           <BorderBeam size="pulse-outside" colorVariant="ocean" theme="dark">
-            <div className="rounded-full bg-indigo-500/10 px-8 py-6">
-              <AgentOrb phase={phase} scale={2.5} dark />
+            <div className="rounded-full bg-indigo-500/10 px-6 py-4">
+              <NovaFace phase={phase} size={240} />
             </div>
           </BorderBeam>
           <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Eleanor <HeartIcon className="w-8 h-8 text-rose-400" /></h1>

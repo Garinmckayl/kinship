@@ -1,5 +1,6 @@
 "use client";
-import { AgentOrb, PHASE_LABEL, type AgentPhase } from "./AgentOrb";
+import { PHASE_LABEL, type AgentPhase } from "./AgentOrb";
+import { NovaFace } from "./NovaFace";
 import { BeamInput } from "./BeamInput";
 import { PhoneIcon, XIcon } from "./icons";
 
@@ -40,7 +41,7 @@ export function CallScreen({
 
       <div className="flex flex-col items-center gap-6">
         <div className="rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
-          <AgentOrb phase={phase} scale={3} dark />
+          <NovaFace phase={phase} size={260} />
         </div>
         <p className="max-w-md text-center text-2xl leading-relaxed text-slate-100 min-h-[4rem]">
           “{caption}”
@@ -74,7 +75,7 @@ export function IncomingCall({ onAccept, onDecline }: { onAccept: () => void; on
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white px-6">
       <div className="animate-pulse rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
-        <AgentOrb phase="idle" scale={3} dark />
+        <NovaFace phase="idle" expression="joyful" size={260} />
       </div>
       <div className="text-center">
         <h2 className="text-4xl font-bold">ElderLove</h2>
