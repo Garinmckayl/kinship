@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AgentPhase } from "./AgentOrb";
 import { voiceMotion } from "./voiceMotion";
 
@@ -14,9 +14,12 @@ const PHASE_FACE: Record<AgentPhase, NovaFaceName> = {
   asleep: "idle",
 };
 
-// Nova: the caregiver Eleanor talks to. Face follows agent phase,
-// crossfades on change, breathes at rest, and moves with her real
-// voice energy (analyser-driven bob, not a static swap).
+const MOUTH = ["mouth-closed", "mouth-half", "mouth-wide"] as const;
+
+// Nova: the caregiver Eleanor talks to. Face follows agent phase with
+// crossfade; while speaking, her mouth flaps across 3 frames driven by
+// live voice energy (~8fps: closed on quiet, wide on loud) plus a subtle
+// head bob. This is what makes her look like she's talking.
 export function NovaFace({
   phase,
   expression,
@@ -27,19 +30,40 @@ export function NovaFace({
   size?: number;
 }) {
   const face = expression ?? PHASE_FACE[phase];
+  const [mouth, setMouth] = useState<(typeof MOUTH)[number]>("mouth-closed");
+  const mouthRef = useRef(mouth);
+  mouthRef.current = mouth;
+  const lastSwap = useRef(0);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Preload flap frames so the first swap doesn't flicker.
+  useEffect(() => {
+    for (const m of MOUTH) {
+      const im = new Image();
+      im.src = `/nova/${m}.png`;
+    }
+  }, []);
 
   useEffect(() => {
     let raf = 0;
     const tick = () => {
       const el = imgRef.current;
+      const l = voiceMotion.level;
+      if (face === "speaking") {
+        const now = performance.now();
+        if (now - lastSwap.current > 125) {
+          const next = l < 0.15 ? MOUTH[0] : l < 0.45 ? MOUTH[1] : MOUTH[2];
+          if (next !== mouthRef.current) {
+            lastSwap.current = now;
+            setMouth(next);
+          }
+        }
+      }
       if (el) {
-        const l = voiceMotion.level;
         if (l > 0.02) {
-          const s = 1 + l * 0.05;
-          const y = -l * 7;
-          const tilt = Math.sin(performance.now() / 140) * l * 1.2;
-          el.style.transform = `scale(${s.toFixed(3)}) translateY(${y.toFixed(1)}px) rotate(${tilt.toFixed(2)}deg)`;
+          const s = 1 + l * 0.04;
+          const y = -l * 6;
+          el.style.transform = `scale(${s.toFixed(3)}) translateY(${y.toFixed(1)}px)`;
         } else {
           el.style.transform = "";
         }
@@ -48,13 +72,15 @@ export function NovaFace({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [face]);
+
+  const src = face === "speaking" ? `/nova/${mouth}.png` : `/nova/${face}.png`;
 
   return (
     <img
       key={face}
       ref={imgRef}
-      src={`/nova/${face}.png`}
+      src={src}
       alt={`Nova — ${face}`}
       width={size}
       height={size}
