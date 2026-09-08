@@ -28,10 +28,93 @@ html { background: #070a14; }
 body {
   color: #f8fafc;
   background-color: #070a14;
-  background-image: radial-gradient(circle at 15% -10%, rgba(99,102,241,0.22), transparent 32rem), radial-gradient(circle at 90% 10%, rgba(217,70,239,0.10), transparent 28rem), linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+  background-image: radial-gradient(circle at 12% -10%, rgba(24,169,143,0.20), transparent 34rem), radial-gradient(circle at 92% 8%, rgba(251,191,36,0.10), transparent 30rem), linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
   background-size: auto, auto, 42px 42px, 42px 42px;
   background-attachment: fixed;
 }
-::selection { background: rgba(129,140,248,0.55); color: white; }
+::selection { background: rgba(79,209,181,0.45); color: white; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid rgba(165,180,252,0.9); outline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid rgba(142,232,211,0.95); outline-offset: 3px; }
+
+/* Coastal night palette: ink, sea-glass teal, warm amber, and coral.
+   Legacy indigo utility names are remapped below so every route shares one identity. */
+:root {
+  --ink-950: #071216;
+  --ink-900: #0b1b20;
+  --ink-800: #11272d;
+  --sea-300: #8ee8d3;
+  --sea-400: #4fd1b5;
+  --sea-500: #18a98f;
+  --sun-300: #ffd38a;
+  --coral-400: #fb7185;
+}
+
+html { background: var(--ink-950); }
+body {
+  color: #f4fbf8;
+  background-color: var(--ink-950);
+  background-image:
+    radial-gradient(circle at 12% -10%, rgba(24,169,143,0.20), transparent 34rem),
+    radial-gradient(circle at 92% 8%, rgba(251,191,36,0.10), transparent 30rem),
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: auto, auto, 42px 42px, 42px 42px;
+  background-attachment: fixed;
+}
+main[class*="radial-gradient"], [class*="radial-gradient"] {
+  background:
+    radial-gradient(circle at 15% -12%, rgba(24,169,143,0.22), transparent 34rem),
+    radial-gradient(circle at 92% 12%, rgba(251,191,36,0.08), transparent 28rem),
+    var(--ink-950) !important;
+}
+::selection { background: rgba(79,209,181,0.45); color: white; }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline-color: rgba(142,232,211,0.95);
+}
+[class*="99,102,241"] {
+  box-shadow: 0 0 100px 18px rgba(24,169,143,0.28) !important;
+}
+
+/* Translate the old accent utilities into sea-glass teal / sunlit amber. */
+[class~="text-indigo-200"], [class~="text-indigo-300"], [class~="text-indigo-400"] {
+  color: var(--sea-300) !important;
+}
+[class~="text-indigo-100"] { color: #d7fff4 !important; }
+[class~="bg-indigo-600"], [class~="bg-indigo-500"] {
+  background-color: var(--sea-500) !important;
+}
+[class~="bg-indigo-500/10"], [class~="bg-indigo-500/15"], [class~="bg-indigo-500/20"] {
+  background-color: rgba(24,169,143,0.16) !important;
+}
+[class~="ring-indigo-300/30"], [class~="ring-indigo-400/20"], [class~="ring-indigo-400/30"] {
+  --tw-ring-color: rgba(142,232,211,0.30) !important;
+}
+[class~="hover:bg-indigo-500"]:hover, [class~="hover:bg-indigo-400"]:hover {
+  background-color: #21c2a3 !important;
+}
+[class~="from-indigo-500"] {
+  --tw-gradient-from: var(--sea-500) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(24 169 143 / 0) var(--tw-gradient-to-position) !important;
+}
+[class~="to-violet-500"], [class~="to-violet-400"] {
+  --tw-gradient-to: #0f766e var(--tw-gradient-to-position) !important;
+}
+[class~="from-indigo-400"] {
+  --tw-gradient-from: #21c2a3 var(--tw-gradient-from-position) !important;
+}
+[class~="bg-fuchsia-400/10"] {
+  background-color: rgba(251,191,36,0.12) !important;
+}
+[class~="ring-fuchsia-300/30"] {
+  --tw-ring-color: rgba(255,211,138,0.32) !important;
+}
+[class~="text-fuchsia-200"], [class~="text-fuchsia-300"] {
+  color: var(--sun-300) !important;
+}
+[class~="bg-fuchsia-300"] { background-color: var(--sun-300) !important; }
+
+.surface {
+  background: linear-gradient(145deg, rgba(17,39,45,0.92), rgba(7,18,22,0.86));
+  border: 1px solid rgba(142,232,211,0.14);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.20);
+}

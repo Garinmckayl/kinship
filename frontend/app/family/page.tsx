@@ -54,6 +54,7 @@ export default function FamilyPage() {
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
   const [cMsgs, setCMsgs] = useState<{ role: "cg" | "agent"; text: string }[]>([]);
+  const [elderHistory, setElderHistory] = useState<{ role: string; content: string; createdAt: string }[]>([]);
   const [cInput, setCInput] = useState("");
   const cScroll = useRef<HTMLDivElement>(null);
   const cBusy = useRef(false);
@@ -77,6 +78,11 @@ export default function FamilyPage() {
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    fetch(API + "/caregiver/elder-history").then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (d?.messages?.length) setElderHistory(d.messages);
+    }).catch(() => {});
+  }, []);
   async function logout() {
     await fetch(`${API}/auth/logout`, { method: "POST" });
     setMe(null);
@@ -250,6 +256,17 @@ export default function FamilyPage() {
                 )
               )}
             </div>
+            {elderHistory.length > 0 && (
+              <div className="mt-5 rounded-2xl bg-teal-950/35 ring-1 ring-teal-300/20 p-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-teal-200 font-bold">Eleanor’s durable history</p>
+                  <span className="text-xs text-teal-100/60">latest {Math.min(6, elderHistory.length)} turns</span>
+                </div>
+                <div className="space-y-2 max-h-56 overflow-y-auto">
+                  {elderHistory.slice(-6).map((m, i) => <div key={i} className="text-sm"><span className="text-teal-200 font-bold">{m.role === "user" ? "Eleanor" : "Kinship"}</span><span className="text-slate-300"> · {m.content}</span></div>)}
+                </div>
+              </div>
+            )}
             <BeamInput value={cInput} onChange={setCInput} onSend={sendC} onMic={() => {}} placeholder="Ask about Eleanor…" />
           </section>
         ) : (

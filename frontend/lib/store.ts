@@ -99,7 +99,11 @@ export async function confirmIntake(elder: string, medId: string, source = "chat
     return Object.keys(getState(elder).intakes).length;
   }
   await ready();
-  await q("insert into intakes(elder_id,med_id,source) values($1,$2,$3)", [elder, medId, source]);
+  const inserted = await q<{ id: number }>(
+    "insert into intakes(elder_id,med_id,source,intake_date) values($1,$2,$3,current_date) on conflict (elder_id,med_id,intake_date) do nothing returning id",
+    [elder, medId, source]
+  );
+  if (!inserted.length) return (await takenMedIds(elder)).length;
   await q("update medications set pills_left = greatest(0, pills_left - 1) where id=$1", [medId]);
   return (await takenMedIds(elder)).length;
 }

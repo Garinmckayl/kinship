@@ -24,7 +24,7 @@ export function BeamInput({
           onClick={onMic}
           aria-label="Speak"
           className={`w-12 h-12 shrink-0 rounded-xl grid place-items-center text-white transition ${
-            micActive ? "bg-red-500 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500"
+            micActive ? "bg-red-500 animate-pulse" : "bg-teal-600 hover:bg-teal-500"
           }`}
         >
           <MicIcon className="w-6 h-6" />
@@ -39,7 +39,7 @@ export function BeamInput({
         <button
           onClick={onSend}
           aria-label="Send"
-          className="w-12 h-12 shrink-0 rounded-xl bg-white text-slate-950 grid place-items-center hover:bg-indigo-100"
+          className="w-12 h-12 shrink-0 rounded-xl bg-white text-slate-950 grid place-items-center hover:bg-teal-100"
         >
           <SendIcon className="w-6 h-6" />
         </button>

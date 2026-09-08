@@ -37,6 +37,7 @@ export default function ElderPage() {
   const [seconds, setSeconds] = useState(0);
   const [wakeOn, setWakeOn] = useState(false);
   const [toolNote, setToolNote] = useState("");
+  const [historyState, setHistoryState] = useState<"checking" | "synced" | "device">("checking");
   const [today, setToday] = useState<{
     meds: { id: string; name: string; dosage: string; time: string; taken: boolean }[];
     checkedInToday: boolean; tasksPending: number;
@@ -64,7 +65,18 @@ export default function ElderPage() {
       }
     } catch {}
   }, []);
+  useEffect(() => {
+    fetch(`${API}/caregiver/elder-history`).then((r) => {
+      if (!r.ok) throw new Error("not authenticated");
+      return r.json();
+    }).then((d) => {
+      if (d?.messages?.length) {
+        setMsgs(d.messages.filter((m: { role: string; content: string }) => m.role !== "system").map((m: { role: string; content: string }) => ({ role: m.role === "user" ? "elder" : "agent", text: m.content })));
+        setHistoryState("synced");
 
+      }
+    }).catch(() => setHistoryState("device"));
+  }, []);
   useEffect(() => {
     if (msgs.length > 1) {
       try { localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(msgs.slice(-80))); } catch {}
@@ -433,8 +445,8 @@ export default function ElderPage() {
 
         {/* Conversation */}
         <div className="flex items-center justify-between mt-8 mb-2">
-          <div><p className="text-xs uppercase tracking-[0.22em] text-indigo-300 font-bold">Your conversation</p><p className="text-sm text-slate-400">Saved on this device and in Kinship history.</p></div>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">saved</span>
+          <div><p className="text-xs uppercase tracking-[0.22em] text-teal-200 font-bold">Your conversation</p><p className="text-sm text-slate-400">{historyState === "synced" ? "Synced to Kinship history." : "Backed up on this device; caregiver sync appears when signed in."}</p></div>
+          <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">{historyState === "synced" ? "synced" : "saved"}</span>
         </div>
         <div ref={scrollRef} className="mt-8 space-y-3 max-h-[42vh] overflow-y-auto pr-1">
           {msgs.map((m, i) =>

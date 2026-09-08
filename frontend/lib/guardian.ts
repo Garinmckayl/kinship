@@ -45,9 +45,10 @@ export const confirmIntake = tool({
   }),
   callback: async (input) => {
     const taken = await takenMedIds(input.userId);
+    const meds = await listMeds(input.userId);
+    const med = meds.find((m) => m.id === input.medId && m.active);
+    if (!med) return JSON.stringify({ ok: false, error: "Medication was not found on the active schedule." });
     if (taken.includes(input.medId)) {
-      const meds = await listMeds(input.userId);
-      const med = meds.find((m) => m.id === input.medId);
       await addEscalation(input.userId, "attention", `Double-dose prevented: Eleanor tried to log ${med?.name ?? input.medId} again — stopped her.`);
       return JSON.stringify({ ok: false, alreadyTaken: true, takenToday: taken });
     }

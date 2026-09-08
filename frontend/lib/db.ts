@@ -54,6 +54,7 @@ create table if not exists intakes (
   elder_id text not null,
   med_id text not null,
   taken_at timestamptz default now(),
+  intake_date date not null default current_date,
   source text default 'chat'
 );
 create table if not exists moods (
@@ -149,6 +150,19 @@ async function init() {
   await getPool().query(SCHEMA);
   // Migrations for pre-existing tables/rows.
   await getPool().query("alter table escalations add column if not exists acked boolean default false");
+  await getPool().query("alter table intakes add column if not exists intake_date date");
+  await getPool().query("update intakes set intake_date = (taken_at at time zone 'UTC')::date where intake_date is null");
+  await getPool().query("alter table intakes alter column intake_date set default current_date");
+  await getPool().query("alter table intakes alter column intake_date set not null");
+  // Repair any legacy duplicate rows before enforcing the medication safety invariant.
+  await getPool().query(`
+    delete from intakes older using intakes newer
+    where older.id > newer.id
+      and older.elder_id = newer.elder_id
+      and older.med_id = newer.med_id
+      and older.intake_date = newer.intake_date
+  `);
+  await getPool().query("create unique index if not exists intakes_one_per_day_idx on intakes(elder_id,med_id,intake_date)");
   await getPool().query("alter table medications add column if not exists pills_left int default 30");
   // One-time persona rename: ruth-78 -> eleanor-79. Parent first (FK), then children.
   await getPool().query("insert into elders(id,name,age) values('eleanor-79','Eleanor',79) on conflict (id) do nothing");

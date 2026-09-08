@@ -23,10 +23,10 @@ export async function POST(req: Request) {
     for (const turn of transcript) {
       const text = String(turn.message ?? "").trim();
       if (!text) continue;
-      await saveChatMessage("elder:eleanor-79", turn.role === "user" ? "user" : "assistant", text, channel);
+      await saveChatMessage("eleanor-79", turn.role === "user" ? "user" : "assistant", text, channel);
     }
     const summary = String((data.analysis as Record<string, unknown> | undefined)?.transcript_summary ?? "").trim();
-    if (summary) await saveChatMessage("elder:eleanor-79", "system", `ElevenAgents call summary: ${summary}`, channel);
+    if (summary) await saveChatMessage("eleanor-79", "system", `ElevenAgents call summary: ${summary}`, channel);
   }
   if (event.type === "call_initiation_failure") {
     await addEscalation("eleanor-79", "attention", `ElevenAgents call failed: ${String(data.failure_reason ?? "unknown reason")}.`);
