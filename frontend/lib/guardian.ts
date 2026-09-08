@@ -21,7 +21,8 @@ Rules:
 - REFILLS: run check_refill_status weekly or when asked. Any med at 7 days or less -> notify family to approve a refill (staged request, human approves; never claim pharmacy integration).
 - BACKGROUND WORK: if Eleanor asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
-- APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.`;
+- APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.
+- COMPOUND RISK: during morning check-ins and when you notice 2+ concerning signals (missed meds, symptoms, low mood, silence), run assess_compound_risk to evaluate the combination. Trust its reasoning — if it returns red, escalate immediately. The combination of weak signals matters more than any single alarm.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -304,7 +305,27 @@ export const checkRefillStatus = tool({
 
 import { checkScam, flagScam } from "./scam";
 
-export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam];
+import { assessCompoundRisk } from "./compound-risk";
+
+export const assessRisk = tool({
+  name: "assess_compound_risk",
+  description: "Run a compound-risk assessment: gathers medication adherence, silence, symptoms, mood, vitals, and unacked alerts. Returns a risk level (green/yellow/orange/red) with cross-domain reasoning. Use proactively during check-ins or when multiple concerns surface.",
+  inputSchema: z.object({ userId: z.string() }),
+  callback: async (input) => {
+    const result = await assessCompoundRisk(input.userId);
+    return JSON.stringify({
+      riskLevel: result.riskLevel,
+      action: result.action,
+      totalWeight: result.totalWeight,
+      signalCount: result.signals.length,
+      reasoning: result.reasoning,
+      signals: result.signals.map((s) => ({ label: s.label, severity: s.severity, detail: s.detail })),
+      escalated: result.escalated,
+    });
+  },
+});
+
+export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam, assessRisk];
 
 let _agent: Agent | null = null;
 export function getAgent(): Agent {

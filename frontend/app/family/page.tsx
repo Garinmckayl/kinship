@@ -25,6 +25,16 @@ type Med = { id: string; name: string; dosage: string; time: string; label: stri
 type BgTask = { id: string; instruction: string; runAt: string; status: string; result?: string };
 type Report = { date: string; channel: string; summary: string };
 type AppointmentPreview = { status: string };
+type RiskSignal = { label: string; severity: string; detail: string };
+type CompoundRisk = {
+  riskLevel: "green" | "yellow" | "orange" | "red";
+  action: string;
+  totalWeight: number;
+  reasoning: string;
+  signals: RiskSignal[];
+  escalated: boolean;
+  at: string;
+};
 
 const FALLBACK: Status = {
   elder: "Eleanor, 79",
@@ -51,6 +61,7 @@ export default function FamilyPage() {
   const [tasks, setTasks] = useState<BgTask[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState(0);
+  const [risk, setRisk] = useState<CompoundRisk | null>(null);
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
@@ -104,6 +115,7 @@ export default function FamilyPage() {
       fetch(`${API}/tasks?user_id=eleanor-79`).then((r) => r.json()).then((d) => setTasks(d.tasks ?? [])).catch(() => {});
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
       fetch(API + "/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => setPendingApprovals((d?.appointments ?? []).filter((a: AppointmentPreview) => a.status === "proposed").length)).catch(() => {});
+      fetch(`${API}/welfare/compound`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setRisk(d)).catch(() => {});
     };
     load();
     const t = setInterval(load, 10000);
@@ -262,8 +274,8 @@ export default function FamilyPage() {
           <AgentOrb phase={urgent ? "speaking" : "idle"} scale={1} dark speed={urgent ? 1.6 : 1} />
           <div className="flex-1">
             <h1 className="text-3xl font-bold">Family Dashboard</h1>
-            <p className={urgent ? "text-red-300 font-semibold" : "text-emerald-300"}>
-              {urgent ? "Attention needed — see below" : "Quiet monitoring — no action needed"}
+            <p className={urgent ? "text-red-300 font-semibold" : risk && risk.riskLevel !== "green" ? (risk.riskLevel === "red" ? "text-red-300 font-semibold" : "text-amber-300 font-semibold") : "text-emerald-300"}>
+              {urgent ? "Attention needed — see below" : risk && risk.riskLevel === "red" ? "Compound risk detected — review signals below" : risk && risk.riskLevel !== "green" ? "Elevated signals — monitoring" : "Quiet monitoring — no action needed"}
             </p>
           </div>
           {me && (
@@ -285,6 +297,52 @@ export default function FamilyPage() {
             <div className="w-10 h-10 rounded-xl bg-amber-300 text-slate-950 grid place-items-center font-black">{pendingApprovals}</div>
             <div className="flex-1"><p className="font-bold text-amber-100">Human decision needed</p><p className="text-sm text-amber-100/70">A proposed appointment is waiting for your approval. Kinship has not booked or synced it.</p></div>
             <Link href="/calendar" className="px-3 py-2 rounded-xl bg-amber-300 text-slate-950 text-sm font-black">Review</Link>
+          </div>
+        )}
+
+        {tab === "Overview" && risk && risk.riskLevel !== "green" && (
+          <div className={`rounded-2xl p-5 ring-1 ${
+            risk.riskLevel === "red" ? "bg-red-950/70 ring-red-400/40" :
+            risk.riskLevel === "orange" ? "bg-orange-950/60 ring-orange-400/30" :
+            "bg-amber-950/50 ring-amber-300/25"
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full animate-pulse ${
+                  risk.riskLevel === "red" ? "bg-red-400" :
+                  risk.riskLevel === "orange" ? "bg-orange-400" : "bg-amber-400"
+                }`} />
+                <p className="text-xs uppercase tracking-[0.22em] font-bold text-white/80">Compound Risk Detection</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                risk.riskLevel === "red" ? "bg-red-500 text-white" :
+                risk.riskLevel === "orange" ? "bg-orange-500 text-white" :
+                "bg-amber-400 text-slate-950"
+              }`}>{risk.riskLevel} &middot; weight {risk.totalWeight}</span>
+            </div>
+            <p className="text-white/90 leading-relaxed mb-4">{risk.reasoning.split(". ").slice(0, 3).join(". ")}.</p>
+            <div className="space-y-2">
+              {risk.signals.map((sig, i) => (
+                <div key={i} className={`flex items-start gap-3 rounded-xl px-3 py-2 ${
+                  sig.severity === "critical" ? "bg-red-500/15" :
+                  sig.severity === "high" ? "bg-red-500/10" :
+                  sig.severity === "medium" ? "bg-amber-500/10" : "bg-white/5"
+                }`}>
+                  <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
+                    sig.severity === "critical" ? "bg-red-400" :
+                    sig.severity === "high" ? "bg-red-300" :
+                    sig.severity === "medium" ? "bg-amber-300" : "bg-slate-400"
+                  }`} />
+                  <div>
+                    <p className="font-semibold text-white/90">{sig.label}</p>
+                    <p className="text-sm text-white/50">{sig.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {risk.escalated && (
+              <p className="mt-3 text-xs text-white/50">Caregiver has been notified via dashboard alert{process.env.NEXT_PUBLIC_HAS_WHATSAPP ? " and WhatsApp" : ""}.</p>
+            )}
           </div>
         )}
 

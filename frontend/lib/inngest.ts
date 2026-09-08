@@ -77,6 +77,7 @@ export const dailyReport = inngest.createFunction(
 );
 
 // Welfare sweep every 30 min: silence is the emergency.
+// Now also runs compound-risk assessment for cross-domain detection.
 export const welfareCheck = inngest.createFunction(
   {
     id: "welfare-check",
@@ -84,10 +85,17 @@ export const welfareCheck = inngest.createFunction(
     triggers: [{ cron: "*/30 * * * *" }],
   },
   async ({ step }) => {
-    await step.run("sweep", async () => {
+    const sweep = await step.run("sweep", async () => {
       const { welfareSweep } = await import("./welfare");
       return welfareSweep("eleanor-79");
     });
+
+    const risk = await step.run("compound-risk", async () => {
+      const { assessCompoundRisk } = await import("./compound-risk");
+      return assessCompoundRisk("eleanor-79");
+    });
+
+    return { sweep, risk: { level: risk.riskLevel, action: risk.action, signals: risk.signals.length, escalated: risk.escalated } };
   }
 );
 
