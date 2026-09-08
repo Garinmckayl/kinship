@@ -322,7 +322,7 @@ export default function FamilyPage() {
                 </div>
               </div>
             )}
-            <BeamInput value={cInput} onChange={setCInput} onSend={sendC} onMic={() => {}} placeholder="Ask about Eleanor…" />
+            <BeamInput value={cInput} onChange={setCInput} onSend={sendC} placeholder="Ask about Eleanor..." />
           </section>
         ) : (
         <>

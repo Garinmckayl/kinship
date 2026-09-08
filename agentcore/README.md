@@ -10,7 +10,7 @@ Mirrors `frontend/lib/guardian.ts` tools against the same Postgres.
 cd agentcore && npm install
 DATABASE_URL=... PORT=8080 node dist/index.js  # after `npx tsc`
 curl localhost:8080/ping
-echo -n '{"user_id":"ruth-78","message":"Did Ruth take her meds?"}' \
+echo -n '{"user_id":"eleanor-79","message":"Did Eleanor take her meds?"}' \
   | curl -X POST localhost:8080/invocations -H "Content-Type: application/octet-stream" --data-binary @-
 ```
 

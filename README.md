@@ -27,20 +27,20 @@ Single codebase: Next.js PWA + Strands TS SDK in `frontend/` — no separate Pyt
 Works with zero AWS creds via rule-based fallback (judges click + it just works). Set AWS creds to enable live Bedrock reasoning. See `ARCHITECTURE.md`.
 
 ## Background agent (survives disconnects)
-- Ruth says "remind me in 30 minutes" → agent calls `schedule_task` → Inngest runs it durably (`elder/task.requested` + `step.sleepUntil`), executes the agent, updates `/api/tasks`, escalates if needed.
+- Eleanor says "remind me in 30 minutes" → agent calls `schedule_task` → Inngest runs it durably (`elder/task.requested` + `step.sleepUntil`), executes the agent, updates `/api/tasks`, escalates if needed.
 - Daily 9am ET proactive check-in via Inngest cron (`morning-checkin`).
 - Without Inngest keys: inline in-process fallback (single-instance dev/demo).
 - Local full loop: `npx inngest-cli dev` + `INNGEST_DEV=1`. Prod: set `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY`.
 
 ## Real phone calls (Twilio, no simulation)
-- `POST /api/voice/trigger {secret, to?}` → Ruth's real phone rings → Gather speech → `/api/voice/respond` runs the Strands agent → replies in ElevenLabs voice via `<Play /api/speak>` (Twilio voice fallback without public URL).
+- `POST /api/voice/trigger {secret, to?}` → Eleanor's real phone rings → Gather speech → `/api/voice/respond` runs the Strands agent → replies in ElevenLabs voice via `<Play /api/speak>` (Twilio voice fallback without public URL).
 - Agent tool `call_elder` lets the agent itself place urgent calls; degrades to family escalation without creds.
 - Env: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`, `ELDER_PHONE_NUMBER`, `VOICE_CALLBACK_SECRET`, `PUBLIC_BASE_URL`.
 
 ## WhatsApp voice loop (FREE — works in Ethiopia where Twilio trial can't)
 - Twilio trial can't terminate to +251, so: Meta Cloud API (free) voice notes instead.
-- Agent → Ruth: ElevenLabs MP3 sent as WhatsApp audio (`POST /api/whatsapp/send {secret, to?, text}`).
-- Ruth → agent: text or voice note → `/api/whatsapp/webhook` → voice transcribed via ElevenLabs Scribe → Strands agent replies with voice note.
+- Agent → Eleanor: ElevenLabs MP3 sent as WhatsApp audio (`POST /api/whatsapp/send {secret, to?, text}`).
+- Eleanor → agent: text or voice note → `/api/whatsapp/webhook` → voice transcribed via ElevenLabs Scribe → Strands agent replies with voice note.
 - Agent tool `call_elder` tries Twilio → WhatsApp voice → family escalation, in that order.
 - Setup: developers.facebook.com → app → WhatsApp API Setup → test number works instantly. Env: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `ELDER_WHATSAPP_NUMBER` (e.g. 251911234567), `WHATSAPP_VERIFY_TOKEN`.
 
@@ -61,9 +61,9 @@ The official platform supports knowledge, authenticated webhook tools, dynamic v
 - Vercel env add: `DATABASE_URL`, `AUTH_SECRET`, `REPORT_SECRET`, `RESEND_API_KEY`, `CAREGIVER_WHATSAPP_NUMBER`, `CAREGIVER_EMAIL`.
 
 ## Life-saving loops (why this wins "for humans")
-- **Silence is the emergency.** Every elder message is a heartbeat. Inngest `welfare-check` cron (30 min) fires when Ruth goes quiet past `WELFARE_QUIET_MINUTES` (6h default): attention nudge → urgent + caregiver WhatsApp + direct voice ping past 2×. Nights are sleep, not silence. Manual trigger: `POST /api/welfare/check` (REPORT_SECRET).
+- **Silence is the emergency.** Every elder message is a heartbeat. Inngest `welfare-check` cron (30 min) fires when Eleanor goes quiet past `WELFARE_QUIET_MINUTES` (6h default): attention nudge → urgent + caregiver WhatsApp + direct voice ping past 2×. Nights are sleep, not silence. Manual trigger: `POST /api/welfare/check` (REPORT_SECRET).
 - **Sent ≠ saved.** Every attention/urgent alert needs a family "I'm on it" tap (`PATCH /api/escalations/[id]`); unconfirmed alerts re-fire via WhatsApp every 30 min until someone owns them.
-- **Double-dose guard.** `confirm_intake` refuses same-day re-logs, stops Ruth firmly, and writes the prevented attempt to the family trail. Proven live: adherence stayed 1/3, family notified.
+- **Double-dose guard.** `confirm_intake` refuses same-day re-logs, stops Eleanor firmly, and writes the prevented attempt to the family trail. Proven live: adherence stayed 1/3, family notified.
 
 ## AgentCore (Bedrock, TypeScript)
 - `agentcore/` = standalone Express guardian (`GET /ping`, `POST /invocations`) per the Strands TS deploy guide, same tools + Postgres. Proven live: `/ping` healthy, `/invocations` answered from Bedrock with tool calls.
@@ -78,17 +78,6 @@ The official platform supports knowledge, authenticated webhook tools, dynamic v
 - **Elder today board:** `/api/today` quick-actions card (meds to log, check-in, reminders, today's doctors).
 - **Caregiver chat:** family dashboard Chat tab — realtime streaming answers from live data, "add Vitamin D at 8am", "remind mom now".
 - shadcn-style `components/ui.tsx` (card, button, badge, input, calendar, tabs) used across new pages.
-
-## Limit-pushing Demo Lab
-
-Open `/demo` for the judge-facing surface:
-
-- **Pharmacy phone-tree buster:** mock-first DTMF trace for CVS on 4th Ave, prescription `RX-4472`, confirmation `CVS-THU-0200`; an optional live Twilio leg uses `LIVE_PHARMACY_DEMO=1`, `PHARMACY_PHONE_NUMBER`, and `PHARMACY_DTMF_DIGITS`.
-- **Pill-tray vision:** browser camera capture with a deterministic safe fallback; with Bedrock credentials and `VISION_MODEL_ID`, the server sends the image through the Strands SDK multimodal `ImageBlock` path.
-- **Scam interceptor:** mock audio-intercept protocol blocks the caller, queues an FTC-style report, simulates a linked-card freeze, and creates an urgent caregiver alert. External bank/report webhooks require both their URL and an explicit `live: true` request; caregiver WhatsApp also requires `ALLOW_DEMO_OUTBOUND=1`.
-- **Temporal graph:** a visible entity-relationship-time chain connects the knee memory, a weather signal, and a proactive heating-pad action.
-
-Every card reports whether it ran in `mock`, `demo-vision`, `bedrock-vision`, or live integration mode.
 
 ## Run locally
 ```bash

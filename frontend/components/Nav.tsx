@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HeartIcon, PhoneIcon, CalendarIcon, PulseIcon, ChatIcon, BellIcon } from "./icons";
+import { HeartIcon, PhoneIcon, CalendarIcon, PulseIcon, ChatIcon } from "./icons";
 
 const LINKS = [
   { href: "/elder", label: "Eleanor", Icon: PhoneIcon },
   { href: "/calendar", label: "Calendar", Icon: CalendarIcon },
   { href: "/health", label: "Health", Icon: PulseIcon },
   { href: "/family", label: "Family", Icon: ChatIcon },
-  { href: "/demo", label: "Demo Lab", Icon: BellIcon },
 ];
 
 export function Nav() {

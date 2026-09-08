@@ -174,7 +174,7 @@ for (const s of stale.slice(0, 3)) {
 - **Source code:** [github.com/Garinmckayl/elderai](https://github.com/Garinmckayl/elderai) (MIT license)
 - **Run locally:** `cd frontend && npm install && npm run dev`
 
-Open `/elder` to be Eleanor. Open `/family` to be Sarah. Open `/demo` to see the agent lab.
+Open `/elder` to be Eleanor. Open `/family` to be Sarah.
 
 Kinship doesn't replace a daughter's love. It makes sure she never has to wonder if her mother is okay.
 

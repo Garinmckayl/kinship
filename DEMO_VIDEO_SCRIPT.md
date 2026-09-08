@@ -151,23 +151,23 @@ Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-f
 
 ---
 
-## BEAT 4 -- The Agent Lab (3:15 - 3:55)
+## BEAT 4 -- Caregiver Dashboard + Scam Shield (3:15 - 3:55)
 
-**[SCREEN]** `/demo` page -- the four showcase cards.
-
-**[NARRATION]**
-> "Beyond the daily loop, Kinship can act in the physical world."
-
-**[ACTION - rapid fire, 10 seconds each]**
-
-1. **Pharmacy phone-tree buster:** Click "Run pharmacy worker." Steps animate: dial, DTMF 1, DTMF 2, prescription number entered, refill confirmed. Caregiver output: *"Lisinopril refill placed at CVS on 4th Ave. Confirmed ready for pickup Thursday 2:00 PM."*
-
-2. **Scam interceptor:** Click "Trigger audio intercept." The transcript reads: "Agent Miller from the IRS... Apple Gift Cards." Result: caller blocked, card frozen (simulated), FTC report queued, zero funds transferred. Urgent alert fires.
-
-3. **Temporal graph:** Click "Run proactive check." The graph connects Eleanor's knee memory from Day 1 to a weather signal on Day 14. Agent message: *"Good morning Eleanor -- heavy rain is coming. Grab your heating pad before your left knee starts complaining like last time."*
+**[SCREEN]** `/family` page -- Overview tab showing alerts, adherence, mood, meds. Then switch to Chat tab.
 
 **[NARRATION]**
-> "The pharmacy worker navigates a real phone tree with DTMF tones. The scam interceptor blocks gift-card fraud in real time -- caller blocked, card frozen, no funds transferred. And the temporal graph connects a symptom memory from two weeks ago to today's weather forecast and acts before Eleanor asks."
+> "Sarah sees everything from her dashboard in Chicago. Adherence percentage, mood, alerts with timestamps, background tasks. But she can also talk to the agent directly."
+
+**[ACTION - show on screen]**
+
+1. **Caregiver chat:** Type "How is mom doing today?" Agent responds with live data -- adherence count, mood, recent alerts, pending tasks. All from real database queries.
+
+2. **Scam protection:** On the elder page, Eleanor says: *"Someone from the IRS called and said I owe money in gift cards."* The agent immediately triggers the ScamGuard sub-agent. Response: *"Eleanor, do not pay or share anything. I'm alerting Sarah right now."* An URGENT alert fires on the family dashboard.
+
+3. **Human-in-the-loop:** Show the Calendar page with a proposed appointment. Sarah taps **Approve** -- it promotes to "upcoming" and syncs to Google Calendar. The agent never books without caregiver consent.
+
+**[NARRATION]**
+> "The scam interceptor catches gift-card fraud, IRS threats, Medicare scams -- any pattern that targets elders. It blocks the interaction, alerts the caregiver, and never shames Eleanor. And every appointment, every medication change, every decision goes through the caregiver first. The agent proposes. A human approves."
 
 ---
 
@@ -215,7 +215,7 @@ Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-f
 1. Record Beat 0 graphic separately (motion graphics or screen capture of a custom page)
 2. Record `/elder` live voice session (Beat 2) -- ensure Today board is visible
 3. Record `/family` dashboard with escalations building (Beat 3)
-4. Record `/demo` lab rapid-fire (Beat 4)
+4. Record `/family` caregiver chat + scam demo + `/calendar` approval (Beat 4)
 5. Screenshot architecture diagram (Beat 5)
 6. Record closing shot on `/elder` (Beat 6)
 
@@ -227,7 +227,6 @@ Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-f
 ### What NOT to say
 - Don't say "AI-powered" without showing what the AI does
 - Don't say "revolutionary" -- the judges have seen 8,000 entries
-- Don't claim pharmacy integration is live unless `LIVE_PHARMACY_DEMO=1` is set -- say "mock demo" for the phone-tree
 - Don't claim medical advice -- say "reminder and escalation log only"
 
 ### Judging Criteria Mapping
@@ -236,5 +235,5 @@ Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-f
 | Technical Implementation | Beat 3 (compound risk), Beat 5 (architecture + AgentCore) |
 | Design | Beat 2 (full product experience, not a POC) |
 | Potential Impact | Beat 1 (stats), Beat 6 (emotional close) |
-| Creativity & Originality | Beat 0 (compound risk hook), Beat 4 (pharmacy/scam/temporal) |
+| Creativity & Originality | Beat 0 (compound risk hook), Beat 4 (scam shield/HITL) |
 | Presentation | Beat 0 (opens with a truck), clean narration throughout |

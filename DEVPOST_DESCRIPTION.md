@@ -104,6 +104,6 @@ The demo persona is Eleanor, 79, living alone in Columbus, Ohio. Her daughter Sa
 
 - **Source:** [github.com/Garinmckayl/elderai](https://github.com/Garinmckayl/elderai) (MIT license)
 - **Run locally:** `cd frontend && npm install && npm run dev`
-- Open `/elder` to be Eleanor. Open `/family` to be Sarah. Open `/demo` to see the agent lab.
+- Open `/elder` to be Eleanor. Open `/family` to be Sarah.
 
 **Track:** Everyday Agents -- "runs quietly in the background and only pings you when there's a real decision to make."

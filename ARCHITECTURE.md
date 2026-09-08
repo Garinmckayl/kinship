@@ -56,7 +56,7 @@ flowchart TB
 1. Morning check-in → med confirm → mood scan → memory moment → escalate only on threshold.
 2. Welfare sweep: every elder message is a heartbeat; silence past threshold → nudge → urgent + call. Nights excluded.
 3. Alert acknowledgment: unconfirmed attention/urgent re-fires until a human taps "I'm on it".
-4. Double-dose guard: same-day re-log refused, Ruth stopped firmly, attempt written to family trail.
+4. Double-dose guard: same-day re-log refused, Eleanor stopped firmly, attempt written to family trail.
 5. Evening digest: adherence/mood/alerts/tasks → WhatsApp + email + saved report.
 6. Human-in-the-loop decisions: agent requests an appointment → caregiver sees the decision queue → explicit approval is required before booking or Google Calendar sync.
 7. Conversation continuity: web, ElevenAgents voice, phone, WhatsApp, and fallback replies write to `chat_messages`; Eleven post-call webhooks backfill the durable voice transcript, while the UI restores the local elder thread and authenticated caregiver thread.

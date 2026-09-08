@@ -28,9 +28,11 @@ type Msg = { role: "agent" | "elder"; text: string };
 type CallMode = "off" | "ringing" | "active";
 
 export default function ElderPage() {
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { role: "agent", text: "Good morning Eleanor 💜 Did you take your Lisinopril? Tap Yes or just talk to me." },
-  ]);
+  const [msgs, setMsgs] = useState<Msg[]>(() => {
+    const h = new Date().getHours();
+    const greeting = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    return [{ role: "agent", text: `${greeting} Eleanor \u{1F49C} Did you take your Lisinopril? Tap Yes or just talk to me.` }];
+  });
   const [input, setInput] = useState("");
   const [phase, setPhase] = useState<AgentPhase>("idle");
   const [callMode, setCallMode] = useState<CallMode>("off");

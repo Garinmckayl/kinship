@@ -29,7 +29,7 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <HeartIcon className="w-10 h-10 mx-auto text-rose-400" />
           <h1 className="text-3xl font-bold">Caregiver login</h1>
-          <p className="text-slate-400">Demo: caregiver@demo.local / demo1234</p>
+          <p className="text-slate-400">Sign in to manage Eleanor's care</p>
         </div>
         <BorderBeam size="md" colorVariant="ocean" theme="dark">
           <div className="bg-slate-950/90 rounded-2xl p-6 space-y-4">
