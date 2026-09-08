@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "^3.1128.0",
     "@elevenlabs/react": "^1.15.2",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@strands-agents/sdk": "^1.16.0",

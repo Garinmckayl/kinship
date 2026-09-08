@@ -1,0 +1,5 @@
+boto3
+nova-act
+bedrock_agentcore
+fastapi
+uvicorn
