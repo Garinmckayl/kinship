@@ -41,6 +41,7 @@ export default function ElderPage() {
   const [toolNote, setToolNote] = useState("");
   const [avatarExpression, setAvatarExpression] = useState<NovaFaceName | undefined>();
   const [historyState, setHistoryState] = useState<"checking" | "synced" | "device">("checking");
+  const [chatExpanded, setChatExpanded] = useState(false);
   const [today, setToday] = useState<{
     meds: { id: string; name: string; dosage: string; time: string; taken: boolean }[];
     checkedInToday: boolean; tasksPending: number;
@@ -463,16 +464,21 @@ export default function ElderPage() {
         {/* Conversation */}
         <div className="flex items-center justify-between mt-8 mb-2">
           <div><p className="text-xs uppercase tracking-[0.22em] text-teal-200 font-bold">Your conversation</p><p className="text-sm text-slate-400">{historyState === "synced" ? "Synced to Kinship history." : "Backed up on this device; caregiver sync appears when signed in."}</p></div>
-          <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">{historyState === "synced" ? "synced" : "saved"}</span>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">{historyState === "synced" ? "synced" : "saved"}</span>
+            <button onClick={() => setChatExpanded(!chatExpanded)} className="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs font-bold ring-1 ring-white/10 hover:bg-white/20">
+              {chatExpanded ? "Collapse" : "Expand"}
+            </button>
+          </div>
         </div>
-        <div ref={scrollRef} className="mt-8 space-y-3 max-h-[42vh] overflow-y-auto pr-1">
+        <div ref={scrollRef} className={`mt-4 space-y-3 overflow-y-auto pr-1 scroll-smooth ${chatExpanded ? "max-h-[75vh]" : "max-h-[42vh]"}`}>
           {msgs.map((m, i) =>
             m.role === "agent" ? (
-              <div key={i} className="bg-white/10 backdrop-blur rounded-3xl p-5 ring-1 ring-white/10">
-                <Markdown text={m.text || "…"} large />
+              <div key={i} className="bg-white/10 backdrop-blur rounded-3xl p-4 sm:p-5 ring-1 ring-white/10">
+                <Markdown text={m.text || "..."} large />
               </div>
             ) : (
-              <div key={i} className="ml-16 bg-indigo-500 rounded-3xl p-4 text-xl text-right">
+              <div key={i} className="ml-8 sm:ml-16 bg-indigo-500 rounded-3xl p-3 sm:p-4 text-lg sm:text-xl text-right">
                 {m.text}
               </div>
             )

@@ -376,7 +376,7 @@ export default function FamilyPage() {
               <div><p className="text-xs uppercase tracking-[0.22em] text-indigo-300 font-bold">Private caregiver thread</p><p className="text-sm text-slate-400 mt-1">Conversation is saved and can be continued after a refresh.</p></div>
               <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">saved</span>
             </div>
-            <div ref={cScroll} className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 mb-4">
+            <div ref={cScroll} className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 mb-4 scroll-smooth">
               {cMsgs.length === 0 && (
                 <p className="text-slate-400">
                   Ask anything about Eleanor — meds, mood, alerts, appointments, health.
@@ -502,8 +502,8 @@ export default function FamilyPage() {
           </div>
         </section>
 
-        {/* Browser automation tasks (Nova Act) */}
-        {browserTasks.length > 0 && (
+        {/* Browser automation tasks (Nova Act) -- shown from sidecar OR from escalation fallbacks */}
+        {(browserTasks.length > 0 || s.escalations.some((e) => e.message.includes("Browser task requested"))) && (
           <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -582,6 +582,22 @@ export default function FamilyPage() {
                 );
               })}
             </div>
+            {/* Fallback: show browser task requests from escalations when sidecar is offline */}
+            {browserTasks.length === 0 && s.escalations.filter((e) => e.message.includes("Browser task requested")).map((e, i) => {
+              const match = e.message.match(/Browser task requested.*?\((\w+)\):\s*(.+?)(?:\.|$)/);
+              const taskType = match?.[1]?.replace(/_/g, " ") ?? "browser task";
+              const reason = match?.[2] ?? e.message;
+              return (
+                <div key={`bt-esc-${i}`} className="mt-3 rounded-2xl p-4 ring-1 ring-fuchsia-400/20 bg-fuchsia-950/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-300">[requested] {taskType}</span>
+                    <span className="px-2.5 py-1 rounded-full bg-amber-400/10 text-amber-200 text-xs font-bold">Awaiting sidecar</span>
+                  </div>
+                  <p className="text-sm text-white/80">{reason}</p>
+                  <p className="mt-2 text-xs text-fuchsia-200/50">Start the Nova Act sidecar to execute: <code className="bg-white/10 px-1.5 py-0.5 rounded">cd nova-act && python server.py</code></p>
+                </div>
+              );
+            })}
           </section>
         )}
 
