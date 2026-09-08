@@ -7,3 +7,5 @@ out/
 agent/__pycache__/
 agentcore/dist/
 agentcore/node_modules/
+*.webm
+act_*.html

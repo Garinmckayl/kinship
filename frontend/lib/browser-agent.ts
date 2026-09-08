@@ -79,6 +79,21 @@ export async function listBrowserTasks(): Promise<BrowserTask[]> {
   return res.json();
 }
 
+export type LatestScreenshot = {
+  task_id: string;
+  status: BrowserTaskStatus;
+  step_count: number;
+  current_step: string | null;
+  screenshot: string | null;  // base64 PNG
+  screenshot_index: number;
+};
+
+export async function getLatestScreenshot(taskId: string): Promise<LatestScreenshot> {
+  const res = await sidecarFetch(`/tasks/${taskId}/latest-screenshot`);
+  if (!res.ok) throw new Error(`sidecar error: ${res.status}`);
+  return res.json();
+}
+
 export async function sidecarHealthy(): Promise<boolean> {
   try {
     const res = await sidecarFetch("/health", { signal: AbortSignal.timeout(3000) });

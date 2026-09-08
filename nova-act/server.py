@@ -67,7 +67,7 @@ class TaskResult(BaseModel):
     steps: list[dict] = []
     result: Optional[dict] = None
     error: Optional[str] = None
-    screenshot_url: Optional[str] = None
+    screenshots: list[str] = []  # base64 encoded PNGs, one per step
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
     recording_url: Optional[str] = None
@@ -76,6 +76,7 @@ class TaskResult(BaseModel):
 # --------------- in-memory task store ---------------
 
 TASKS: dict[str, TaskResult] = {}
+SCREENSHOTS: dict[str, list[str]] = {}  # task_id -> list of base64 PNGs
 _counter = 0
 
 def next_id() -> str:
@@ -206,34 +207,70 @@ WORKFLOW_CONFIGS = {
 # --------------- Nova Act execution engine ---------------
 
 async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) -> TaskResult:
-    """Execute a Nova Act workflow with step-by-step browser automation."""
+    """Execute a Nova Act workflow with step-by-step browser automation and screenshot capture."""
     try:
         from nova_act import NovaAct
     except ImportError:
-        # Nova Act not installed — run in demo mode with simulated steps
         log.warning("nova-act package not installed, running in demo mode")
         return await execute_demo_workflow(task, config, params)
 
     task.status = TaskStatus.running
     task.started_at = datetime.now(timezone.utc).isoformat()
+    SCREENSHOTS[task.task_id] = []
+
+    logs_dir = f"/tmp/nova-sessions/{task.task_id}"
+    os.makedirs(logs_dir, exist_ok=True)
 
     try:
         starting_page = params.get("portal_url", config["starting_page"])
+        try:
+            starting_page = starting_page.format(**params)
+        except (KeyError, ValueError):
+            pass
 
-        # Use headless mode for server environments
         nova_kwargs = {
             "starting_page": starting_page,
             "headless": True,
+            "record_video": True,
+            "logs_directory": logs_dir,
+            "tty": False,
         }
 
-        # Add API key if available
-        if os.environ.get("NOVA_ACT_API_KEY"):
-            pass  # SDK reads from env automatically
+        # Use Workflow for IAM auth if AWS creds are available
+        nova_context = None
+        workflow_ctx = None
+        if os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_PROFILE"):
+            try:
+                from nova_act import Workflow
+                workflow_ctx = Workflow(
+                    workflow_definition_name="elderlove-guardian",
+                    model_id="nova-act-latest",
+                    boto_session_kwargs={"region_name": os.environ.get("AWS_DEFAULT_REGION", "us-east-1")},
+                )
+                workflow_ctx.__enter__()
+                nova_kwargs["workflow"] = workflow_ctx
+            except Exception as e:
+                log.warning(f"Could not create workflow context: {e}")
 
         with NovaAct(**nova_kwargs) as nova:
+            # Capture initial screenshot
+            try:
+                page = nova._page if hasattr(nova, '_page') else None
+                if page:
+                    import base64
+                    screenshot_bytes = page.screenshot(type="png")
+                    b64 = base64.b64encode(screenshot_bytes).decode()
+                    SCREENSHOTS[task.task_id].append(b64)
+                    task.screenshots = SCREENSHOTS[task.task_id]
+            except Exception:
+                pass
+
             for i, step_config in enumerate(config["steps"]):
                 step_label = step_config["label"]
-                prompt = step_config["prompt"].format(**params)
+                try:
+                    prompt = step_config["prompt"].format(**params)
+                except (KeyError, ValueError):
+                    prompt = step_config["prompt"]
 
                 log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
 
@@ -243,6 +280,7 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
                     "status": "running",
                     "started_at": datetime.now(timezone.utc).isoformat(),
                 }
+                task.steps.append(step_record)
 
                 try:
                     if step_config.get("extract"):
@@ -259,21 +297,44 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
                     step_record["status"] = "failed"
                     step_record["error"] = str(step_err)[:500]
                     log.error(f"Step {step_label} failed: {step_err}")
-                    # Don't fail the whole workflow on one step — continue if possible
-                    if "sign in" in step_label.lower():
-                        raise  # Auth failures are fatal
+                    if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
+                        raise
 
                 step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
-                task.steps.append(step_record)
+
+                # Capture screenshot after each step
+                try:
+                    page = nova._page if hasattr(nova, '_page') else None
+                    if page:
+                        import base64
+                        screenshot_bytes = page.screenshot(type="png")
+                        b64 = base64.b64encode(screenshot_bytes).decode()
+                        SCREENSHOTS[task.task_id].append(b64)
+                        task.screenshots = SCREENSHOTS[task.task_id]
+                        step_record["screenshot_index"] = len(SCREENSHOTS[task.task_id]) - 1
+                except Exception:
+                    pass
 
         task.status = TaskStatus.completed
         task.completed_at = datetime.now(timezone.utc).isoformat()
+
+        # Store recording path
+        for f in os.listdir(logs_dir):
+            if f.endswith(".webm"):
+                task.recording_url = f"/recordings/{task.task_id}/{f}"
+                break
 
     except Exception as e:
         task.status = TaskStatus.failed
         task.error = str(e)[:1000]
         task.completed_at = datetime.now(timezone.utc).isoformat()
         log.error(f"Workflow failed: {e}")
+    finally:
+        if workflow_ctx:
+            try:
+                workflow_ctx.__exit__(None, None, None)
+            except Exception:
+                pass
 
     return task
 
@@ -493,7 +554,41 @@ async def get_task(task_id: str, authorization: Optional[str] = Header(None)):
 @app.get("/tasks", response_model=list[TaskResult])
 async def list_tasks(authorization: Optional[str] = Header(None)):
     verify_secret(authorization)
-    return sorted(TASKS.values(), key=lambda t: t.task_id, reverse=True)[:20]
+    # Return tasks without full screenshot data (too large for list view)
+    tasks = sorted(TASKS.values(), key=lambda t: t.task_id, reverse=True)[:20]
+    return [TaskResult(**{**t.model_dump(), "screenshots": []}) for t in tasks]
+
+
+@app.get("/tasks/{task_id}/screenshots")
+async def get_screenshots(task_id: str, after: int = 0, authorization: Optional[str] = Header(None)):
+    """Stream screenshots for a running task. Polls with ?after=N to get new screenshots since index N."""
+    verify_secret(authorization)
+    shots = SCREENSHOTS.get(task_id, [])
+    task = TASKS.get(task_id)
+    return {
+        "task_id": task_id,
+        "status": task.status if task else "unknown",
+        "total": len(shots),
+        "screenshots": shots[after:after + 5],  # Max 5 at a time to keep responses small
+        "next_after": min(after + 5, len(shots)),
+        "has_more": after + 5 < len(shots),
+    }
+
+
+@app.get("/tasks/{task_id}/latest-screenshot")
+async def get_latest_screenshot(task_id: str, authorization: Optional[str] = Header(None)):
+    """Get just the latest screenshot for a running task (for live viewer)."""
+    verify_secret(authorization)
+    shots = SCREENSHOTS.get(task_id, [])
+    task = TASKS.get(task_id)
+    return {
+        "task_id": task_id,
+        "status": task.status if task else "unknown",
+        "step_count": len(task.steps) if task else 0,
+        "current_step": task.steps[-1]["label"] if task and task.steps else None,
+        "screenshot": shots[-1] if shots else None,
+        "screenshot_index": len(shots) - 1 if shots else -1,
+    }
 
 
 if __name__ == "__main__":
