@@ -5,7 +5,7 @@
 const NOVA_SIDECAR_URL = process.env.NOVA_SIDECAR_URL ?? "http://localhost:8100";
 const NOVA_SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
 
-export type BrowserTaskType = "pharmacy_refill" | "bill_payment" | "appointment_booking" | "grocery_order" | "custom";
+export type BrowserTaskType = "pharmacy_refill" | "insurance_check" | "bill_payment" | "appointment_booking" | "grocery_order" | "benefits_recert" | "custom";
 export type BrowserTaskStatus = "pending_approval" | "approved" | "running" | "completed" | "failed" | "cancelled";
 
 export type BrowserTaskStep = {

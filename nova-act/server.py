@@ -38,9 +38,11 @@ def verify_secret(authorization: Optional[str] = Header(None)):
 
 class TaskType(str, Enum):
     pharmacy_refill = "pharmacy_refill"
+    insurance_check = "insurance_check"
     bill_payment = "bill_payment"
     appointment_booking = "appointment_booking"
     grocery_order = "grocery_order"
+    benefits_recert = "benefits_recert"
     custom = "custom"
 
 class TaskStatus(str, Enum):
@@ -83,56 +85,119 @@ def next_id() -> str:
 
 
 # --------------- workflow definitions ---------------
+# Each workflow is a sequence of Nova Act prompts. The agent executes them
+# step by step in a real browser. Every workflow begins with caregiver
+# approval (human-in-the-loop) — the agent never acts without consent.
+
+# SAFE SANDBOX: For bill_payment, the starting_page is a hardcoded verified
+# URL from the elder's known providers — never a search engine result.
+# This eliminates phishing clones, sponsored ad traps, and fake invoice sites.
 
 WORKFLOW_CONFIGS = {
+
+    # ── Scenario 1A: Pharmacy Prescription Refill ──────────────────────
     TaskType.pharmacy_refill: {
         "name": "Pharmacy Prescription Refill",
-        "description": "Navigate to a pharmacy portal and submit a prescription refill request.",
+        "description": "Navigate pharmacy portal, renew expiring prescriptions, confirm pickup.",
         "starting_page": "https://www.cvs.com/",
+        "safe_sandbox": True,
         "steps": [
-            {"prompt": "Click on 'Sign In' or 'Log In' to access the pharmacy account.", "label": "Navigate to login"},
-            {"prompt": "Enter the username '{username}' and password '{password}' and sign in.", "label": "Sign in", "sensitive": True},
-            {"prompt": "Navigate to the prescriptions or pharmacy section. Look for 'My Prescriptions', 'Refills', or similar.", "label": "Go to prescriptions"},
-            {"prompt": "Find the prescription for '{medication}' and click 'Refill' or 'Request Refill'.", "label": "Request refill"},
-            {"prompt": "Confirm the refill request. Select pickup at '{pharmacy_location}' if asked.", "label": "Confirm refill"},
-            {"prompt": "Return the confirmation number, estimated pickup time, and pharmacy location.", "label": "Get confirmation", "extract": True},
+            {"prompt": "Click on 'Sign In' or 'Log In' to access the pharmacy account.", "label": "Open pharmacy portal"},
+            {"prompt": "Enter the username '{username}' and password '{password}' and sign in. If asked for MFA, pause and wait.", "label": "Authenticate", "sensitive": True},
+            {"prompt": "Navigate to 'My Prescriptions', 'Prescription Center', or 'Refills'. Look for a list of current and past prescriptions.", "label": "Go to prescriptions"},
+            {"prompt": "Find the prescription for '{medication}'. Check if it shows 'Refill Available' or a refill count. If refills remain, click 'Refill' or 'Request Refill'.", "label": "Request refill for {medication}"},
+            {"prompt": "If there are additional medications to refill ({additional_meds}), find each one and request refills for all of them.", "label": "Refill additional medications"},
+            {"prompt": "Select pickup at '{pharmacy_location}' if asked for a pharmacy location. Confirm all refill requests.", "label": "Confirm pickup location"},
+            {"prompt": "Return a JSON object with: confirmation_number, medications_refilled (array), estimated_pickup_time, pharmacy_name, and pharmacy_address.", "label": "Capture confirmation", "extract": True},
         ],
     },
+
+    # ── Scenario 1B: Insurance Formulary Cross-Reference ──────────────
+    TaskType.insurance_check: {
+        "name": "Insurance Coverage Check",
+        "description": "Cross-reference medications against insurance formulary to detect tier changes or denials.",
+        "starting_page": "https://www.medicare.gov/",
+        "safe_sandbox": True,
+        "steps": [
+            {"prompt": "Navigate to the drug coverage or formulary lookup section. Look for 'Plan Finder', 'Formulary', or 'Drug Coverage'.", "label": "Find formulary tool"},
+            {"prompt": "Enter the plan name or ID '{plan_id}' if asked, or search for '{plan_name}'.", "label": "Select insurance plan"},
+            {"prompt": "Search for the drug '{medication_1}'. Note the tier level, copay amount, and any restrictions (prior authorization, step therapy, quantity limits).", "label": "Check {medication_1} coverage", "extract": True},
+            {"prompt": "Search for the drug '{medication_2}'. Note the tier level, copay amount, and any restrictions.", "label": "Check {medication_2} coverage", "extract": True},
+            {"prompt": "Search for the drug '{medication_3}'. Note the tier level, copay amount, and any restrictions.", "label": "Check {medication_3} coverage", "extract": True},
+            {"prompt": "Return a JSON summary: for each medication, include drug_name, tier, copay, restrictions (array), generic_alternative (if shown), and generic_copay.", "label": "Coverage summary", "extract": True},
+        ],
+    },
+
+    # ── Scenario 3: Safe Sandbox Bill Payment ─────────────────────────
+    # CRITICAL: starting_page is a VERIFIED bookmark, never a search result.
+    # Eleanor never touches the open web for financial transactions.
     TaskType.bill_payment: {
-        "name": "Utility Bill Payment",
-        "description": "Navigate to a utility provider portal and check/pay an outstanding bill.",
-        "starting_page": "https://www.example-utility.com/",
+        "name": "Safe Sandbox Bill Payment",
+        "description": "Pay utility bills using verified portal bookmarks — never via search engines. Protects against phishing.",
+        "starting_page": "{portal_url}",  # Caregiver-configured verified URL
+        "safe_sandbox": True,
         "steps": [
-            {"prompt": "Click on 'Sign In' or 'My Account' to access the billing portal.", "label": "Navigate to login"},
-            {"prompt": "Enter the username '{username}' and password '{password}' and sign in.", "label": "Sign in", "sensitive": True},
-            {"prompt": "Navigate to 'Billing', 'Pay Bill', or 'Account Balance'.", "label": "Go to billing"},
-            {"prompt": "Return the current balance, due date, and account number.", "label": "Check balance", "extract": True},
-            {"prompt": "If the balance is greater than $0 and a 'Pay Now' or 'Make Payment' button exists, click it and proceed to payment using the card on file. Do NOT enter new payment information.", "label": "Pay bill"},
-            {"prompt": "Return the payment confirmation number and amount paid.", "label": "Get confirmation", "extract": True},
+            {"prompt": "You are on a VERIFIED utility portal ('{provider_name}'). Click 'Sign In', 'My Account', or 'Log In'.", "label": "Open verified portal ({provider_name})"},
+            {"prompt": "Enter the username '{username}' and password '{password}' and sign in.", "label": "Authenticate securely", "sensitive": True},
+            {"prompt": "Navigate to 'Billing', 'Pay Bill', 'Account Balance', or 'My Bills'. Find the current statement or balance.", "label": "Navigate to billing"},
+            {"prompt": "Return a JSON object with: account_number, current_balance, due_date, last_payment_date, last_payment_amount, autopay_status.", "label": "Read current balance", "extract": True},
+            {"prompt": "STOP HERE. Do NOT click Pay yet. The caregiver must review the balance before proceeding. Return the balance and due date for approval.", "label": "Await payment approval", "extract": True, "pause_for_approval": True},
+            {"prompt": "The caregiver has approved payment. Click 'Pay Now', 'Make Payment', or 'Pay Bill'. Use the card or bank account already on file. Do NOT enter new payment information. Do NOT sign up for autopay or any new service.", "label": "Execute payment"},
+            {"prompt": "Return a JSON object with: payment_confirmation_number, amount_paid, payment_method_last4, and expected_posting_date.", "label": "Capture payment receipt", "extract": True},
         ],
     },
+
+    # ── Scenario 4: Grocery & Essential Supply Ordering ───────────────
+    TaskType.grocery_order: {
+        "name": "Grocery & Essentials Delivery",
+        "description": "Order groceries using the elder's preferred brands and delivery preferences.",
+        "starting_page": "{portal_url}",
+        "safe_sandbox": True,
+        "steps": [
+            {"prompt": "Sign in to the grocery delivery site using '{username}' and '{password}'.", "label": "Authenticate", "sensitive": True},
+            {"prompt": "If there are previous orders, check order history for preferred brands. Note Eleanor's usual choices for: {items}", "label": "Check order history for brand preferences"},
+            {"prompt": "Search for each item in the list: {items}. For each item, select the brand that matches Eleanor's previous orders, or the most popular option. AVOID sponsored items or items marked as subscription-only. Add each to the cart.", "label": "Add items to cart"},
+            {"prompt": "Review the cart. Remove any accidental duplicates. Check for hidden subscription sign-ups or recurring delivery fees and UNCHECK any such boxes.", "label": "Review cart and remove subscriptions"},
+            {"prompt": "Proceed to checkout. Set delivery address to '{address}'. Select the next available MORNING delivery slot (before noon if possible). Eleanor prefers morning deliveries.", "label": "Select morning delivery slot"},
+            {"prompt": "STOP at the final payment screen. Do NOT confirm the order yet. Return a JSON object with: items_in_cart (array with name, brand, price), delivery_slot, delivery_fee, subtotal, total.", "label": "Review order for approval", "extract": True, "pause_for_approval": True},
+            {"prompt": "The caregiver has approved the order. Click 'Place Order' or 'Confirm Order'. Do NOT add tips or extras unless already configured.", "label": "Place order"},
+            {"prompt": "Return a JSON object with: order_number, estimated_delivery, total_charged.", "label": "Capture order confirmation", "extract": True},
+        ],
+    },
+
+    # ── Scenario 2: Government Benefits Re-Certification ──────────────
+    TaskType.benefits_recert: {
+        "name": "Government Benefits Re-Certification",
+        "description": "Complete annual re-certification for Medicare Extra Help, SNAP, or utility assistance.",
+        "starting_page": "{portal_url}",
+        "safe_sandbox": True,
+        "steps": [
+            {"prompt": "Navigate to the login page and sign in with '{username}' and '{password}'.", "label": "Authenticate on government portal", "sensitive": True},
+            {"prompt": "Navigate to 'Re-Certification', 'Renew Benefits', 'Annual Review', or 'Recertify'. Look for any pending deadlines.", "label": "Find recertification form"},
+            {"prompt": "Return the current benefit status, recertification deadline, and which sections need to be completed.", "label": "Check recertification status", "extract": True},
+            {"prompt": "Fill in the personal information section using: Name: '{full_name}', DOB: '{dob}', SSN last 4: '{ssn_last4}', Address: '{address}', Phone: '{phone}'.", "label": "Fill personal information", "sensitive": True},
+            {"prompt": "Fill in the income section using: Monthly income: '{monthly_income}', Income source: '{income_source}'. If asked about assets, enter: Bank balance approximately '{bank_balance}'.", "label": "Fill income information", "sensitive": True},
+            {"prompt": "If the form requires uploading proof documents, upload the files from these paths: {document_paths}. Use the file upload dialogs.", "label": "Upload supporting documents"},
+            {"prompt": "Review all entered information for accuracy. Do NOT submit yet. Return a JSON summary of all filled fields for caregiver review.", "label": "Review before submission", "extract": True, "pause_for_approval": True},
+            {"prompt": "The caregiver has approved. Submit the re-certification form.", "label": "Submit recertification"},
+            {"prompt": "Return a JSON object with: confirmation_number, submission_date, next_review_date, benefit_status.", "label": "Capture confirmation", "extract": True},
+        ],
+    },
+
+    # ── Scenario: Doctor Appointment Booking ──────────────────────────
     TaskType.appointment_booking: {
         "name": "Doctor Appointment Booking",
-        "description": "Navigate to a patient portal and book a doctor appointment.",
-        "starting_page": "https://mychart.example.com/",
+        "description": "Navigate patient portal and book a doctor appointment.",
+        "starting_page": "{portal_url}",
+        "safe_sandbox": True,
         "steps": [
-            {"prompt": "Click on 'Sign In' or 'Log In' to access the patient portal.", "label": "Navigate to login"},
-            {"prompt": "Enter the username '{username}' and password '{password}' and sign in.", "label": "Sign in", "sensitive": True},
-            {"prompt": "Navigate to 'Schedule Appointment', 'Appointments', or 'Visit Schedule'.", "label": "Go to appointments"},
-            {"prompt": "Search for an appointment with '{doctor}' for '{reason}' on or after '{preferred_date}'.", "label": "Search available slots"},
-            {"prompt": "Select the earliest available slot and confirm the booking.", "label": "Book appointment"},
-            {"prompt": "Return the appointment date, time, doctor name, location, and any confirmation number.", "label": "Get confirmation", "extract": True},
-        ],
-    },
-    TaskType.grocery_order: {
-        "name": "Grocery Order",
-        "description": "Order groceries from an online store for delivery.",
-        "starting_page": "https://www.instacart.com/",
-        "steps": [
-            {"prompt": "Sign in using '{username}' and '{password}'.", "label": "Sign in", "sensitive": True},
-            {"prompt": "Search for and add the following items to the cart: {items}", "label": "Add items to cart"},
-            {"prompt": "Go to the cart and proceed to checkout. Select delivery to '{address}'.", "label": "Checkout"},
-            {"prompt": "Return the order total, delivery time estimate, and order confirmation.", "label": "Get confirmation", "extract": True},
+            {"prompt": "Click on 'Sign In' or 'Log In' to access the patient portal.", "label": "Open patient portal"},
+            {"prompt": "Enter the username '{username}' and password '{password}' and sign in.", "label": "Authenticate", "sensitive": True},
+            {"prompt": "Navigate to 'Schedule Appointment', 'Appointments', 'Visits', or 'Request Appointment'.", "label": "Go to appointments"},
+            {"prompt": "Search for an appointment with '{doctor}' at '{clinic}' for '{reason}'. Look for dates on or after '{preferred_date}'.", "label": "Search available slots"},
+            {"prompt": "Return a list of the next 3 available appointment slots with date, time, and provider name.", "label": "Show available slots", "extract": True, "pause_for_approval": True},
+            {"prompt": "The caregiver has approved. Select the appointment at '{selected_slot}' and confirm the booking.", "label": "Book appointment"},
+            {"prompt": "Return a JSON object with: appointment_date, appointment_time, doctor_name, clinic_name, confirmation_number.", "label": "Capture confirmation", "extract": True},
         ],
     },
 }
@@ -232,27 +297,105 @@ async def execute_demo_workflow(task: TaskResult, config: dict, params: dict) ->
         }
 
         if step_config.get("extract"):
+            ts = int(datetime.now(timezone.utc).timestamp()) % 10000
             if task.task_type == TaskType.pharmacy_refill:
                 step_record["response"] = json.dumps({
-                    "confirmation": f"CVS-{int(datetime.now(timezone.utc).timestamp()) % 10000}",
-                    "pickup_time": "Tomorrow at 2:00 PM",
-                    "pharmacy": params.get("pharmacy_location", "CVS Pharmacy, 4th Ave"),
-                    "medication": params.get("medication", "Lisinopril 10mg"),
+                    "confirmation_number": f"CVS-{ts}",
+                    "medications_refilled": [params.get("medication", "Lisinopril 10mg")],
+                    "estimated_pickup_time": "Tomorrow at 2:00 PM",
+                    "pharmacy_name": "CVS Pharmacy",
+                    "pharmacy_address": params.get("pharmacy_location", "CVS Pharmacy, 4th Ave, Columbus OH"),
+                })
+            elif task.task_type == TaskType.insurance_check:
+                med = params.get("medication_1", "Lisinopril")
+                step_record["response"] = json.dumps({
+                    "drug_name": med,
+                    "tier": "Tier 1 - Preferred Generic",
+                    "copay": "$3.00",
+                    "restrictions": [],
+                    "generic_alternative": None,
+                    "generic_copay": "$3.00",
+                    "status": "Covered - no changes from last year",
                 })
             elif task.task_type == TaskType.bill_payment:
-                step_record["response"] = json.dumps({
-                    "balance": "$127.43",
-                    "due_date": "September 15, 2026",
-                    "payment_confirmation": f"PAY-{int(datetime.now(timezone.utc).timestamp()) % 10000}",
-                })
+                if "balance" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "account_number": "***-***-4821",
+                        "current_balance": "$127.43",
+                        "due_date": "September 15, 2026",
+                        "last_payment_date": "August 12, 2026",
+                        "last_payment_amount": "$118.90",
+                        "autopay_status": "Not enrolled",
+                    })
+                elif "approval" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "balance": "$127.43",
+                        "due_date": "September 15, 2026",
+                        "action": "AWAITING_CAREGIVER_APPROVAL",
+                    })
+                else:
+                    step_record["response"] = json.dumps({
+                        "payment_confirmation_number": f"PAY-{ts}",
+                        "amount_paid": "$127.43",
+                        "payment_method_last4": "4821",
+                        "expected_posting_date": "September 10, 2026",
+                    })
             elif task.task_type == TaskType.appointment_booking:
-                step_record["response"] = json.dumps({
-                    "date": params.get("preferred_date", "September 16, 2026"),
-                    "time": "10:30 AM",
-                    "doctor": params.get("doctor", "Dr. Harrison"),
-                    "location": "Riverside Clinic",
-                    "confirmation": f"APPT-{int(datetime.now(timezone.utc).timestamp()) % 10000}",
-                })
+                if "slot" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "available_slots": [
+                            {"date": "September 16, 2026", "time": "10:30 AM", "doctor": params.get("doctor", "Dr. Harrison")},
+                            {"date": "September 17, 2026", "time": "2:00 PM", "doctor": params.get("doctor", "Dr. Harrison")},
+                            {"date": "September 19, 2026", "time": "9:00 AM", "doctor": params.get("doctor", "Dr. Harrison")},
+                        ],
+                    })
+                else:
+                    step_record["response"] = json.dumps({
+                        "appointment_date": "September 16, 2026",
+                        "appointment_time": "10:30 AM",
+                        "doctor_name": params.get("doctor", "Dr. Harrison"),
+                        "clinic_name": params.get("clinic", "Riverside Clinic"),
+                        "confirmation_number": f"APPT-{ts}",
+                    })
+            elif task.task_type == TaskType.grocery_order:
+                items_raw = params.get("items", "milk, bread, eggs")
+                items_list = [i.strip() for i in str(items_raw).split(",")]
+                if "review" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "items_in_cart": [{"name": i, "brand": "Eleanor's usual", "price": f"${3.49 + idx * 0.5:.2f}"} for idx, i in enumerate(items_list)],
+                        "delivery_slot": "Tomorrow 9:00 AM - 11:00 AM",
+                        "delivery_fee": "$3.99",
+                        "subtotal": f"${sum(3.49 + idx * 0.5 for idx in range(len(items_list))):.2f}",
+                        "total": f"${sum(3.49 + idx * 0.5 for idx in range(len(items_list))) + 3.99:.2f}",
+                    })
+                else:
+                    step_record["response"] = json.dumps({
+                        "order_number": f"GRC-{ts}",
+                        "estimated_delivery": "Tomorrow 9:00 AM - 11:00 AM",
+                        "total_charged": f"${sum(3.49 + idx * 0.5 for idx in range(len(items_list))) + 3.99:.2f}",
+                    })
+            elif task.task_type == TaskType.benefits_recert:
+                if "status" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "benefit_program": "Medicare Part D Extra Help",
+                        "current_status": "Active",
+                        "recertification_deadline": "October 31, 2026",
+                        "sections_to_complete": ["Personal Info", "Income", "Assets", "Document Upload"],
+                    })
+                elif "review" in step_label.lower():
+                    step_record["response"] = json.dumps({
+                        "name": params.get("full_name", "Eleanor Morrison"),
+                        "income": params.get("monthly_income", "$1,847"),
+                        "status": "All fields complete. Ready for submission.",
+                        "action": "AWAITING_CAREGIVER_APPROVAL",
+                    })
+                else:
+                    step_record["response"] = json.dumps({
+                        "confirmation_number": f"SSA-{ts}",
+                        "submission_date": datetime.now(timezone.utc).strftime("%B %d, %Y"),
+                        "next_review_date": "October 2027",
+                        "benefit_status": "Renewed - Active",
+                    })
             else:
                 step_record["response"] = json.dumps({"status": "completed"})
 
