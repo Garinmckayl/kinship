@@ -7,7 +7,12 @@ export type Role = "caregiver" | "elder";
 export type User = { id: number; name: string; email: string; role: Role };
 
 const COOKIE = "elderlove_session";
-const secret = () => process.env.AUTH_SECRET ?? "dev-secret-change-me";
+const MAX_AGE = 30 * 24 * 3600;
+const secret = () => {
+  const value = process.env.AUTH_SECRET;
+  if (!value && process.env.NODE_ENV === "production") throw new Error("AUTH_SECRET is required in production");
+  return value ?? "dev-secret-change-me";
+};
 
 // --- users (Postgres; auth requires the database) ---
 export async function createUser(name: string, email: string, password: string, role: Role = "caregiver"): Promise<User> {
@@ -43,12 +48,30 @@ export async function getSession(): Promise<User | null> {
   }
 }
 
-export function sessionCookie(token: string) {
-  return `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30 * 24 * 3600}${process.env.NODE_ENV === "production" ? "; Secure" : ""}`;
+export function setSessionCookie(res: NextResponse, token: string) {
+  res.cookies.set({
+    name: COOKIE,
+    value: token,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: MAX_AGE,
+  });
+  return res;
 }
 
-export function clearSessionCookie() {
-  return `${COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+export function clearSessionCookie(res: NextResponse) {
+  res.cookies.set({
+    name: COOKIE,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+  return res;
 }
 
 export async function requireCaregiver(): Promise<User> {

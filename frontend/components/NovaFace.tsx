@@ -29,12 +29,27 @@ export function NovaFace({
   expression?: NovaFaceName;
   size?: number;
 }) {
-  const face = expression ?? PHASE_FACE[phase];
+  // Keep talking/listening tied to the live phase so an expression never
+  // hides the mouth animation or activity cue.
+  const face = phase === "speaking" || phase === "listening" ? PHASE_FACE[phase] : expression ?? PHASE_FACE[phase];
   const [mouth, setMouth] = useState<(typeof MOUTH)[number]>("mouth-closed");
+  const [blinking, setBlinking] = useState(false);
   const mouthRef = useRef(mouth);
   mouthRef.current = mouth;
   const lastSwap = useRef(0);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const motionRef = useRef<HTMLDivElement>(null);
+  const [dayPart, setDayPart] = useState<"morning" | "day" | "evening">("day");
+
+  useEffect(() => {
+    const update = () => {
+      const hour = new Date().getHours();
+      setDayPart(hour >= 5 && hour < 11 ? "morning" : hour >= 18 || hour < 5 ? "evening" : "day");
+    };
+    update();
+    const timer = window.setInterval(update, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
 
   // Preload flap frames so the first swap doesn't flicker.
   useEffect(() => {
@@ -44,10 +59,29 @@ export function NovaFace({
     }
   }, []);
 
+  // Human faces blink on their own rhythm. Keep it slightly irregular so the
+  // companion feels present without looking like a looping GIF.
+  useEffect(() => {
+    let alive = true;
+    let openTimer: ReturnType<typeof setTimeout>;
+    let closeTimer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      openTimer = setTimeout(() => {
+        if (!alive) return;
+        setBlinking(true);
+        closeTimer = setTimeout(() => {
+          if (alive) setBlinking(false);
+          if (alive) schedule();
+        }, 120);
+      }, 3200 + Math.random() * 2800);
+    };
+    schedule();
+    return () => { alive = false; clearTimeout(openTimer); clearTimeout(closeTimer); };
+  }, [face]);
   useEffect(() => {
     let raf = 0;
     const tick = () => {
-      const el = imgRef.current;
+      const el = motionRef.current;
       const l = voiceMotion.level;
       if (face === "speaking") {
         const now = performance.now();
@@ -76,17 +110,35 @@ export function NovaFace({
 
   const src = face === "speaking" ? `/nova/${mouth}.png` : `/nova/${face}.png`;
 
+  const statusLabel = phase === "listening" ? "Listening now" : phase === "speaking" ? "Speaking" : phase === "thinking" ? "Thinking" : phase === "connecting" ? "Connecting" : "Here with you";
+  const statusVisible = phase !== "idle" && phase !== "asleep";
+
   return (
-    <img
-      key={face}
-      ref={imgRef}
-      src={src}
-      alt={`Nova — ${face}`}
-      width={size}
-      height={size}
-      draggable={false}
-      className={`nova-fade select-none ${face === "idle" ? "nova-breathe" : ""}`}
-      style={{ width: size, height: size, objectFit: "contain" }}
-    />
+    <div
+      className={`nova-stage nova-face-${face} nova-phase-${phase} nova-daypart-${dayPart}`}
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`Kinship caregiver is ${statusLabel.toLowerCase()}`}
+    >
+      <div className="nova-halo" aria-hidden="true" />
+      <div ref={motionRef} className="nova-motion">
+        <img
+          key={face}
+          src={src}
+          alt=""
+          width={size}
+          height={size}
+          draggable={false}
+          className={`nova-face-image nova-fade select-none ${blinking ? "nova-blink" : ""}`}
+          style={{ width: size, height: size, objectFit: "contain" }}
+        />
+      </div>
+      {statusVisible && (
+        <div className="nova-activity" aria-live="polite">
+          <span className="nova-activity-dot" aria-hidden="true" />
+          <span>{statusLabel}</span>
+        </div>
+      )}
+    </div>
   );
 }

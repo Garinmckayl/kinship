@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BorderBeam } from "border-beam";
 import { PHASE_LABEL, type AgentPhase } from "@/components/AgentOrb";
-import { NovaFace } from "@/components/NovaFace";
+import { NovaFace, type NovaFaceName } from "@/components/NovaFace";
 import { BeamInput } from "@/components/BeamInput";
 import { CallScreen, IncomingCall } from "@/components/CallScreen";
 import { Markdown } from "@/components/Markdown";
@@ -37,6 +37,7 @@ export default function ElderPage() {
   const [seconds, setSeconds] = useState(0);
   const [wakeOn, setWakeOn] = useState(false);
   const [toolNote, setToolNote] = useState("");
+  const [avatarExpression, setAvatarExpression] = useState<NovaFaceName | undefined>();
   const [historyState, setHistoryState] = useState<"checking" | "synced" | "device">("checking");
   const [today, setToday] = useState<{
     meds: { id: string; name: string; dosage: string; time: string; taken: boolean }[];
@@ -55,6 +56,7 @@ export default function ElderPage() {
   phaseRef.current = phase;
   const wakeOnRef = useRef(false);
   wakeOnRef.current = wakeOn;
+  const expressionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     try {
@@ -86,6 +88,7 @@ export default function ElderPage() {
   useEffect(() => {
     return () => {
       try { wakeRecRef.current?.abort(); recogRef.current?.abort(); } catch {}
+      if (expressionTimerRef.current) clearTimeout(expressionTimerRef.current);
     };
   }, []);
 
@@ -122,6 +125,12 @@ export default function ElderPage() {
   }
 
   // Streaming chat: tokens render live, tool activity shows, full reply drives voice.
+  function showAvatarExpression(next: NovaFaceName, ms = 2400) {
+    setAvatarExpression(next);
+    if (expressionTimerRef.current) clearTimeout(expressionTimerRef.current);
+    expressionTimerRef.current = setTimeout(() => setAvatarExpression(undefined), ms);
+  }
+
   async function send(text: string) {
     if (!text.trim() || streamingRef.current) return;
     streamingRef.current = true;
@@ -173,6 +182,12 @@ export default function ElderPage() {
         }
       }
       setToolNote("");
+      const combined = `${text} ${full}`;
+      if (/\b(took|yes|done|logged|completed|great|thank you)\b/i.test(combined)) {
+        showAvatarExpression("joyful");
+      } else if (/\b(chest pain|fall|dizzy|scam|urgent|don't give|do not give)\b/i.test(combined)) {
+        showAvatarExpression("concerned", 3000);
+      }
       await speak(full || "I'm here with you.");
     } catch {
       patchLast("(offline) Logged with love. Your family is notified only if needed.");
@@ -365,7 +380,7 @@ export default function ElderPage() {
         <div className="flex flex-col items-center text-center gap-3 lg:sticky lg:top-24">
           <BorderBeam size="pulse-outside" colorVariant="ocean" theme="dark">
             <div className="rounded-full bg-indigo-500/10 px-6 py-4">
-              <NovaFace phase={phase} size={240} />
+              <NovaFace phase={phase} expression={avatarExpression} size={240} />
             </div>
           </BorderBeam>
           <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Eleanor <HeartIcon className="w-8 h-8 text-rose-400" /></h1>

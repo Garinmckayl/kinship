@@ -45,6 +45,7 @@ function adherencePct(s: string) {
 export default function FamilyPage() {
   const [me, setMe] = useState<{ name: string; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [authIssue, setAuthIssue] = useState(false);
   const [s, setS] = useState<Status>(FALLBACK);
   const [meds, setMeds] = useState<Med[]>([]);
   const [tasks, setTasks] = useState<BgTask[]>([]);
@@ -60,12 +61,43 @@ export default function FamilyPage() {
   const cBusy = useRef(false);
 
   useEffect(() => {
-    fetch(API + "/auth/me").then((r) => (r.ok ? r.json() : null)).then((d) => {
-      setMe(d?.user ?? null);
-      if (d?.user) fetch(API + "/caregiver/history").then((r) => (r.ok ? r.json() : null)).then((h) => {
-        if (h?.messages?.length) setCMsgs(h.messages.map((m: { role: string; content: string }) => ({ role: m.role === "user" ? "cg" : "agent", text: m.content })));
-      }).catch(() => {});
-    }).catch(() => {}).finally(() => setAuthChecked(true));
+    let cancelled = false;
+    const check = async (attempt = 0) => {
+      try {
+        const res = await fetch(API + "/auth/me", { cache: "no-store" });
+        if (res.status === 401) {
+          if (!cancelled) {
+            setMe(null);
+            setAuthIssue(false);
+            setAuthChecked(true);
+          }
+          return;
+        }
+        if (!res.ok) throw new Error("auth check failed");
+        const d = await res.json();
+        if (cancelled) return;
+        setMe(d.user ?? null);
+        setAuthIssue(false);
+        setAuthChecked(true);
+        if (d.user) fetch(API + "/caregiver/history", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((h) => {
+          if (h?.messages?.length) setCMsgs(h.messages.map((m: { role: string; content: string }) => ({ role: m.role === "user" ? "cg" : "agent", text: m.content })));
+        }).catch(() => {});
+      } catch {
+        if (attempt < 2) {
+          window.setTimeout(() => check(attempt + 1), 350 * (attempt + 1));
+          return;
+        }
+        if (!cancelled) {
+          setAuthIssue(true);
+          setAuthChecked(true);
+        }
+      }
+    };
+    check();
+    return () => { cancelled = true; };
+  }, []);
+  useEffect(() => {
+    if (!authChecked || !me) return;
     const load = () => {
       fetch(`${API}/status?user_id=eleanor-79`).then((r) => r.json()).then(setS).catch(() => {});
       fetch(`${API}/meds`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setMeds(d.meds ?? [])).catch(() => {});
@@ -76,13 +108,14 @@ export default function FamilyPage() {
     load();
     const t = setInterval(load, 10000);
     return () => clearInterval(t);
-  }, []);
+  }, [authChecked, me]);
 
   useEffect(() => {
+    if (!authChecked || !me) return;
     fetch(API + "/caregiver/elder-history").then((r) => (r.ok ? r.json() : null)).then((d) => {
       if (d?.messages?.length) setElderHistory(d.messages);
     }).catch(() => {});
-  }, []);
+  }, [authChecked, me]);
   async function logout() {
     await fetch(`${API}/auth/logout`, { method: "POST" });
     setMe(null);
@@ -180,7 +213,29 @@ export default function FamilyPage() {
   const urgent = s.escalations.find((e) => e.level === "urgent");
   const pct = adherencePct(s.adherence_today);
 
-  if (authChecked && !me) {
+  if (!authChecked) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white grid place-items-center">
+        <div className="text-center space-y-3">
+          <div className="mx-auto h-10 w-10 rounded-full border-2 border-teal-200/30 border-t-teal-200 animate-spin" />
+          <p className="text-teal-100 font-semibold">Checking your secure caregiver session…</p>
+        </div>
+      </main>
+    );
+  }
+  if (authIssue) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white grid place-items-center px-5">
+        <div className="text-center space-y-4 max-w-md">
+          <HeartIcon className="w-12 h-12 mx-auto text-amber-300" />
+          <h1 className="text-3xl font-bold">Caregiver session unavailable</h1>
+          <p className="text-slate-300">Your session was not lost. Kinship could not reach the auth service. Try again before signing in again.</p>
+          <button onClick={() => window.location.reload()} className="px-6 py-3 rounded-2xl bg-teal-500 text-slate-950 font-black">Try again</button>
+        </div>
+      </main>
+    );
+  }
+  if (!me) {
     return (
       <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
         <Nav />

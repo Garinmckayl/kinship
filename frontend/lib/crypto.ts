@@ -35,7 +35,9 @@ export function verifyJWT(token: string, secret: string): Record<string, unknown
   try {
     const [h, p, sig] = token.split(".");
     const expect = createHmac("sha256", secret).update(`${h}.${p}`).digest("base64url");
-    if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
+    const actualBytes = Buffer.from(sig ?? "");
+    const expectedBytes = Buffer.from(expect);
+    if (actualBytes.length !== expectedBytes.length || !timingSafeEqual(actualBytes, expectedBytes)) return null;
     const payload = JSON.parse(Buffer.from(p, "base64url").toString());
     if (payload.exp && payload.exp < Date.now() / 1000) return null;
     return payload;
