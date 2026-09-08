@@ -1,0 +1,5 @@
+nova-act
+fastapi
+uvicorn[standard]
+pydantic
+boto3

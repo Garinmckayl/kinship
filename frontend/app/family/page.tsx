@@ -62,6 +62,7 @@ export default function FamilyPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [risk, setRisk] = useState<CompoundRisk | null>(null);
+  const [browserTasks, setBrowserTasks] = useState<{ task_id: string; task_type: string; status: string; params: Record<string, unknown>; steps: { label: string; status: string }[]; result: Record<string, string> | null; error: string | null }[]>([]);
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
@@ -116,6 +117,7 @@ export default function FamilyPage() {
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
       fetch(API + "/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => setPendingApprovals((d?.appointments ?? []).filter((a: AppointmentPreview) => a.status === "proposed").length)).catch(() => {});
       fetch(`${API}/welfare/compound`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setRisk(d)).catch(() => {});
+      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks(d.tasks)).catch(() => {});
     };
     load();
     const t = setInterval(load, 10000);
@@ -477,6 +479,72 @@ export default function FamilyPage() {
             })}
           </div>
         </section>
+
+        {/* Browser automation tasks (Nova Act) */}
+        {browserTasks.length > 0 && (
+          <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="font-bold text-xl flex items-center gap-2">Browser Automation</h2>
+                <p className="text-slate-400 text-sm">Real browser tasks powered by Amazon Nova Act. Approve to execute.</p>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-fuchsia-400/10 text-fuchsia-200 text-xs font-bold ring-1 ring-fuchsia-300/20">Nova Act</span>
+            </div>
+            <div className="space-y-3">
+              {browserTasks.map((bt) => {
+                const isPending = bt.status === "pending_approval";
+                const isRunning = bt.status === "running" || bt.status === "approved";
+                const isDone = bt.status === "completed";
+                const isFailed = bt.status === "failed";
+                return (
+                  <div key={bt.task_id} className={`rounded-2xl p-4 ring-1 ring-white/10 ${isPending ? "bg-amber-950/40" : isRunning ? "bg-sky-950/40" : isDone ? "bg-emerald-950/40" : isFailed ? "bg-red-950/40" : "bg-white/5"}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-xs font-bold uppercase tracking-wider ${isPending ? "text-amber-300" : isRunning ? "text-sky-300 animate-pulse" : isDone ? "text-emerald-300" : "text-red-300"}`}>
+                        [{bt.status}] {bt.task_type.replace(/_/g, " ")}
+                      </span>
+                      {isPending && (
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, { method: "POST" });
+                            if (res.ok) setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, status: "approved" } : t));
+                          }}
+                          className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
+                        >
+                          Approve & Execute
+                        </button>
+                      )}
+                    </div>
+                    {bt.params && Object.keys(bt.params).length > 0 && (
+                      <div className="text-sm text-slate-300 mb-2">
+                        {Object.entries(bt.params).filter(([k]) => k !== "username" && k !== "password").map(([k, v]) => (
+                          <span key={k} className="inline-block mr-3">{k}: <span className="text-white font-semibold">{String(v)}</span></span>
+                        ))}
+                      </div>
+                    )}
+                    {bt.steps.length > 0 && (
+                      <div className="space-y-1 mt-2">
+                        {bt.steps.map((step, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm">
+                            <span className={`w-2 h-2 rounded-full ${step.status === "completed" ? "bg-emerald-400" : step.status === "running" ? "bg-sky-400 animate-pulse" : "bg-slate-500"}`} />
+                            <span className={step.status === "completed" ? "text-emerald-200" : "text-slate-400"}>{step.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {bt.result && (
+                      <div className="mt-2 rounded-xl bg-emerald-400/10 p-3 text-sm">
+                        {Object.entries(bt.result).map(([k, v]) => (
+                          <div key={k}><span className="text-emerald-200 font-semibold">{k}:</span> <span className="text-white">{v}</span></div>
+                        ))}
+                      </div>
+                    )}
+                    {bt.error && <p className="mt-2 text-sm text-red-300">{bt.error}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Background tasks */}
         <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">

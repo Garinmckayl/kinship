@@ -22,7 +22,8 @@ Rules:
 - BACKGROUND WORK: if Eleanor asks to be reminded later or asks you to do something later ("remind me in 30 minutes", "check my night pill tonight"), use schedule_task — it runs durably in the background even if she disconnects or closes the app.
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
 - APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.
-- COMPOUND RISK: during morning check-ins and when you notice 2+ concerning signals (missed meds, symptoms, low mood, silence), run assess_compound_risk to evaluate the combination. Trust its reasoning — if it returns red, escalate immediately. The combination of weak signals matters more than any single alarm.`;
+- COMPOUND RISK: during morning check-ins and when you notice 2+ concerning signals (missed meds, symptoms, low mood, silence), run assess_compound_risk to evaluate the combination. Trust its reasoning — if it returns red, escalate immediately. The combination of weak signals matters more than any single alarm.
+- BROWSER TASKS: when Eleanor needs something done on a website she can't navigate (pharmacy refill, utility bill, doctor appointment booking, grocery order), use request_browser_task. This opens a real browser via Nova Act and completes the task. It ALWAYS requires caregiver approval first — never claim the task is done until the caregiver approves and the automation completes. Tell Eleanor you've sent the request to Sarah for approval.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -325,7 +326,38 @@ export const assessRisk = tool({
   },
 });
 
-export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam, assessRisk];
+export const requestBrowserTask = tool({
+  name: "request_browser_task",
+  description: "Request a real browser automation task via Nova Act. Types: pharmacy_refill, bill_payment, appointment_booking, grocery_order. ALWAYS creates a pending_approval task — caregiver must approve before execution. Include relevant params like medication, pharmacy_location, doctor, preferred_date, etc.",
+  inputSchema: z.object({
+    userId: z.string(),
+    taskType: z.enum(["pharmacy_refill", "bill_payment", "appointment_booking", "grocery_order"]),
+    params: z.record(z.string(), z.unknown()).describe("Task-specific params: medication, pharmacy_location, doctor, preferred_date, reason, items, address, etc."),
+    reason: z.string().describe("Why this task is needed — shown to caregiver for approval"),
+  }),
+  callback: async (input) => {
+    try {
+      const { createBrowserTask, sidecarHealthy } = await import("./browser-agent");
+      const healthy = await sidecarHealthy();
+      if (!healthy) {
+        // Sidecar not running — still create the request as an escalation
+        await addEscalation(input.userId, "attention",
+          `Browser task requested (${input.taskType}): ${input.reason}. Nova Act sidecar is offline — caregiver should complete manually.`);
+        return JSON.stringify({ ok: false, fallback: "escalation", reason: "Nova Act sidecar not available" });
+      }
+      const task = await createBrowserTask(input.taskType, input.params, false);
+      await addEscalation(input.userId, "attention",
+        `Browser task requested — awaiting caregiver approval: ${input.taskType}. Reason: ${input.reason}. Task ID: ${task.task_id}`);
+      return JSON.stringify({ ok: true, taskId: task.task_id, status: task.status, needsCaregiverApproval: true });
+    } catch (e) {
+      await addEscalation(input.userId, "attention",
+        `Browser task requested (${input.taskType}): ${input.reason}. Could not reach automation service — caregiver should complete manually.`);
+      return JSON.stringify({ ok: false, error: String(e).slice(0, 200) });
+    }
+  },
+});
+
+export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam, assessRisk, requestBrowserTask];
 
 let _agent: Agent | null = null;
 export function getAgent(): Agent {
