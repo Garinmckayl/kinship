@@ -337,24 +337,15 @@ export const requestBrowserTask = tool({
   }),
   callback: async (input) => {
     try {
-      const { createBrowserTask } = await import("./browser-agent");
-      // createBrowserTask handles routing: tries sidecar first, falls back to AgentCore.
-      // Pass approved=false so it creates a pending task for caregiver approval.
-      const task = await createBrowserTask(input.taskType, input.params, false);
-
-      if (task.error) {
-        // Neither sidecar nor AgentCore available
-        await addEscalation(input.userId, "attention",
-          `Browser task requested (${input.taskType}): ${input.reason}. Automation not available — caregiver should complete manually.`);
-        return JSON.stringify({ ok: false, fallback: "escalation", reason: task.error });
-      }
-
+      const { saveBrowserTask } = await import("./store");
+      const taskId = `bt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      await saveBrowserTask(taskId, input.taskType, input.params, "pending_approval");
       await addEscalation(input.userId, "attention",
-        `Browser task requested — awaiting caregiver approval: ${input.taskType}. Reason: ${input.reason}. Task ID: ${task.task_id}`);
-      return JSON.stringify({ ok: true, taskId: task.task_id, status: task.status, needsCaregiverApproval: true });
+        `Browser task requested — awaiting caregiver approval: ${input.taskType}. Reason: ${input.reason}. Task ID: ${taskId}`);
+      return JSON.stringify({ ok: true, taskId, status: "pending_approval", needsCaregiverApproval: true });
     } catch (e) {
       await addEscalation(input.userId, "attention",
-        `Browser task requested (${input.taskType}): ${input.reason}. Could not reach automation service — caregiver should complete manually.`);
+        `Browser task requested (${input.taskType}): ${input.reason}. Could not save task — caregiver should complete manually.`);
       return JSON.stringify({ ok: false, error: String(e).slice(0, 200) });
     }
   },

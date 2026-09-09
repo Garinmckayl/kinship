@@ -99,4 +99,83 @@ export const welfareCheck = inngest.createFunction(
   }
 );
 
-export const functions = [processElderTask, morningCheckin, dailyReport, welfareCheck];
+// Browser task execution via AgentCore (durable, survives Vercel 10s timeout).
+// Triggered by: inngest.send({ name: "elder/browser-task.approved", data: { taskId, taskType, params } })
+export const processBrowserTask = inngest.createFunction(
+  {
+    id: "process-browser-task",
+    retries: 1,
+    triggers: [{ event: "elder/browser-task.approved" }],
+  },
+  async ({ event, step }) => {
+    const { taskId, taskType, params } = event.data as { taskId: string; taskType: string; params: Record<string, unknown> };
+
+    // Mark as running
+    await step.run("mark-running", async () => {
+      const { updateBrowserTask, addEscalation } = await import("./store");
+      await updateBrowserTask(taskId, { status: "running" });
+      await addEscalation("eleanor-79", "info", `Browser task executing via AgentCore: ${taskType}`);
+    });
+
+    // Invoke AgentCore (this is the long-running step — Inngest handles the timeout)
+    const result = await step.run("invoke-agentcore", async () => {
+      const RUNTIME_ARN = process.env.NOVA_AGENTCORE_RUNTIME;
+      if (!RUNTIME_ARN) return { status: "error", response: "NOVA_AGENTCORE_RUNTIME not configured" };
+
+      const { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } = await import("@aws-sdk/client-bedrock-agentcore");
+      const client = new BedrockAgentCoreClient({ region: process.env.AWS_REGION ?? "us-east-1" });
+
+      const payload = JSON.stringify({ task_type: taskType, params });
+      const command = new InvokeAgentRuntimeCommand({
+        agentRuntimeArn: RUNTIME_ARN,
+        contentType: "application/json",
+        accept: "application/json",
+        payload: new TextEncoder().encode(payload),
+      });
+
+      try {
+        const response = await client.send(command);
+        let responseBody = "{}";
+        if (response.response) {
+          if (response.response instanceof Uint8Array) {
+            responseBody = new TextDecoder().decode(response.response);
+          } else if (typeof response.response === "string") {
+            responseBody = response.response;
+          } else {
+            const chunks: Uint8Array[] = [];
+            for await (const chunk of response.response as AsyncIterable<Uint8Array>) {
+              chunks.push(chunk);
+            }
+            const merged = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
+            let offset = 0;
+            for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.length; }
+            responseBody = new TextDecoder().decode(merged);
+          }
+        }
+        return JSON.parse(responseBody);
+      } catch (e) {
+        return { status: "error", response: String(e).slice(0, 500) };
+      }
+    });
+
+    // Store result in DB
+    await step.run("store-result", async () => {
+      const { updateBrowserTask, addEscalation } = await import("./store");
+      const ok = result.status === "success";
+      await updateBrowserTask(taskId, {
+        status: ok ? "completed" : "failed",
+        steps: result.steps ?? [],
+        result: result.result ?? null,
+        error: ok ? null : (result.response ?? "unknown error"),
+      });
+      await addEscalation("eleanor-79",
+        ok ? "info" : "attention",
+        `Browser task ${ok ? "completed" : "failed"}: ${taskType}. ${result.result ? JSON.stringify(result.result).slice(0, 200) : result.response ?? ""}`,
+      );
+    });
+
+    return { taskId, status: result.status };
+  }
+);
+
+export const functions = [processElderTask, morningCheckin, dailyReport, welfareCheck, processBrowserTask];

@@ -1,101 +1,87 @@
 import { NextResponse } from "next/server";
-import { addEscalation } from "@/lib/store";
+import { addEscalation, saveBrowserTask, updateBrowserTask } from "@/lib/store";
 
-// Approve and execute a browser task directly via AgentCore.
-// On Vercel (serverless), we can't persist in-memory task state across invocations.
-// Instead, the approve button sends the task_type and params directly, and we invoke AgentCore here.
+// Approve a browser task: saves to DB and fires Inngest event for durable execution.
+// Returns immediately (within Vercel's 10s timeout). Inngest handles the long-running AgentCore call.
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-  let body: Record<string, unknown> = {};
   try {
-    body = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
     const taskType = body.task_type as string | undefined;
     const taskParams = (body.params ?? {}) as Record<string, unknown>;
 
     if (!taskType) {
-      // Try the bridge's approveBrowserTask (works when sidecar is running)
-      const { approveBrowserTask } = await import("@/lib/browser-agent");
-      const task = await approveBrowserTask(params.id);
-      await addEscalation("eleanor-79", "info", `Browser task approved: ${task.task_type} (${task.task_id})`);
-      return NextResponse.json(task);
+      return NextResponse.json({ error: "task_type required" }, { status: 400 });
     }
 
-    // Direct AgentCore invocation
-    const RUNTIME_ARN = process.env.NOVA_AGENTCORE_RUNTIME;
-    if (!RUNTIME_ARN) {
-      return NextResponse.json({ error: "NOVA_AGENTCORE_RUNTIME not configured" }, { status: 503 });
-    }
+    const taskId = params.id;
 
-    await addEscalation("eleanor-79", "info", `Browser task approved and executing via AgentCore: ${taskType}`);
+    // Save task to DB
+    await saveBrowserTask(taskId, taskType, taskParams, "approved");
+    await addEscalation("eleanor-79", "info", `Browser task approved: ${taskType}. Executing via AgentCore...`);
 
-    const { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } = await import("@aws-sdk/client-bedrock-agentcore");
-    const client = new BedrockAgentCoreClient({ region: process.env.AWS_REGION ?? "us-east-1" });
+    // Fire Inngest event for durable background execution
+    try {
+      const { inngest } = await import("@/lib/inngest");
+      await inngest.send({
+        name: "elder/browser-task.approved",
+        data: { taskId, taskType, params: taskParams },
+      });
+    } catch (inngestErr) {
+      // Inngest not available — try direct invocation (will likely timeout on Vercel Hobby)
+      console.warn("Inngest unavailable, falling back to direct invocation:", inngestErr);
 
-    const payload = JSON.stringify({ task_type: taskType, params: taskParams });
-    const command = new InvokeAgentRuntimeCommand({
-      agentRuntimeArn: RUNTIME_ARN,
-      contentType: "application/json",
-      accept: "application/json",
-      payload: new TextEncoder().encode(payload),
-    });
+      const RUNTIME_ARN = process.env.NOVA_AGENTCORE_RUNTIME;
+      if (!RUNTIME_ARN) {
+        await updateBrowserTask(taskId, { status: "failed", error: "Neither Inngest nor NOVA_AGENTCORE_RUNTIME configured" });
+        return NextResponse.json({
+          task_id: taskId, task_type: taskType, status: "failed",
+          error: "Browser automation not configured. Set NOVA_AGENTCORE_RUNTIME and Inngest keys.",
+        });
+      }
 
-    const response = await client.send(command);
-
-    let responseBody = "{}";
-    if (response.response) {
-      if (response.response instanceof Uint8Array) {
-        responseBody = new TextDecoder().decode(response.response);
-      } else if (typeof response.response === "string") {
-        responseBody = response.response;
-      } else {
-        const chunks: Uint8Array[] = [];
-        for await (const chunk of response.response as AsyncIterable<Uint8Array>) {
-          chunks.push(chunk);
+      // Best-effort direct call (may timeout on Hobby plan)
+      try {
+        const { BedrockAgentCoreClient, InvokeAgentRuntimeCommand } = await import("@aws-sdk/client-bedrock-agentcore");
+        const client = new BedrockAgentCoreClient({ region: process.env.AWS_REGION ?? "us-east-1" });
+        const command = new InvokeAgentRuntimeCommand({
+          agentRuntimeArn: RUNTIME_ARN,
+          contentType: "application/json",
+          accept: "application/json",
+          payload: new TextEncoder().encode(JSON.stringify({ task_type: taskType, params: taskParams })),
+        });
+        await updateBrowserTask(taskId, { status: "running" });
+        const response = await client.send(command);
+        let responseBody = "{}";
+        if (response.response) {
+          const chunks: Uint8Array[] = [];
+          for await (const chunk of response.response as AsyncIterable<Uint8Array>) { chunks.push(chunk); }
+          const merged = new Uint8Array(chunks.reduce((s, c) => s + c.length, 0));
+          let offset = 0;
+          for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.length; }
+          responseBody = new TextDecoder().decode(merged);
         }
-        const total = chunks.reduce((s, c) => s + c.length, 0);
-        const merged = new Uint8Array(total);
-        let offset = 0;
-        for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.length; }
-        responseBody = new TextDecoder().decode(merged);
+        const parsed = JSON.parse(responseBody);
+        await updateBrowserTask(taskId, {
+          status: parsed.status === "success" ? "completed" : "failed",
+          result: parsed.result ?? null,
+          error: parsed.status === "error" ? parsed.response : null,
+        });
+      } catch (e) {
+        await updateBrowserTask(taskId, { status: "failed", error: `AgentCore invocation failed: ${String(e).slice(0, 300)}` });
       }
     }
 
-    const parsed = JSON.parse(responseBody);
-    await addEscalation("eleanor-79",
-      parsed.status === "success" ? "info" : "attention",
-      `Browser task ${parsed.status === "success" ? "completed" : "failed"}: ${taskType}. ${parsed.result ? JSON.stringify(parsed.result).slice(0, 200) : parsed.response ?? ""}`
-    );
-
+    // Return immediately with "approved" status
     return NextResponse.json({
-      task_id: params.id,
+      task_id: taskId,
       task_type: taskType,
-      status: parsed.status === "success" ? "completed" : "failed",
-      steps: parsed.steps ?? [],
-      result: parsed.result ?? null,
-      error: parsed.status === "error" ? parsed.response : null,
-    });
-  } catch (e) {
-    const msg = String(e).slice(0, 500);
-    console.error("[browser-agent/approve] Error:", msg);
-
-    // If AgentCore runtime is starting or failed, return a helpful message
-    if (msg.includes("RuntimeClientError") || msg.includes("starting the runtime")) {
-      return NextResponse.json({
-        task_id: params.id,
-        task_type: body?.task_type ?? "unknown",
-        status: "failed",
-        steps: [],
-        result: null,
-        error: "The Nova Act runtime is starting up. Please try again in 30 seconds.",
-      }, { status: 200 }); // Return 200 so the dashboard can show the message
-    }
-
-    return NextResponse.json({
-      task_id: params.id,
-      task_type: body?.task_type ?? "unknown",
-      status: "failed",
+      status: "approved",
+      params: taskParams,
       steps: [],
       result: null,
-      error: msg,
-    }, { status: 200 });
+      error: null,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: String(e).slice(0, 500) }, { status: 500 });
   }
 }

@@ -137,6 +137,18 @@ create table if not exists chat_messages (
   created_at timestamptz default now()
 );
 create index if not exists chat_messages_thread_time_idx on chat_messages(thread_id, created_at);
+create table if not exists browser_tasks (
+  id text primary key,
+  elder_id text not null default 'eleanor-79',
+  task_type text not null,
+  status text default 'pending_approval',
+  params jsonb default '{}',
+  steps jsonb default '[]',
+  result jsonb,
+  error text,
+  created_at timestamptz default now(),
+  completed_at timestamptz
+);
 `;
 
 let readyP: Promise<void> | null = null;
