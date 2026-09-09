@@ -5,10 +5,11 @@ import { addEscalation } from "@/lib/store";
 // On Vercel (serverless), we can't persist in-memory task state across invocations.
 // Instead, the approve button sends the task_type and params directly, and we invoke AgentCore here.
 export async function POST(req: Request, { params }: { params: { id: string } }) {
+  let body: Record<string, unknown> = {};
   try {
-    const body = await req.json().catch(() => ({}));
-    const taskType = body.task_type;
-    const taskParams = body.params ?? {};
+    body = await req.json().catch(() => ({}));
+    const taskType = body.task_type as string | undefined;
+    const taskParams = (body.params ?? {}) as Record<string, unknown>;
 
     if (!taskType) {
       // Try the bridge's approveBrowserTask (works when sidecar is running)
@@ -73,6 +74,28 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       error: parsed.status === "error" ? parsed.response : null,
     });
   } catch (e) {
-    return NextResponse.json({ error: String(e).slice(0, 500) }, { status: 500 });
+    const msg = String(e).slice(0, 500);
+    console.error("[browser-agent/approve] Error:", msg);
+
+    // If AgentCore runtime is starting or failed, return a helpful message
+    if (msg.includes("RuntimeClientError") || msg.includes("starting the runtime")) {
+      return NextResponse.json({
+        task_id: params.id,
+        task_type: body?.task_type ?? "unknown",
+        status: "failed",
+        steps: [],
+        result: null,
+        error: "The Nova Act runtime is starting up. Please try again in 30 seconds.",
+      }, { status: 200 }); // Return 200 so the dashboard can show the message
+    }
+
+    return NextResponse.json({
+      task_id: params.id,
+      task_type: body?.task_type ?? "unknown",
+      status: "failed",
+      steps: [],
+      result: null,
+      error: msg,
+    }, { status: 200 });
   }
 }
