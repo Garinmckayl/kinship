@@ -527,8 +527,15 @@ export default function FamilyPage() {
                       {isPending && (
                         <button
                           onClick={async () => {
-                            const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, { method: "POST" });
-                            if (res.ok) setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, status: "approved" } : t));
+                            const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ task_type: bt.task_type, params: bt.params }),
+                            });
+                            if (res.ok) {
+                              const result = await res.json();
+                              setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, ...result } : t));
+                            }
                           }}
                           className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
                         >
@@ -585,16 +592,31 @@ export default function FamilyPage() {
             {/* Fallback: show browser task requests from escalations when sidecar is offline */}
             {browserTasks.length === 0 && s.escalations.filter((e) => e.message.includes("Browser task requested")).map((e, i) => {
               const match = e.message.match(/Browser task requested.*?\((\w+)\):\s*(.+?)(?:\.|$)/);
-              const taskType = match?.[1]?.replace(/_/g, " ") ?? "browser task";
+              const taskType = match?.[1] ?? "insurance_check";
+              const taskLabel = taskType.replace(/_/g, " ");
               const reason = match?.[2] ?? e.message;
               return (
                 <div key={`bt-esc-${i}`} className="mt-3 rounded-2xl p-4 ring-1 ring-fuchsia-400/20 bg-fuchsia-950/30">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-300">[requested] {taskType}</span>
-                    <span className="px-2.5 py-1 rounded-full bg-amber-400/10 text-amber-200 text-xs font-bold">Awaiting sidecar</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-300">[requested] {taskLabel}</span>
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`${API}/browser-agent/escalation-${i}/approve`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ task_type: taskType, params: {} }),
+                        });
+                        if (res.ok) {
+                          const result = await res.json();
+                          setBrowserTasks((ts) => [...ts, result]);
+                        }
+                      }}
+                      className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
+                    >
+                      Approve & Execute via AgentCore
+                    </button>
                   </div>
                   <p className="text-sm text-white/80">{reason}</p>
-                  <p className="mt-2 text-xs text-fuchsia-200/50">Start the Nova Act sidecar to execute: <code className="bg-white/10 px-1.5 py-0.5 rounded">cd nova-act && python server.py</code></p>
                 </div>
               );
             })}

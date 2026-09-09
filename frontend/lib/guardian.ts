@@ -337,15 +337,18 @@ export const requestBrowserTask = tool({
   }),
   callback: async (input) => {
     try {
-      const { createBrowserTask, sidecarHealthy } = await import("./browser-agent");
-      const healthy = await sidecarHealthy();
-      if (!healthy) {
-        // Sidecar not running — still create the request as an escalation
-        await addEscalation(input.userId, "attention",
-          `Browser task requested (${input.taskType}): ${input.reason}. Nova Act sidecar is offline — caregiver should complete manually.`);
-        return JSON.stringify({ ok: false, fallback: "escalation", reason: "Nova Act sidecar not available" });
-      }
+      const { createBrowserTask } = await import("./browser-agent");
+      // createBrowserTask handles routing: tries sidecar first, falls back to AgentCore.
+      // Pass approved=false so it creates a pending task for caregiver approval.
       const task = await createBrowserTask(input.taskType, input.params, false);
+
+      if (task.error) {
+        // Neither sidecar nor AgentCore available
+        await addEscalation(input.userId, "attention",
+          `Browser task requested (${input.taskType}): ${input.reason}. Automation not available — caregiver should complete manually.`);
+        return JSON.stringify({ ok: false, fallback: "escalation", reason: task.error });
+      }
+
       await addEscalation(input.userId, "attention",
         `Browser task requested — awaiting caregiver approval: ${input.taskType}. Reason: ${input.reason}. Task ID: ${task.task_id}`);
       return JSON.stringify({ ok: true, taskId: task.task_id, status: task.status, needsCaregiverApproval: true });
