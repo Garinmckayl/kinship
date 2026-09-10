@@ -261,10 +261,15 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
                 with NovaAct(**nova_kwargs) as nova:
                     for i, step_config in enumerate(config["steps"]):
                         step_label = step_config["label"]
-                        try:
-                            prompt = step_config["prompt"].format(**params)
-                        except (KeyError, ValueError):
-                            prompt = step_config["prompt"]
+                    step_label = step_config["label"]
+                    try:
+                        step_label = step_label.format(**params)
+                    except (KeyError, ValueError):
+                        pass
+                    try:
+                        prompt = step_config["prompt"].format(**params)
+                    except (KeyError, ValueError):
+                        prompt = step_config["prompt"]
 
                         log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
 

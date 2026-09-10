@@ -44,9 +44,14 @@ export async function GET() {
       };
     });
 
-    // Add sidecar-only tasks and override status for running ones
+    // Add sidecar-only tasks and override status for matching DB ones
     for (const st of sidecarTasks) {
-      const existing = merged.find((m) => m.task_type === st.task_type && (m.status === "approved" || m.status === "running"));
+      const existing = merged.find((m) =>
+        m.task_type === st.task_type && (
+          m.status === "approved" || m.status === "running" ||
+          m.status === "completed" || m.status === "failed"
+        )
+      );
       if (existing) {
         // Sidecar has the real status -- override
         existing.status = String(st.status ?? existing.status);
