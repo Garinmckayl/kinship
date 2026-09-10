@@ -572,18 +572,16 @@ export default function FamilyPage() {
                       </div>
                     )}
                     {bt.error && <p className="mt-2 text-sm text-red-300">{bt.error}</p>}
-                    {/* Live browser view via ACBT (AgentCore Browser Tool) */}
-                    {bt.recording_url && (isRunning || isDone) && (
+                    {/* Live browser view via ACBT -- only while task is RUNNING */}
+                    {bt.recording_url && isRunning && (
                       <div className="mt-3 rounded-xl overflow-hidden ring-1 ring-sky-400/30">
                         <div className="flex items-center justify-between bg-sky-950/60 px-3 py-1.5">
                           <div className="flex items-center gap-2">
-                            {isRunning && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-                            <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">
-                              {isRunning ? "Live Browser Session" : "Browser Session Recording"}
-                            </span>
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                            <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">Live Browser Session</span>
                           </div>
                           <a href={bt.recording_url} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 hover:text-sky-100 underline">
-                            Open in new tab
+                            Open fullscreen
                           </a>
                         </div>
                         <iframe

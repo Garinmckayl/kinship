@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clip 5 — Zero-Friction Accessible Senior UI</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/__hyperframes-runtime.js"></script>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+          font-family: "Inter", sans-serif;
+          color: #0f172a;
+        }
+        .headline {
+          position: absolute;
+          top: 64px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+        }
+        .headline h1 {
+          font-size: 60px;
+          font-weight: 900;
+          letter-spacing: 6px;
+          color: #0f766e;
+          margin: 0;
+        }
+        .headline p {
+          margin: 12px 0 0;
+          font-size: 28px;
+          font-weight: 500;
+          color: #334155;
+          letter-spacing: 1px;
+        }
+        .mic-stage {
+          position: absolute;
+          top: 410px;
+          left: 50%;
+          width: 0;
+          height: 0;
+        }
+        .mic-btn {
+          position: absolute;
+          top: -170px;
+          left: -170px;
+          width: 340px;
+          height: 340px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f0fdfa 55%, #ccfbf1 100%);
+          border: 2px solid #99f6e4;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.15), 0 0 0 18px rgba(20, 184, 166, 0.06), 0 0 0 36px rgba(20, 184, 166, 0.03);
+          display: grid;
+          place-items: center;
+          opacity: 0;
+        }
+        .mic-btn svg {
+          width: 130px;
+          height: 130px;
+          stroke: #0f766e;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .ring {
+          position: absolute;
+          top: -150px;
+          left: -150px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          border: 3px solid #14b8a6;
+          opacity: 0;
+        }
+        .question {
+          position: absolute;
+          top: 640px;
+          left: 50%;
+          margin-left: -620px;
+          width: 1240px;
+          text-align: center;
+          font-size: 46px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.4;
+        }
+        .question .w {
+          display: inline-block;
+          margin: 0 0.26em;
+          opacity: 0;
+        }
+        .reply {
+          position: absolute;
+          top: 830px;
+          left: 50%;
+          margin-left: -560px;
+          width: 1120px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 22px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08), 0 30px 60px -20px rgba(13, 148, 136, 0.22);
+          padding: 30px 40px;
+          display: flex;
+          align-items: center;
+          gap: 26px;
+          opacity: 0;
+        }
+        .reply .vol {
+          flex: 0 0 auto;
+          width: 76px;
+          height: 76px;
+          border-radius: 50%;
+          background: #f0fdfa;
+          border: 1px solid #99f6e4;
+          display: grid;
+          place-items: center;
+        }
+        .reply .vol svg {
+          width: 40px;
+          height: 40px;
+          stroke: #14b8a6;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .reply .txt {
+          font-size: 33px;
+          font-weight: 600;
+          color: #334155;
+          line-height: 1.35;
+          text-align: left;
+        }
+        .reply .txt b {
+          color: #0f766e;
+        }
+        /* stroke "draw" baseline: mic icon hidden until the timeline draws it */
+        #mic-capsule {
+          stroke-dasharray: 23.43;
+          stroke-dashoffset: 23.43;
+        }
+        #mic-arc {
+          stroke-dasharray: 26;
+          stroke-dashoffset: 26;
+        }
+        #mic-stem {
+          stroke-dasharray: 3;
+          stroke-dashoffset: 3;
+        }
+      </style>
+
+      <div id="root" data-composition-id="clip-5" data-width="1920" data-height="1080" data-duration="5">
+        <div class="headline">
+          <h1>BUILT FOR ACCESSIBILITY</h1>
+          <p>WCAG AAA Compliant • Voice-First • Zero Tiny Touch Targets</p>
+        </div>
+
+        <div class="mic-stage">
+          <div class="ring" id="ring1"></div>
+          <div class="ring" id="ring2"></div>
+          <div class="ring" id="ring3"></div>
+          <div class="mic-btn" id="mic-btn">
+            <svg viewBox="0 0 24 24" id="mic-svg">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" id="mic-capsule"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" id="mic-arc"></path>
+              <path d="M12 19v3" id="mic-stem"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="question" id="question">
+          <span class="w">Good</span>
+          <span class="w">morning</span>
+          <span class="w">Kinship.</span>
+          <span class="w">Can</span>
+          <span class="w">you</span>
+          <span class="w">check</span>
+          <span class="w">if</span>
+          <span class="w">my</span>
+          <span class="w">blood</span>
+          <span class="w">pressure</span>
+          <span class="w">refill</span>
+          <span class="w">is</span>
+          <span class="w">ready?</span>
+        </div>
+
+        <div class="reply" id="reply">
+          <div class="vol">
+            <svg viewBox="0 0 24 24">
+              <path d="M11 5 6 9H2v6h4l5 4V5z"></path>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+          </div>
+          <div class="txt">"Yes, <b>Eleanor</b>. It was processed this morning and is ready for delivery."</div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        // SVG stroke "draw": baselines live in CSS; the timeline only draws to 0
+
+        // 0.0 - 2.0s: giant mic button blooms in, organic soundwave rings radiate (finite cycles)
+        tl.fromTo(".headline", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7 }, 0.15)
+          .fromTo("#mic-btn", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.6)" }, 0.25)
+          .to("#mic-capsule", { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, 0.6)
+          .to("#mic-arc", { strokeDashoffset: 0, duration: 0.4, ease: "power2.inOut" }, 0.95)
+          .to("#mic-stem", { strokeDashoffset: 0, duration: 0.2, ease: "power2.out" }, 1.25);
+
+        // soundwave rings: 3 staggered emitters, 4 finite cycles each, all done by 5.0s
+        tl.fromTo("#ring1", { scale: 0.9, opacity: 0.65 }, { scale: 1.75, opacity: 0, duration: 0.95, ease: "power1.out", repeat: 3 }, 0.7)
+          .fromTo("#ring2", { scale: 0.9, opacity: 0.55 }, { scale: 1.75, opacity: 0, duration: 0.95, ease: "power1.out", repeat: 3 }, 0.95)
+          .fromTo("#ring3", { scale: 0.9, opacity: 0.45 }, { scale: 1.75, opacity: 0, duration: 0.95, ease: "power1.out", repeat: 3 }, 1.2);
+
+        // 2.0 - 3.8s: ultra-legible speech text streams in word by word (single fromTo per property)
+        tl.fromTo("#question .w", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.16, stagger: 0.13, ease: "power2.out" }, 2.0);
+
+        // 3.8 - 5.0s: agent's accessible reply with audio feedback badge
+        tl.fromTo("#reply", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.4)" }, 3.85)
+          .to(".vol", { scale: 1.15, duration: 0.18, ease: "power1.inOut", repeat: 3, yoyo: true }, 4.3);
+
+        window.__timelines["clip-5"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
