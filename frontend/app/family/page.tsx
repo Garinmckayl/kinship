@@ -121,9 +121,21 @@ export default function FamilyPage() {
       fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks(d.tasks)).catch(() => {});
     };
     load();
+    // Poll: fast for status (10s), browser tasks check every 3s when one is running
     const t = setInterval(load, 10000);
     return () => clearInterval(t);
   }, [authChecked, me]);
+
+  // Faster polling when a browser task is running
+  useEffect(() => {
+    const hasRunning = browserTasks.some((t) => t.status === "running" || t.status === "approved");
+    if (!hasRunning) return;
+    const poll = () => {
+      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks(d.tasks)).catch(() => {});
+    };
+    const t = setInterval(poll, 3000);
+    return () => clearInterval(t);
+  }, [browserTasks]);
 
   useEffect(() => {
     if (!authChecked || !me) return;

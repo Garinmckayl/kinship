@@ -246,7 +246,8 @@ async function collectHealthSignals(elder: string): Promise<Signal[]> {
 
 // --------------- main assessment ---------------
 
-export async function assessCompoundRisk(elder = "eleanor-79"): Promise<CompoundAssessment> {
+export async function assessCompoundRisk(elder = "eleanor-79", opts: { escalate?: boolean } = {}): Promise<CompoundAssessment> {
+  const shouldEscalate = opts.escalate ?? false;
   // Gather all signals in parallel
   const [meds, silence, symptoms, mood, escalations, health] = await Promise.all([
     collectMedSignals(elder),
@@ -300,9 +301,9 @@ export async function assessCompoundRisk(elder = "eleanor-79"): Promise<Compound
   // Build reasoning string (this is what makes compound-risk explainable)
   const reasoning = buildReasoning(unique, totalWeight, riskLevel);
 
-  // Escalate if needed
+  // Escalate if needed (only when explicitly requested, not on every poll)
   let escalated = false;
-  if (action === "critical" || action === "urgent") {
+  if (shouldEscalate && (action === "critical" || action === "urgent")) {
     const signalSummary = unique.map((s) => s.label).join(", ");
     await addEscalation(
       elder,
@@ -333,7 +334,7 @@ export async function assessCompoundRisk(elder = "eleanor-79"): Promise<Compound
         }
       } catch {}
     }
-  } else if (action === "alert") {
+  } else if (shouldEscalate && action === "alert") {
     const signalSummary = unique.map((s) => s.label).join(", ");
     await addEscalation(
       elder,

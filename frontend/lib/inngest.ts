@@ -92,7 +92,7 @@ export const welfareCheck = inngest.createFunction(
 
     const risk = await step.run("compound-risk", async () => {
       const { assessCompoundRisk } = await import("./compound-risk");
-      return assessCompoundRisk("eleanor-79");
+      return assessCompoundRisk("eleanor-79", { escalate: true });
     });
 
     return { sweep, risk: { level: risk.riskLevel, action: risk.action, signals: risk.signals.length, escalated: risk.escalated } };

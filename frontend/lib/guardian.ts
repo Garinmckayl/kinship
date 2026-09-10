@@ -313,7 +313,7 @@ export const assessRisk = tool({
   description: "Run a compound-risk assessment: gathers medication adherence, silence, symptoms, mood, vitals, and unacked alerts. Returns a risk level (green/yellow/orange/red) with cross-domain reasoning. Use proactively during check-ins or when multiple concerns surface.",
   inputSchema: z.object({ userId: z.string() }),
   callback: async (input) => {
-    const result = await assessCompoundRisk(input.userId);
+    const result = await assessCompoundRisk(input.userId, { escalate: true });
     return JSON.stringify({
       riskLevel: result.riskLevel,
       action: result.action,
