@@ -207,19 +207,20 @@ WORKFLOW_CONFIGS = {
 # --------------- Nova Act execution engine ---------------
 
 async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) -> TaskResult:
-    """Execute a Nova Act workflow with step-by-step browser automation and screenshot capture."""
+    """Execute a Nova Act workflow using AgentCore Browser Tool (cloud-hosted browser)."""
     try:
-        from nova_act import NovaAct
-    except ImportError:
-        log.warning("nova-act package not installed, running in demo mode")
+        from nova_act import NovaAct, workflow as nova_workflow
+        from bedrock_agentcore.tools.browser_client import BrowserClient
+    except ImportError as e:
+        log.warning(f"Required package not installed ({e}), running in demo mode")
         return await execute_demo_workflow(task, config, params)
 
     task.status = TaskStatus.running
     task.started_at = datetime.now(timezone.utc).isoformat()
     SCREENSHOTS[task.task_id] = []
 
-    logs_dir = f"/tmp/nova-sessions/{task.task_id}"
-    os.makedirs(logs_dir, exist_ok=True)
+    aws_region = os.environ.get("AWS_REGION", "us-east-1")
+    acbt_client = None
 
     try:
         starting_page = params.get("portal_url", config["starting_page"])
@@ -228,101 +229,86 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
         except (KeyError, ValueError):
             pass
 
+        # Start AgentCore Browser Tool (cloud-hosted Chromium)
+        log.info(f"Starting ACBT cloud browser in {aws_region}...")
+        acbt_client = BrowserClient(region=aws_region)
+        acbt_client.start()
+        live_view_url = acbt_client.generate_live_view_url(expires=600)
+        cdp_ws_url, cdp_headers = acbt_client.generate_ws_headers()
+        log.info(f"ACBT browser started. Live view: {live_view_url[:80]}...")
+
+        # Store live view URL for the dashboard
+        task.recording_url = live_view_url
+
         nova_kwargs = {
             "starting_page": starting_page,
-            "headless": True,
-            "record_video": True,
-            "logs_directory": logs_dir,
+            "cdp_endpoint_url": cdp_ws_url,
+            "cdp_headers": cdp_headers,
+            "ignore_https_errors": True,
             "tty": False,
+            "record_video": False,
         }
 
-        # Use Workflow for IAM auth if AWS creds are available
-        nova_context = None
-        workflow_ctx = None
-        if os.environ.get("AWS_ACCESS_KEY_ID") or os.environ.get("AWS_PROFILE"):
-            try:
-                from nova_act import Workflow
-                workflow_ctx = Workflow(
-                    workflow_definition_name="elderlove-guardian",
-                    model_id="nova-act-latest",
-                    boto_session_kwargs={"region_name": os.environ.get("AWS_DEFAULT_REGION", "us-east-1")},
-                )
-                workflow_ctx.__enter__()
-                nova_kwargs["workflow"] = workflow_ctx
-            except Exception as e:
-                log.warning(f"Could not create workflow context: {e}")
+        @nova_workflow(
+            workflow_definition_name="elderlove-guardian",
+            model_id="nova-act-latest",
+            boto_session_kwargs={"region_name": aws_region},
+        )
+        def _run():
+            with NovaAct(**nova_kwargs) as nova:
+                for i, step_config in enumerate(config["steps"]):
+                    step_label = step_config["label"]
+                    try:
+                        prompt = step_config["prompt"].format(**params)
+                    except (KeyError, ValueError):
+                        prompt = step_config["prompt"]
 
-        with NovaAct(**nova_kwargs) as nova:
-            # Capture initial screenshot
-            try:
-                page = nova._page if hasattr(nova, '_page') else None
-                if page:
-                    import base64
-                    screenshot_bytes = page.screenshot(type="png")
-                    b64 = base64.b64encode(screenshot_bytes).decode()
-                    SCREENSHOTS[task.task_id].append(b64)
-                    task.screenshots = SCREENSHOTS[task.task_id]
-            except Exception:
-                pass
+                    log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
 
-            for i, step_config in enumerate(config["steps"]):
-                step_label = step_config["label"]
-                try:
-                    prompt = step_config["prompt"].format(**params)
-                except (KeyError, ValueError):
-                    prompt = step_config["prompt"]
+                    step_record = {
+                        "index": i + 1,
+                        "label": step_label,
+                        "status": "running",
+                        "started_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    task.steps.append(step_record)
 
-                log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
+                    try:
+                        if step_config.get("extract"):
+                            result = nova.act_get(prompt)
+                            step_record["status"] = "completed"
+                            step_record["response"] = result.response if hasattr(result, 'response') else str(result)
+                            if task.result is None:
+                                task.result = {}
+                            task.result[step_label] = step_record["response"]
+                        else:
+                            nova.act(prompt)
+                            step_record["status"] = "completed"
+                    except Exception as step_err:
+                        step_record["status"] = "failed"
+                        step_record["error"] = str(step_err)[:500]
+                        log.error(f"Step {step_label} failed: {step_err}")
+                        if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
+                            raise
 
-                step_record = {
-                    "index": i + 1,
-                    "label": step_label,
-                    "status": "running",
-                    "started_at": datetime.now(timezone.utc).isoformat(),
-                }
-                task.steps.append(step_record)
+                    step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
 
-                try:
-                    if step_config.get("extract"):
-                        result = nova.act_get(prompt)
-                        step_record["status"] = "completed"
-                        step_record["response"] = result.response if hasattr(result, 'response') else str(result)
-                        if task.result is None:
-                            task.result = {}
-                        task.result[step_label] = step_record["response"]
-                    else:
-                        nova.act(prompt)
-                        step_record["status"] = "completed"
-                except Exception as step_err:
-                    step_record["status"] = "failed"
-                    step_record["error"] = str(step_err)[:500]
-                    log.error(f"Step {step_label} failed: {step_err}")
-                    if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
-                        raise
-
-                step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
-
-                # Capture screenshot after each step
-                try:
-                    page = nova._page if hasattr(nova, '_page') else None
-                    if page:
+                    # Capture screenshot
+                    try:
                         import base64
-                        screenshot_bytes = page.screenshot(type="png")
-                        b64 = base64.b64encode(screenshot_bytes).decode()
-                        SCREENSHOTS[task.task_id].append(b64)
-                        task.screenshots = SCREENSHOTS[task.task_id]
-                        step_record["screenshot_index"] = len(SCREENSHOTS[task.task_id]) - 1
-                except Exception:
-                    pass
+                        page = nova._page if hasattr(nova, '_page') else None
+                        if page:
+                            screenshot_bytes = page.screenshot(type="png")
+                            b64 = base64.b64encode(screenshot_bytes).decode()
+                            SCREENSHOTS[task.task_id].append(b64)
+                            task.screenshots = SCREENSHOTS[task.task_id]
+                            step_record["screenshot_index"] = len(SCREENSHOTS[task.task_id]) - 1
+                    except Exception:
+                        pass
 
+        _run()
         task.status = TaskStatus.completed
         task.completed_at = datetime.now(timezone.utc).isoformat()
-
-        # Store recording path
-        for f in os.listdir(logs_dir):
-            if f.endswith(".webm"):
-                task.recording_url = f"/recordings/{task.task_id}/{f}"
-                break
 
     except Exception as e:
         task.status = TaskStatus.failed
@@ -330,9 +316,10 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
         task.completed_at = datetime.now(timezone.utc).isoformat()
         log.error(f"Workflow failed: {e}")
     finally:
-        if workflow_ctx:
+        if acbt_client:
             try:
-                workflow_ctx.__exit__(None, None, None)
+                acbt_client.stop()
+                log.info("ACBT browser session stopped")
             except Exception:
                 pass
 
