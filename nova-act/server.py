@@ -207,7 +207,8 @@ WORKFLOW_CONFIGS = {
 # --------------- Nova Act execution engine ---------------
 
 async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) -> TaskResult:
-    """Execute a Nova Act workflow using AgentCore Browser Tool (cloud-hosted browser)."""
+    """Execute a Nova Act workflow using AgentCore Browser Tool (cloud-hosted browser).
+    Runs in a separate thread because Nova Act uses sync Playwright which conflicts with asyncio."""
     try:
         from nova_act import NovaAct, workflow as nova_workflow
         from bedrock_agentcore.tools.browser_client import BrowserClient
@@ -215,114 +216,109 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
         log.warning(f"Required package not installed ({e}), running in demo mode")
         return await execute_demo_workflow(task, config, params)
 
+    import threading
+
     task.status = TaskStatus.running
     task.started_at = datetime.now(timezone.utc).isoformat()
     SCREENSHOTS[task.task_id] = []
 
     aws_region = os.environ.get("AWS_REGION", "us-east-1")
-    acbt_client = None
+    error_holder: list = []
 
-    try:
-        starting_page = params.get("portal_url", config["starting_page"])
+    def _browser_thread():
+        acbt_client = None
         try:
-            starting_page = starting_page.format(**params)
-        except (KeyError, ValueError):
-            pass
-
-        # Start AgentCore Browser Tool (cloud-hosted Chromium)
-        log.info(f"Starting ACBT cloud browser in {aws_region}...")
-        acbt_client = BrowserClient(region=aws_region)
-        acbt_client.start()
-        live_view_url = acbt_client.generate_live_view_url(expires=300)
-        cdp_ws_url, cdp_headers = acbt_client.generate_ws_headers()
-        log.info(f"ACBT browser started. Live view: {live_view_url[:80]}...")
-
-        # Store live view URL for the dashboard
-        task.recording_url = live_view_url
-
-        nova_kwargs = {
-            "starting_page": starting_page,
-            "cdp_endpoint_url": cdp_ws_url,
-            "cdp_headers": cdp_headers,
-            "ignore_https_errors": True,
-            "tty": False,
-            "record_video": False,
-        }
-
-        @nova_workflow(
-            workflow_definition_name="elderlove-guardian",
-            model_id="nova-act-latest",
-            boto_session_kwargs={"region_name": aws_region},
-        )
-        def _run():
-            with NovaAct(**nova_kwargs) as nova:
-                for i, step_config in enumerate(config["steps"]):
-                    step_label = step_config["label"]
-                    try:
-                        prompt = step_config["prompt"].format(**params)
-                    except (KeyError, ValueError):
-                        prompt = step_config["prompt"]
-
-                    log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
-
-                    step_record = {
-                        "index": i + 1,
-                        "label": step_label,
-                        "status": "running",
-                        "started_at": datetime.now(timezone.utc).isoformat(),
-                    }
-                    task.steps.append(step_record)
-
-                    try:
-                        if step_config.get("extract"):
-                            result = nova.act_get(prompt)
-                            step_record["status"] = "completed"
-                            step_record["response"] = result.response if hasattr(result, 'response') else str(result)
-                            if task.result is None:
-                                task.result = {}
-                            task.result[step_label] = step_record["response"]
-                        else:
-                            nova.act(prompt)
-                            step_record["status"] = "completed"
-                    except Exception as step_err:
-                        step_record["status"] = "failed"
-                        step_record["error"] = str(step_err)[:500]
-                        log.error(f"Step {step_label} failed: {step_err}")
-                        if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
-                            raise
-
-                    step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
-
-                    # Capture screenshot
-                    try:
-                        import base64
-                        page = nova._page if hasattr(nova, '_page') else None
-                        if page:
-                            screenshot_bytes = page.screenshot(type="png")
-                            b64 = base64.b64encode(screenshot_bytes).decode()
-                            SCREENSHOTS[task.task_id].append(b64)
-                            task.screenshots = SCREENSHOTS[task.task_id]
-                            step_record["screenshot_index"] = len(SCREENSHOTS[task.task_id]) - 1
-                    except Exception:
-                        pass
-
-        _run()
-        task.status = TaskStatus.completed
-        task.completed_at = datetime.now(timezone.utc).isoformat()
-
-    except Exception as e:
-        task.status = TaskStatus.failed
-        task.error = str(e)[:1000]
-        task.completed_at = datetime.now(timezone.utc).isoformat()
-        log.error(f"Workflow failed: {e}")
-    finally:
-        if acbt_client:
+            starting_page = params.get("portal_url", config["starting_page"])
             try:
-                acbt_client.stop()
-                log.info("ACBT browser session stopped")
-            except Exception:
+                starting_page = starting_page.format(**params)
+            except (KeyError, ValueError):
                 pass
 
+            # Start AgentCore Browser Tool (cloud-hosted Chromium)
+            log.info(f"Starting ACBT cloud browser in {aws_region}...")
+            acbt_client = BrowserClient(region=aws_region)
+            acbt_client.start()
+            live_view_url = acbt_client.generate_live_view_url(expires=300)
+            cdp_ws_url, cdp_headers = acbt_client.generate_ws_headers()
+            log.info(f"ACBT browser started. Live view: {live_view_url[:80]}...")
+
+            # Store live view URL
+            task.recording_url = live_view_url
+
+            @nova_workflow(
+                workflow_definition_name="elderlove-guardian",
+                model_id="nova-act-latest",
+                boto_session_kwargs={"region_name": aws_region},
+            )
+            def _run():
+                nova_kwargs = {
+                    "starting_page": starting_page,
+                    "cdp_endpoint_url": cdp_ws_url,
+                    "cdp_headers": cdp_headers,
+                    "ignore_https_errors": True,
+                }
+
+                with NovaAct(**nova_kwargs) as nova:
+                    for i, step_config in enumerate(config["steps"]):
+                        step_label = step_config["label"]
+                        try:
+                            prompt = step_config["prompt"].format(**params)
+                        except (KeyError, ValueError):
+                            prompt = step_config["prompt"]
+
+                        log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
+
+                        step_record = {
+                            "index": i + 1,
+                            "label": step_label,
+                            "status": "running",
+                            "started_at": datetime.now(timezone.utc).isoformat(),
+                        }
+                        task.steps.append(step_record)
+
+                        try:
+                            if step_config.get("extract"):
+                                result = nova.act_get(prompt)
+                                step_record["status"] = "completed"
+                                step_record["response"] = result.response if hasattr(result, 'response') else str(result)
+                                if task.result is None:
+                                    task.result = {}
+                                task.result[step_label] = step_record["response"]
+                            else:
+                                nova.act(prompt)
+                                step_record["status"] = "completed"
+                        except Exception as step_err:
+                            step_record["status"] = "failed"
+                            step_record["error"] = str(step_err)[:500]
+                            log.error(f"Step {step_label} failed: {step_err}")
+                            if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
+                                raise
+
+                        step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
+
+            _run()
+            task.status = TaskStatus.completed
+            task.completed_at = datetime.now(timezone.utc).isoformat()
+
+        except Exception as e:
+            task.status = TaskStatus.failed
+            task.error = str(e)[:1000]
+            task.completed_at = datetime.now(timezone.utc).isoformat()
+            log.error(f"Workflow failed: {e}")
+        finally:
+            if acbt_client:
+                try:
+                    acbt_client.stop()
+                    log.info("ACBT browser session stopped")
+                except Exception:
+                    pass
+
+    # Run in a separate thread to avoid asyncio/sync Playwright conflict
+    # Don't block -- let the thread run in background, polling will get status
+    thread = threading.Thread(target=_browser_thread, daemon=True)
+    thread.start()
+
+    # Return immediately -- task.status will be updated by the thread
     return task
 
 
