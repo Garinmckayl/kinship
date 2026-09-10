@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { listBrowserTasks as listFromDB, saveBrowserTask, updateBrowserTask } from "@/lib/store";
 import { type BrowserTaskType } from "@/lib/browser-agent";
 
-const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
+const SIDECAR_URL = process.env.NOVA_SIDECAR_URL || "http://98.92.77.193:8100";
 const SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
 
 async function fetchSidecar(path: string): Promise<Response | null> {

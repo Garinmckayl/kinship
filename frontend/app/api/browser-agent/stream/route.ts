@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth";
 
-const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
+const SIDECAR_URL = process.env.NOVA_SIDECAR_URL || "http://98.92.77.193:8100";
 const SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
 
 export async function POST(req: Request) {
