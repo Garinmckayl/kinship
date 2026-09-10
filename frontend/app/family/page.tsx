@@ -62,8 +62,7 @@ export default function FamilyPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [risk, setRisk] = useState<CompoundRisk | null>(null);
-  const [browserTasks, setBrowserTasks] = useState<{ task_id: string; task_type: string; status: string; params: Record<string, unknown>; steps: { label: string; status: string }[]; result: Record<string, string> | null; error: string | null }[]>([]);
-  const [liveScreenshot, setLiveScreenshot] = useState<{ task_id: string; screenshot: string | null; current_step: string | null; status: string } | null>(null);
+  const [browserTasks, setBrowserTasks] = useState<{ task_id: string; task_type: string; status: string; params: Record<string, unknown>; steps: { label: string; status: string }[]; result: Record<string, string> | null; error: string | null; recording_url?: string | null }[]>([]);
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
@@ -143,26 +142,6 @@ export default function FamilyPage() {
       if (d?.messages?.length) setElderHistory(d.messages);
     }).catch(() => {});
   }, [authChecked, me]);
-
-  // Live screenshot polling for running browser tasks
-  useEffect(() => {
-    const runningTask = browserTasks.find((t) => t.status === "running" || t.status === "approved");
-    if (!runningTask) {
-      setLiveScreenshot(null);
-      return;
-    }
-    const poll = () => {
-      fetch(`${API}/browser-agent/${runningTask.task_id}/screenshot`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (d?.screenshot) setLiveScreenshot({ task_id: runningTask.task_id, screenshot: d.screenshot, current_step: d.current_step, status: d.status });
-        })
-        .catch(() => {});
-    };
-    poll();
-    const t = setInterval(poll, 2000);
-    return () => clearInterval(t);
-  }, [browserTasks]);
 
   async function logout() {
     await fetch(`${API}/auth/logout`, { method: "POST" });
@@ -593,20 +572,26 @@ export default function FamilyPage() {
                       </div>
                     )}
                     {bt.error && <p className="mt-2 text-sm text-red-300">{bt.error}</p>}
-                    {/* Live session viewer: shows real-time browser screenshot when task is running */}
-                    {isRunning && liveScreenshot?.task_id === bt.task_id && liveScreenshot.screenshot && (
+                    {/* Live browser view via ACBT (AgentCore Browser Tool) */}
+                    {bt.recording_url && (isRunning || isDone) && (
                       <div className="mt-3 rounded-xl overflow-hidden ring-1 ring-sky-400/30">
                         <div className="flex items-center justify-between bg-sky-950/60 px-3 py-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">Live Browser Session</span>
+                            {isRunning && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
+                            <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">
+                              {isRunning ? "Live Browser Session" : "Browser Session Recording"}
+                            </span>
                           </div>
-                          <span className="text-xs text-sky-300">{liveScreenshot.current_step ?? "Working..."}</span>
+                          <a href={bt.recording_url} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 hover:text-sky-100 underline">
+                            Open in new tab
+                          </a>
                         </div>
-                        <img
-                          src={`data:image/png;base64,${liveScreenshot.screenshot}`}
-                          alt="Live browser session"
-                          className="w-full"
+                        <iframe
+                          src={bt.recording_url}
+                          className="w-full border-0"
+                          style={{ height: "500px" }}
+                          allow="autoplay"
+                          sandbox="allow-scripts allow-same-origin"
                         />
                       </div>
                     )}

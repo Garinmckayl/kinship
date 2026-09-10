@@ -40,7 +40,7 @@ export async function GET() {
       return {
         task_id: dt.id, task_type: dt.task_type, status: dt.status,
         params: dt.params, steps: dt.steps ?? [], result: dt.result, error: dt.error,
-        started_at: dt.created_at, completed_at: dt.completed_at,
+        started_at: dt.created_at, completed_at: dt.completed_at, recording_url: null,
       };
     });
 
@@ -58,6 +58,7 @@ export async function GET() {
         existing.steps = (st.steps as unknown[]) ?? existing.steps;
         existing.result = (st.result as Record<string, unknown>) ?? existing.result;
         existing.error = (st.error as string) ?? existing.error;
+        if (st.recording_url) existing.recording_url = String(st.recording_url);
         // Sync completed status back to DB
         if (st.status === "completed" || st.status === "failed") {
           updateBrowserTask(String(existing.task_id), {
@@ -76,6 +77,7 @@ export async function GET() {
           error: (st.error as string) ?? null,
           started_at: (st.started_at as string) ?? null,
           completed_at: (st.completed_at as string) ?? null,
+          recording_url: (st.recording_url as string) ?? null,
         });
       }
     }
