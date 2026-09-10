@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clip 7 — Strands SDK Architecture Pipeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/__hyperframes-runtime.js"></script>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+          font-family: "Inter", sans-serif;
+          color: #0f172a;
+        }
+        .headline {
+          position: absolute;
+          top: 64px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+        }
+        .headline h1 {
+          font-size: 60px;
+          font-weight: 900;
+          letter-spacing: 6px;
+          color: #0f766e;
+          margin: 0;
+        }
+        .headline p {
+          margin: 12px 0 0;
+          font-size: 28px;
+          font-weight: 500;
+          color: #334155;
+          letter-spacing: 1px;
+        }
+        .hub {
+          position: absolute;
+          top: 420px;
+          left: 760px;
+          width: 400px;
+          height: 160px;
+          background: #0f766e;
+          border-radius: 22px;
+          box-shadow: 0 20px 45px -12px rgba(15, 118, 110, 0.5);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          opacity: 0;
+          z-index: 6;
+        }
+        .hub svg {
+          width: 54px;
+          height: 54px;
+          stroke: #99f6e4;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .hub .t {
+          color: #ffffff;
+          font-size: 30px;
+          font-weight: 800;
+          letter-spacing: 1px;
+        }
+        .hub .s {
+          color: #aaf8e9;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 17px;
+          font-weight: 600;
+          letter-spacing: 2px;
+        }
+        .line {
+          position: absolute;
+          background: #0f766e;
+          border-radius: 3px;
+          opacity: 0;
+          z-index: 2;
+        }
+        .line-a {
+          top: 497px;
+          left: 632px;
+          width: 128px;
+          height: 6px;
+          transform-origin: right center;
+        }
+        .line-b {
+          top: 497px;
+          left: 1160px;
+          width: 128px;
+          height: 6px;
+          transform-origin: left center;
+        }
+        .line-c {
+          top: 580px;
+          left: 957px;
+          width: 6px;
+          height: 187px;
+          transform-origin: top center;
+        }
+        .tool {
+          position: absolute;
+          width: 460px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 20px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08);
+          padding: 26px 30px;
+          display: flex;
+          align-items: center;
+          gap: 22px;
+          opacity: 0;
+          z-index: 5;
+        }
+        .tool .ic {
+          flex: 0 0 auto;
+          width: 82px;
+          height: 82px;
+          border-radius: 20px;
+          background: #f0fdfa;
+          border: 1px solid #99f6e4;
+          display: grid;
+          place-items: center;
+        }
+        .tool .ic svg {
+          width: 44px;
+          height: 44px;
+          stroke: #0f766e;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .tool .tt {
+          font-size: 26px;
+          font-weight: 800;
+          color: #0f172a;
+          line-height: 1.2;
+        }
+        .tool .ts {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 18px;
+          font-weight: 600;
+          color: #0f766e;
+          margin-top: 8px;
+        }
+        .tool-a { top: 425px; left: 170px; }
+        .tool-b { top: 425px; left: 1290px; }
+        .tool-c { top: 767px; left: 730px; }
+        .pulse {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 18px;
+          height: 18px;
+          margin: -9px 0 0 -9px;
+          border-radius: 50%;
+          background: #14b8a6;
+          box-shadow: 0 0 14px 4px rgba(20, 184, 166, 0.55);
+          opacity: 0;
+          z-index: 7;
+        }
+        .metrics {
+          position: absolute;
+          top: 984px;
+          left: 50%;
+          margin-left: -460px;
+          width: 920px;
+          background: #0f172a;
+          color: #5eead4;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 24px;
+          font-weight: 700;
+          text-align: center;
+          padding: 22px 30px;
+          border-radius: 14px;
+          box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.4);
+          opacity: 0;
+          z-index: 10;
+        }
+        .metrics .sep {
+          color: #14b8a6;
+          padding: 0 10px;
+        }
+      </style>
+
+      <div id="root" data-composition-id="clip-7" data-width="1920" data-height="1080" data-duration="6">
+        <div class="headline">
+          <h1>POWERED BY STRANDS AGENTS SDK</h1>
+          <p>Modular Multi-Tool Orchestration Built for Real-World Reliability</p>
+        </div>
+
+        <div class="line line-a" id="line-a"></div>
+        <div class="line line-b" id="line-b"></div>
+        <div class="line line-c" id="line-c"></div>
+
+        <div class="hub" id="hub">
+          <svg viewBox="0 0 24 24">
+            <rect width="16" height="16" x="4" y="4" rx="2"></rect>
+            <rect width="6" height="6" x="9" y="9" rx="1"></rect>
+            <path d="M15 2v2"></path>
+            <path d="M15 20v2"></path>
+            <path d="M2 15h2"></path>
+            <path d="M2 9h2"></path>
+            <path d="M20 15h2"></path>
+            <path d="M20 9h2"></path>
+            <path d="M9 2v2"></path>
+            <path d="M9 20v2"></path>
+          </svg>
+          <div class="t">Strands Agent Runtime</div>
+          <div class="s">ORCHESTRATOR · BEDROCK CLAUDE</div>
+        </div>
+
+        <div class="tool tool-a" id="tool-a">
+          <div class="ic">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M2 12h20"></path>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="tt">Headless Browser Tool</div>
+            <div class="ts">Playwright</div>
+          </div>
+        </div>
+
+        <div class="tool tool-b" id="tool-b">
+          <div class="ic">
+            <svg viewBox="0 0 24 24">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M3 5V19A9 3 0 0 0 21 19V5"></path>
+              <path d="M3 12A9 3 0 0 0 21 12"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="tt">Episodic State Store</div>
+            <div class="ts">DynamoDB</div>
+          </div>
+        </div>
+
+        <div class="tool tool-c" id="tool-c">
+          <div class="ic">
+            <svg viewBox="0 0 24 24">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="m16 11 2 2 4-4"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="tt">Human-in-the-Loop Dispatch</div>
+            <div class="ts">Caregiver Webhook</div>
+          </div>
+        </div>
+
+        <div class="pulse" id="pulse-a"></div>
+        <div class="pulse" id="pulse-b"></div>
+        <div class="pulse" id="pulse-c"></div>
+
+        <div class="metrics" id="metrics">
+          DETERMINISTIC EXECUTION<span class="sep">•</span>ZERO CLOUD LATENCY SPIKES
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        // pulse resting baselines (immediate, outside the timeline) so any pre-tween seek is safe
+        gsap.set(["#pulse-a", "#pulse-b", "#pulse-c"], { left: 0, top: 0, x: 0, y: 0, opacity: 0 });
+
+        // 0.0 - 1.5s: Strands Runtime hub animates in
+        tl.fromTo(".headline", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7 }, 0.15)
+          .fromTo("#hub", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(1.6)" }, 0.35);
+
+        // 1.5 - 3.8s: three crisp directional lines draw outward to the tool cards
+        tl.fromTo("#line-a", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.55, ease: "power2.inOut" }, 1.5)
+          .fromTo("#tool-a", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.55 }, 1.85)
+          .fromTo("#line-b", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.55, ease: "power2.inOut" }, 2.1)
+          .fromTo("#tool-b", { opacity: 0, x: 60 }, { opacity: 1, x: 0, duration: 0.55 }, 2.45)
+          .fromTo("#line-c", { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.55, ease: "power2.inOut" }, 2.7)
+          .fromTo("#tool-c", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.55 }, 3.05);
+
+        // 3.8 - 6.0s: glowing mint pulses cycle through all three nodes simultaneously (finite repeats)
+        // pulse-a: travels hub left edge (x 760) -> tool-a right edge (x 636); y 500
+        tl.fromTo("#pulse-a", { x: 760, y: 491, opacity: 0 }, { x: 636, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 3.85)
+          .to("#pulse-a", { opacity: 0, duration: 0.15, ease: "none" }, 4.15)
+          .fromTo("#pulse-a", { x: 760, y: 491, opacity: 0 }, { x: 636, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 4.6)
+          .to("#pulse-a", { opacity: 0, duration: 0.15, ease: "none" }, 4.9)
+          .fromTo("#pulse-a", { x: 760, y: 491, opacity: 0 }, { x: 636, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 5.35)
+          .to("#pulse-a", { opacity: 0, duration: 0.15, ease: "none" }, 5.65);
+        // pulse-b: hub right edge (x 1160) -> tool-b left edge (x 1290); y 500
+        tl.fromTo("#pulse-b", { x: 1160, y: 491, opacity: 0 }, { x: 1290, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 3.85)
+          .to("#pulse-b", { opacity: 0, duration: 0.15, ease: "none" }, 4.15)
+          .fromTo("#pulse-b", { x: 1160, y: 491, opacity: 0 }, { x: 1290, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 4.6)
+          .to("#pulse-b", { opacity: 0, duration: 0.15, ease: "none" }, 4.9)
+          .fromTo("#pulse-b", { x: 1160, y: 491, opacity: 0 }, { x: 1290, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 5.35)
+          .to("#pulse-b", { opacity: 0, duration: 0.15, ease: "none" }, 5.65);
+        // pulse-c: hub bottom (y 580) -> tool-c top edge (y 767); x 960
+        tl.fromTo("#pulse-c", { x: 951, y: 580, opacity: 0 }, { y: 767, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 3.85)
+          .to("#pulse-c", { opacity: 0, duration: 0.15, ease: "none" }, 4.15)
+          .fromTo("#pulse-c", { x: 951, y: 580, opacity: 0 }, { y: 767, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 4.6)
+          .to("#pulse-c", { opacity: 0, duration: 0.15, ease: "none" }, 4.9)
+          .fromTo("#pulse-c", { x: 951, y: 580, opacity: 0 }, { y: 767, opacity: 1, duration: 0.3, ease: "none", immediateRender: false }, 5.35)
+          .to("#pulse-c", { opacity: 0, duration: 0.15, ease: "none" }, 5.65);
+        // tool icons glow mint while pulses arrive
+        tl.to(["#tool-a .ic", "#tool-b .ic", "#tool-c .ic"], { borderColor: "#14b8a6", duration: 0.3, yoyo: true, repeat: 3, ease: "power1.inOut" }, 4.0);
+
+        // metrics chip at the base
+        tl.fromTo("#metrics", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55, ease: "back.out(1.3)" }, 3.95);
+
+        window.__timelines["clip-7"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

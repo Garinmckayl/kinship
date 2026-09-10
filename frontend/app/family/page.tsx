@@ -125,15 +125,66 @@ export default function FamilyPage() {
     return () => clearInterval(t);
   }, [authChecked, me]);
 
-  // Faster polling when a browser task is running
+  // Faster streaming when a browser task is running
   useEffect(() => {
     const hasRunning = browserTasks.some((t) => t.status === "running" || t.status === "approved");
     if (!hasRunning) return;
-    const poll = () => {
-      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks(d.tasks)).catch(() => {});
+
+    let cancelled = false;
+    const startStream = async () => {
+      try {
+        const res = await fetch(`${API}/browser-agent/stream`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+
+        if (!res.ok || !res.body) return;
+
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "";
+
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done || cancelled) break;
+
+          buf += dec.decode(value, { stream: true });
+          const parts = buf.split("\n\n");
+          buf = parts.pop() ?? "";
+
+          for (const p of parts) {
+            const line = p.trim();
+            if (!line.startsWith("data:")) continue;
+
+            try {
+              const ev = JSON.parse(line.slice(5));
+              if (ev.tasks && Array.isArray(ev.tasks)) {
+                if (!cancelled) setBrowserTasks(ev.tasks);
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+      } catch {
+        // Fall back to polling on error
+        setTimeout(
+          () => {
+            fetch(`${API}/browser-agent`)
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d) => d?.tasks && !cancelled && setBrowserTasks(d.tasks))
+              .catch(() => {});
+          },
+          1000
+        );
+      }
     };
-    const t = setInterval(poll, 3000);
-    return () => clearInterval(t);
+
+    startStream();
+    return () => {
+      cancelled = true;
+    };
   }, [browserTasks]);
 
   useEffect(() => {
@@ -514,7 +565,22 @@ export default function FamilyPage() {
                 <h2 className="font-bold text-xl flex items-center gap-2">Browser Automation</h2>
                 <p className="text-slate-400 text-sm">Real browser tasks powered by Amazon Nova Act. Approve to execute.</p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-fuchsia-400/10 text-fuchsia-200 text-xs font-bold ring-1 ring-fuchsia-300/20">Nova Act</span>
+              <div className="flex items-center gap-2">
+                {browserTasks.some((t) => t.status === "completed" || t.status === "failed") && (
+                  <button
+                    onClick={() => {
+                      const toDelete = browserTasks.filter((t) => t.status === "completed" || t.status === "failed");
+                      Promise.all(toDelete.map((t) => fetch(`${API}/browser-agent/${t.task_id}`, { method: "DELETE" })))
+                        .then(() => setBrowserTasks((ts) => ts.filter((t) => t.status !== "completed" && t.status !== "failed")))
+                        .catch(() => {});
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
+                  >
+                    Clear completed
+                  </button>
+                )}
+                <span className="px-2.5 py-1 rounded-full bg-fuchsia-400/10 text-fuchsia-200 text-xs font-bold ring-1 ring-fuchsia-300/20">Nova Act</span>
+              </div>
             </div>
             <div className="space-y-3">
               {browserTasks.map((bt) => {
@@ -528,24 +594,39 @@ export default function FamilyPage() {
                       <span className={`text-xs font-bold uppercase tracking-wider ${isPending ? "text-amber-300" : isRunning ? "text-sky-300 animate-pulse" : isDone ? "text-emerald-300" : "text-red-300"}`}>
                         [{bt.status}] {bt.task_type.replace(/_/g, " ")}
                       </span>
-                      {isPending && (
-                        <button
-                          onClick={async () => {
-                            const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ task_type: bt.task_type, params: bt.params }),
-                            });
-                            if (res.ok) {
-                              const result = await res.json();
-                              setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, ...result } : t));
-                            }
-                          }}
-                          className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
-                        >
-                          Approve & Execute
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {isPending && (
+                          <button
+                            onClick={async () => {
+                              const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ task_type: bt.task_type, params: bt.params }),
+                              });
+                              if (res.ok) {
+                                const result = await res.json();
+                                setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, ...result } : t));
+                              }
+                            }}
+                            className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
+                          >
+                            Approve & Execute
+                          </button>
+                        )}
+                        {(isDone || isFailed) && (
+                          <button
+                            onClick={() => {
+                              fetch(`${API}/browser-agent/${bt.task_id}`, { method: "DELETE" })
+                                .then(() => setBrowserTasks((ts) => ts.filter((t) => t.task_id !== bt.task_id)))
+                                .catch(() => {});
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-red-950/50 hover:text-red-200"
+                            title="Dismiss this task"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {bt.params && Object.keys(bt.params).length > 0 && (
                       <div className="text-sm text-slate-300 mb-2">

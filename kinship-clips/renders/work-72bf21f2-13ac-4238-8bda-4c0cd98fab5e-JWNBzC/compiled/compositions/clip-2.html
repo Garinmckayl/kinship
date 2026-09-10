@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clip 2 — Medicare / Insurance Portal Decoder</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/__hyperframes-runtime.js"></script>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+          font-family: "Inter", sans-serif;
+          color: #0f172a;
+        }
+        .headline {
+          position: absolute;
+          top: 64px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+        }
+        .headline h1 {
+          font-size: 60px;
+          font-weight: 900;
+          letter-spacing: 6px;
+          color: #0f766e;
+          margin: 0;
+        }
+        .headline p {
+          margin: 12px 0 0;
+          font-size: 28px;
+          font-weight: 500;
+          color: #334155;
+          letter-spacing: 1px;
+        }
+        .doc {
+          position: absolute;
+          top: 240px;
+          left: 560px;
+          width: 800px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08);
+          padding: 44px 52px;
+          opacity: 0;
+        }
+        .doc-head {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 30px;
+        }
+        .doc-head svg {
+          width: 34px;
+          height: 34px;
+          stroke: #94a3b8;
+          flex: 0 0 auto;
+        }
+        .doc-head .t {
+          font-size: 22px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #64748b;
+        }
+        .row {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 25px;
+          color: #94a3b8;
+          padding: 13px 14px;
+          border-bottom: 1px dashed #e2e8f0;
+          border-radius: 8px;
+          white-space: nowrap;
+        }
+        .row:last-child {
+          border-bottom: none;
+        }
+        .beam {
+          position: absolute;
+          top: 240px;
+          left: 520px;
+          width: 880px;
+          height: 3px;
+          background: #14b8a6;
+          box-shadow: 0 0 18px 3px rgba(20, 184, 166, 0.65), 0 0 60px 12px rgba(20, 184, 166, 0.25);
+          border-radius: 2px;
+          opacity: 0;
+          z-index: 10;
+        }
+        .result {
+          position: absolute;
+          top: 350px;
+          left: 510px;
+          width: 900px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 24px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08), 0 40px 80px -24px rgba(13, 148, 136, 0.28);
+          padding: 52px 60px;
+          text-align: center;
+          opacity: 0;
+          z-index: 20;
+        }
+        .shield-wrap {
+          width: 108px;
+          height: 108px;
+          margin: 0 auto 22px;
+          border-radius: 50%;
+          background: #f0fdfa;
+          border: 1px solid #ccfbf1;
+          display: grid;
+          place-items: center;
+        }
+        .shield-wrap svg {
+          width: 62px;
+          height: 62px;
+          stroke: #0f766e;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .metric {
+          font-size: 96px;
+          font-weight: 900;
+          color: #0f766e;
+          letter-spacing: 1px;
+          line-height: 1;
+        }
+        .metric-label {
+          font-size: 34px;
+          font-weight: 800;
+          letter-spacing: 8px;
+          color: #0f766e;
+          margin-top: 8px;
+        }
+        .result p.sub {
+          margin: 26px 0 0;
+          font-size: 27px;
+          font-weight: 500;
+          color: #334155;
+          opacity: 0;
+        }
+      </style>
+
+      <div id="root" data-composition-id="clip-2" data-width="1920" data-height="1080" data-duration="5">
+        <div class="headline">
+          <h1>PORTAL &amp; INSURANCE DECODER</h1>
+          <p>Translating Hostile Billing Forms into Plain English</p>
+        </div>
+
+        <div class="doc">
+          <div class="doc-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+              <path d="M10 9H8"></path>
+              <path d="M16 13H8"></path>
+              <path d="M16 17H8"></path>
+            </svg>
+            <span class="t">MEDICARE SUMMARY NOTICE — 2026</span>
+          </div>
+          <div class="row">CLAIM #MC-2026-118437 ........ FILED 09/03</div>
+          <div class="row">CPT 99214 — OFFICE VISIT, ESTABLISHED</div>
+          <div class="row">BILLED AMOUNT ................. $265.00</div>
+          <div class="row">MEDICARE APPROVED ............ $148.32</div>
+          <div class="row">DEDUCTIBLE REMAINING ........... $0.00</div>
+          <div class="row">COINSURANCE (20%) ............. $29.66</div>
+          <div class="row">NETWORK STATUS ....... IN-NETWORK, PART B</div>
+          <div class="row">PATIENT RESPONSIBILITY ......... $????</div>
+        </div>
+
+        <div class="beam"></div>
+
+        <div class="result">
+          <div class="shield-wrap">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+          </div>
+          <div class="metric"><span id="amount">$124.50</span></div>
+          <div class="metric-label">OUT-OF-POCKET</div>
+          <p class="sub">Medicare Part B: 100% In-Network Coverage Verified</p>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        // 0.0 - 1.5s: headline + hostile claim table appear in faded grey
+        tl.fromTo(".headline", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7 }, 0.15)
+          .fromTo(".doc", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.7 }, 0.35)
+          .fromTo(".row", { opacity: 0.55, x: -16 }, { opacity: 1, x: 0, duration: 0.4, stagger: 0.06 }, 0.5);
+
+        // 1.5 - 3.0s: mint laser beam sweeps down; rows it passes light up teal
+        // beam travel: y 0 -> 560 over 1.5s; row highlight beats every ~0.17s
+        tl.set(".beam", { y: 0, opacity: 1 }, 1.5)
+          .to(".beam", { y: 556, duration: 1.5, ease: "none" }, 1.5)
+          .to(".beam", { opacity: 0, duration: 0.25, ease: "power1.out" }, 3.0);
+
+        const rowBeats = [1.62, 1.79, 1.96, 2.13, 2.3, 2.47, 2.64, 2.81];
+        const rows = gsap.utils.toArray(".row");
+        rows.forEach((row, i) => {
+          const t = rowBeats[i] || 2.85;
+          tl.to(row, { color: "#0f766e", duration: 0.25, ease: "none" }, t);
+          if (i >= 6) tl.to(row, { backgroundColor: "#f0fdfa", duration: 0.25, ease: "none" }, t);
+        });
+        // passed rows soften back — the beam "burns through the noise"
+        rows.forEach((row, i) => {
+          tl.to(row, { filter: "blur(1.5px)", opacity: 0.45, duration: 0.4, ease: "none" }, (rowBeats[i] || 2.85) + 0.35);
+        });
+
+        // 3.0 - 5.0s: messy table collapses into the clean result card
+        tl.to(".doc", { scale: 0.86, y: 40, opacity: 0, filter: "blur(6px)", duration: 0.55, ease: "power2.in" }, 3.05)
+          .fromTo(
+            ".result",
+            { opacity: 0, scale: 0.82, y: 60 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: "back.out(1.5)" },
+            3.5
+          );
+
+        // dollar counter rolls down to zero (deterministic per-seek via onUpdate)
+        const amountEl = document.getElementById("amount");
+        const counter = { v: 124.5 };
+        tl.to(
+          counter,
+          {
+            v: 0,
+            duration: 0.9,
+            ease: "power2.inOut",
+            snap: { v: 0.01 },
+            onUpdate: () => {
+              amountEl.textContent = "$" + counter.v.toFixed(2);
+            },
+          },
+          3.75
+        );
+        tl.fromTo(".sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 4.45);
+
+        window.__timelines["clip-2"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

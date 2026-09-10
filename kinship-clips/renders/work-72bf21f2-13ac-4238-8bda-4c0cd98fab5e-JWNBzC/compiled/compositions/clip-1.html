@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clip 1 — Autonomous Browser Engine</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/__hyperframes-runtime.js"></script>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+          font-family: "Inter", sans-serif;
+          color: #0f172a;
+        }
+        .headline {
+          position: absolute;
+          top: 64px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+        }
+        .headline h1 {
+          font-size: 60px;
+          font-weight: 900;
+          letter-spacing: 6px;
+          color: #0f766e;
+          margin: 0;
+        }
+        .headline p {
+          margin: 12px 0 0;
+          font-size: 28px;
+          font-weight: 500;
+          color: #334155;
+          letter-spacing: 1px;
+        }
+        .browser {
+          position: absolute;
+          top: 248px;
+          left: 320px;
+          width: 1280px;
+          height: 600px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 20px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08), 0 30px 60px -20px rgba(13, 148, 136, 0.15);
+          opacity: 0;
+          overflow: hidden;
+        }
+        .chrome-bar {
+          height: 64px;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          padding: 0 26px;
+        }
+        .dots {
+          display: flex;
+          gap: 10px;
+        }
+        .dots span {
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          background: #ccfbf1;
+          display: block;
+        }
+        .dots span:first-child {
+          background: #14b8a6;
+        }
+        .urlbar {
+          flex: 1;
+          height: 40px;
+          border-radius: 20px;
+          background: #f8fafc;
+          border: 1px solid #ccfbf1;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 18px;
+        }
+        .urlbar svg {
+          width: 22px;
+          height: 22px;
+          stroke: #0f766e;
+          flex: 0 0 auto;
+        }
+        .url-wrap {
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+        }
+        .url {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 19px;
+          color: #0f766e;
+          white-space: nowrap;
+          clip-path: inset(0 100% 0 0);
+        }
+        .caret {
+          display: inline-block;
+          width: 2px;
+          height: 20px;
+          background: #14b8a6;
+          margin-left: 2px;
+          opacity: 0;
+        }
+        .form-stage {
+          position: relative;
+          padding: 34px 48px;
+          filter: blur(1.2px);
+        }
+        .form-title {
+          width: 300px;
+          height: 28px;
+          border-radius: 8px;
+          background: #e2e8f0;
+          margin-bottom: 26px;
+        }
+        .form-row {
+          display: flex;
+          gap: 24px;
+          margin-bottom: 20px;
+        }
+        .field {
+          flex: 1;
+        }
+        .field .lbl {
+          height: 13px;
+          width: 40%;
+          border-radius: 6px;
+          background: #f1f5f9;
+          margin-bottom: 10px;
+        }
+        .field {
+          position: relative;
+        }
+        .field .inp {
+          height: 50px;
+          border-radius: 10px;
+          border: 1.5px solid #e2e8f0;
+          background: #f8fafc;
+        }
+        .glow {
+          position: absolute;
+          top: 23px;
+          left: 0;
+          right: 0;
+          height: 50px;
+          border-radius: 10px;
+          border: 1.5px solid #14b8a6;
+          box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+          background: #ffffff;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .ripple {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 26px;
+          height: 26px;
+          margin: -13px 0 0 -13px;
+          border: 3px solid #14b8a6;
+          border-radius: 50%;
+          opacity: 0;
+          pointer-events: none;
+        }
+        .cursor {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 42px;
+          height: 42px;
+          opacity: 0;
+          z-index: 30;
+        }
+        .cursor svg {
+          width: 42px;
+          height: 42px;
+          stroke: #0f766e;
+          fill: rgba(20, 184, 166, 0.25);
+          stroke-width: 2;
+          filter: drop-shadow(0 3px 6px rgba(15, 118, 110, 0.35));
+        }
+        .code-pill {
+          position: absolute;
+          right: 64px;
+          bottom: 92px;
+          background: #0f172a;
+          color: #5eead4;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 21px;
+          padding: 18px 28px;
+          border-radius: 12px;
+          box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.4);
+          opacity: 0;
+          white-space: nowrap;
+        }
+        .code-pill .fn {
+          color: #fbbf24;
+        }
+        .notif {
+          position: absolute;
+          top: 400px;
+          left: 620px;
+          width: 680px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 22px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08), 0 40px 80px -24px rgba(13, 148, 136, 0.28);
+          padding: 38px 44px;
+          display: flex;
+          align-items: center;
+          gap: 30px;
+          opacity: 0;
+          z-index: 40;
+        }
+        .check-wrap {
+          flex: 0 0 auto;
+          width: 92px;
+          height: 92px;
+          position: relative;
+        }
+        .check-bg {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: #f0fdfa;
+          border: 1px solid #ccfbf1;
+        }
+        .check {
+          position: absolute;
+          inset: 0;
+          width: 92px;
+          height: 92px;
+          stroke: #14b8a6;
+          stroke-width: 2;
+          fill: none;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        /* stroke "draw" baseline: hidden until the timeline draws them */
+        #check-circle {
+          stroke-dasharray: 62.85;
+          stroke-dashoffset: 62.85;
+        }
+        #check-mark {
+          stroke-dasharray: 12.5;
+          stroke-dashoffset: 12.5;
+        }
+        .notif h2 {
+          font-size: 35px;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0 0 10px;
+        }
+        .notif p {
+          font-size: 24px;
+          font-weight: 500;
+          color: #334155;
+          margin: 0;
+        }
+      </style>
+
+      <div id="root" data-composition-id="clip-1" data-width="1920" data-height="1080" data-duration="6">
+        <div class="headline">
+          <h1>AUTONOMOUS WEB NAVIGATION</h1>
+          <p>Handles Complex Healthcare Portals in Real Browsers</p>
+        </div>
+
+        <div class="browser">
+          <div class="chrome-bar">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <div class="urlbar">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M2 12h20"></path>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <div class="url-wrap">
+                <span class="url">https://pharmacy.care/rx/refill</span>
+                <span class="caret"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-stage">
+            <div class="form-title"></div>
+            <div class="form-row">
+              <div class="field"><div class="lbl"></div><div class="inp"></div><div class="glow" id="g1"></div></div>
+              <div class="field"><div class="lbl"></div><div class="inp"></div><div class="glow" id="g2"></div></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><div class="lbl"></div><div class="inp"></div><div class="glow" id="g3"></div></div>
+              <div class="field"><div class="lbl"></div><div class="inp"></div></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><div class="lbl"></div><div class="inp"></div></div>
+              <div class="field"><div class="lbl"></div><div class="inp"></div></div>
+            </div>
+            <div class="ripple" id="r1"></div>
+            <div class="ripple" id="r2"></div>
+            <div class="ripple" id="r3"></div>
+          </div>
+        </div>
+
+        <div class="cursor" id="cursor">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 3l7.5 17 2.2-6.8L20.5 11z"></path>
+          </svg>
+        </div>
+
+        <div class="code-pill">[Strands: PlaywrightTool.<span class="fn">fill_and_submit</span>("#rx-order-form")]</div>
+
+        <div class="notif">
+          <div class="check-wrap">
+            <div class="check-bg"></div>
+            <svg class="check" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" id="check-circle"></circle>
+              <path d="M8 12.5l2.7 2.7L16 9.5" id="check-mark"></path>
+            </svg>
+          </div>
+          <div>
+            <h2>Prescription Refill Staged</h2>
+            <p>Atorvastatin 20mg • 90-day supply ready for pickup</p>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        // SVG stroke "draw": baselines live in CSS; the timeline only draws to 0
+
+        // 0.0 - 1.5s: browser window opens over the mint canvas, URL reveals
+        tl.fromTo(".browser", { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.8 }, 0.1)
+          .fromTo(".headline", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7 }, 0.25)
+          .fromTo(".url", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.9, ease: "power2.inOut" }, 0.6)
+          .to(".caret", { opacity: 1, duration: 0.05 }, 0.6)
+          .to(".caret", { opacity: 0, duration: 0.05, repeat: 5, yoyo: true }, 1.1);
+
+        // 1.5 - 3.5s: autonomous cursor clicks three fields with eased two-leg (Bézier-like) motion
+        // field centers (viewport coords): (659, 449) · (1263, 449) · (659, 542); cursor box centers on them
+        tl.set("#cursor", { x: 1750, y: 1020, opacity: 1 }, 1.35)
+          .to("#cursor", { keyframes: [{ x: 1150, y: 800 }, { x: 638, y: 428 }], duration: 0.55, ease: "power2.inOut" }, 1.4)
+          .to("#g1", { opacity: 1, duration: 0.18 }, 1.95)
+          .fromTo("#r1", { opacity: 0.9, scale: 0.4, x: 338, y: 136 }, { opacity: 0, scale: 2.6, duration: 0.55, ease: "power2.out" }, 1.95)
+          .to("#cursor", { keyframes: [{ x: 960, y: 700 }, { x: 1242, y: 428 }], duration: 0.5, ease: "power2.inOut" }, 2.1)
+          .to("#g2", { opacity: 1, duration: 0.18 }, 2.6)
+          .fromTo("#r2", { opacity: 0.9, scale: 0.4, x: 942, y: 136 }, { opacity: 0, scale: 2.6, duration: 0.55, ease: "power2.out" }, 2.6)
+          .to("#cursor", { keyframes: [{ x: 960, y: 660 }, { x: 638, y: 521 }], duration: 0.45, ease: "power2.inOut" }, 2.7)
+          .to("#g3", { opacity: 1, duration: 0.18 }, 3.15)
+          .fromTo("#r3", { opacity: 0.9, scale: 0.4, x: 338, y: 229 }, { opacity: 0, scale: 2.6, duration: 0.55, ease: "power2.out" }, 3.15)
+          .to("#cursor", { opacity: 0, scale: 0.6, duration: 0.3, ease: "power2.in" }, 3.45);
+
+        // code pill slides in bottom-right
+        tl.fromTo(".code-pill", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.55 }, 1.8);
+
+        // 3.5 - 6.0s: confirmation card + stroke-drawn check badge
+        tl.fromTo(
+          ".notif",
+          { opacity: 0, y: 80, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.4)" },
+          3.9
+        )
+          .to("#check-circle", { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, 4.45)
+          .to("#check-mark", { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, 4.95);
+        // hold final frame until 6.0s (host slot length) — no trailing tweens needed
+
+        window.__timelines["clip-1"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

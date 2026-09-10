@@ -454,3 +454,13 @@ export async function listBrowserTasks(elder = "eleanor-79"): Promise<BrowserTas
     error: r.error, created_at: r.created_at, completed_at: r.completed_at,
   }));
 }
+
+export async function deleteBrowserTask(id: string): Promise<void> {
+  if (!dbOn()) {
+    const idx = MEM_BROWSER_TASKS.findIndex((t) => t.id === id);
+    if (idx !== -1) MEM_BROWSER_TASKS.splice(idx, 1);
+    return;
+  }
+  await ready();
+  await q("delete from browser_tasks where id=$1", [id]);
+}

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clip 3 — Longitudinal Symptom Correlation</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/__hyperframes-runtime.js"></script>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+          font-family: "Inter", sans-serif;
+          color: #0f172a;
+        }
+        .headline {
+          position: absolute;
+          top: 64px;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+        }
+        .headline h1 {
+          font-size: 60px;
+          font-weight: 900;
+          letter-spacing: 6px;
+          color: #0f766e;
+          margin: 0;
+        }
+        .headline p {
+          margin: 12px 0 0;
+          font-size: 28px;
+          font-weight: 500;
+          color: #334155;
+          letter-spacing: 1px;
+        }
+        .tl-line {
+          position: absolute;
+          top: 620px;
+          left: 240px;
+          width: 1440px;
+          height: 10px;
+          border-radius: 5px;
+          background: #ccfbf1;
+          transform-origin: left center;
+        }
+        .tl-vector {
+          position: absolute;
+          top: 622px;
+          left: 664px;
+          width: 608px;
+          height: 6px;
+          border-radius: 3px;
+          background: #0f766e;
+          transform-origin: left center;
+          z-index: 5;
+        }
+        .node {
+          position: absolute;
+          top: 343px;
+          width: 250px;
+          margin-left: -125px;
+          text-align: center;
+          opacity: 0;
+        }
+        .node.n1 { left: 664px; }
+        .node.n2 { left: 1272px; }
+        .dot {
+          width: 116px;
+          height: 116px;
+          margin: 14px auto 0;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2px solid #ccfbf1;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.15);
+          display: grid;
+          place-items: center;
+          position: relative;
+          z-index: 6;
+        }
+        .dot svg {
+          width: 54px;
+          height: 54px;
+          stroke: #0f766e;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .day {
+          font-size: 24px;
+          font-weight: 800;
+          letter-spacing: 4px;
+          color: #0f766e;
+          margin-bottom: 14px;
+        }
+        .node-card {
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 16px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08);
+          padding: 24px 20px;
+          min-height: 160px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .node-card .txt {
+          font-size: 26px;
+          font-weight: 600;
+          color: #0f172a;
+          line-height: 1.3;
+        }
+        .sev {
+          display: inline-block;
+          margin-top: 14px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 21px;
+          font-weight: 700;
+          color: #0f766e;
+          background: #f0fdfa;
+          border: 1px solid #99f6e4;
+          border-radius: 999px;
+          padding: 6px 18px;
+        }
+        .badge {
+          position: absolute;
+          top: 240px;
+          left: 968px;
+          margin-left: -380px;
+          width: 760px;
+          text-align: center;
+          background: #0f766e;
+          color: #ffffff;
+          font-size: 27px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          padding: 20px 30px;
+          border-radius: 14px;
+          box-shadow: 0 20px 40px -12px rgba(15, 118, 110, 0.45);
+          opacity: 0;
+          z-index: 10;
+        }
+        .badge .mono {
+          color: #99f6e4;
+          font-family: "JetBrains Mono", monospace;
+          font-weight: 700;
+        }
+        .alert {
+          position: absolute;
+          top: 763px;
+          left: 1272px;
+          margin-left: -330px;
+          width: 660px;
+          background: #ffffff;
+          border: 1px solid #ccfbf1;
+          border-radius: 18px;
+          box-shadow: 0 10px 25px -5px rgba(13, 148, 136, 0.08), 0 30px 60px -20px rgba(13, 148, 136, 0.25);
+          padding: 30px 34px;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          opacity: 0;
+          z-index: 10;
+        }
+        .alert .icon-wrap {
+          flex: 0 0 auto;
+          width: 84px;
+          height: 84px;
+          border-radius: 20px;
+          background: #f0fdfa;
+          border: 1px solid #99f6e4;
+          display: grid;
+          place-items: center;
+        }
+        .alert .icon-wrap svg {
+          width: 46px;
+          height: 46px;
+          stroke: #0f766e;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .alert .t1 {
+          font-size: 20px;
+          font-weight: 800;
+          letter-spacing: 3px;
+          color: #14b8a6;
+          margin-bottom: 8px;
+        }
+        .alert .t2 {
+          font-size: 30px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.25;
+        }
+        .stem {
+          position: absolute;
+          top: 683px;
+          left: 1270px;
+          width: 4px;
+          height: 60px;
+          background: #14b8a6;
+          transform-origin: top center;
+          z-index: 9;
+        }
+      </style>
+
+      <div id="root" data-composition-id="clip-3" data-width="1920" data-height="1080" data-duration="6">
+        <div class="headline">
+          <h1>EPISODIC HEALTH MEMORY</h1>
+          <p>Correlating Multi-Day Symptoms Without Clinical Nagging</p>
+        </div>
+
+        <div class="tl-line"></div>
+        <div class="tl-vector"></div>
+        <div class="stem"></div>
+
+        <div class="node n1">
+          <div class="day">TUESDAY</div>
+          <div class="node-card">
+            <div class="txt">Right knee pain noted</div>
+            <span class="sev">Severity: 3/10</span>
+          </div>
+          <div class="dot">
+            <svg viewBox="0 0 24 24">
+              <path d="M8 2v4"></path>
+              <path d="M16 2v4"></path>
+              <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+              <path d="M3 10h18"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="node n2">
+          <div class="day">THURSDAY</div>
+          <div class="node-card">
+            <div class="txt">Right knee pain on stairs</div>
+            <span class="sev">Severity: 5/10</span>
+          </div>
+          <div class="dot">
+            <svg viewBox="0 0 24 24">
+              <path d="M8 2v4"></path>
+              <path d="M16 2v4"></path>
+              <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+              <path d="M3 10h18"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="badge">
+          <span class="mono">[EPISODIC THRESHOLD]</span> Recurring Symptom Detected
+        </div>
+
+        <div class="alert">
+          <div class="icon-wrap" id="activity-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="t1">AUTONOMOUS TRIGGER</div>
+            <div class="t2">Clinic Appointment Staging</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+        // 0.0 - 2.0s: timeline stretches, calendar nodes drop in with spring bounce
+        tl.fromTo(".headline", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.7 }, 0.15)
+          .fromTo(".tl-line", { scaleX: 0 }, { scaleX: 1, duration: 0.9, ease: "power3.inOut" }, 0.4)
+          .fromTo(".node.n1", { opacity: 0, y: -110 }, { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" }, 0.95)
+          .fromTo(".node.n2", { opacity: 0, y: -110 }, { opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.6)" }, 1.35);
+
+        // 2.0 - 4.0s: teal vector draws Tuesday -> Thursday, threshold badge pops
+        tl.fromTo(".tl-vector", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power2.inOut" }, 2.1)
+          .fromTo(".badge", { opacity: 0, scale: 0.5, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(2)" }, 2.7);
+
+        // 4.0 - 6.0s: alert trigger card slides out from Node 2 + pulse
+        tl.fromTo(".stem", { scaleY: 0 }, { scaleY: 1, duration: 0.3, ease: "power2.out" }, 4.15)
+          .fromTo(".alert", { opacity: 0, y: -30, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.4)" }, 4.35)
+          .to("#activity-icon", { scale: 1.14, duration: 0.22, ease: "power1.inOut", repeat: 3, yoyo: true }, 4.9);
+
+        window.__timelines["clip-3"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
