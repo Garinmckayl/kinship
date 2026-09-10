@@ -186,10 +186,30 @@ export default function ElderPage() {
       }
       setToolNote("");
       const combined = `${text} ${full}`;
-      if (/\b(took|yes|done|logged|completed|great|thank you)\b/i.test(combined)) {
-        showAvatarExpression("joyful");
-      } else if (/\b(chest pain|fall|dizzy|scam|urgent|don't give|do not give)\b/i.test(combined)) {
+      if (/\b(chest pain|fall|dizzy|scam|urgent|don.?t give|do not give)\b/i.test(combined)) {
         showAvatarExpression("concerned", 3000);
+      } else if (/\b(sad|lonely|miss|upset|afraid|worried)\b/i.test(combined)) {
+        showAvatarExpression("empathetic", 3000);
+      } else if (/\b(surprise|unexpected|really\?|wow)\b/i.test(combined)) {
+        showAvatarExpression("surprised");
+      } else if (/\b(took|done|logged|completed|managed|remembered)\b/i.test(combined)) {
+        showAvatarExpression("proud");
+      } else if (/\b(thank you|thanks|grateful|appreciate)\b/i.test(combined)) {
+        showAvatarExpression("grateful");
+      } else if (/\b(you can|keep going|one step|try again|we can)\b/i.test(combined)) {
+        showAvatarExpression("encouraging");
+      } else if (/\b(relax|safe|all right|okay now|handled)\b/i.test(combined)) {
+        showAvatarExpression("reassured");
+      } else if (/\b(good night|bedtime|sleep|rest well|tired)\b/i.test(combined)) {
+        showAvatarExpression("sleepy", 3000);
+      } else if (/\b(joke|funny|made me laugh|silly)\b/i.test(combined)) {
+        showAvatarExpression("playful");
+      } else if (/\b(let me check|checking|reviewing|schedule|details)\b/i.test(combined)) {
+        showAvatarExpression("focused");
+      } else if (/\b(calm|breathe|take your time|no rush)\b/i.test(combined)) {
+        showAvatarExpression("calm");
+      } else if (/\b(great|wonderful|good news|lovely)\b/i.test(combined)) {
+        showAvatarExpression("joyful");
       }
       await speak(full || "I'm here with you.");
     } catch {

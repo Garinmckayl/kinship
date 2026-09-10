@@ -3,7 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import type { AgentPhase } from "./AgentOrb";
 import { voiceMotion } from "./voiceMotion";
 
-export type NovaFaceName = "idle" | "listening" | "speaking" | "thinking" | "concerned" | "joyful";
+export type NovaFaceName =
+  | "idle" | "listening" | "speaking" | "thinking" | "concerned" | "joyful"
+  | "reassured" | "empathetic" | "surprised" | "proud" | "sleepy"
+  | "playful" | "focused" | "grateful" | "encouraging" | "calm";
+
+const EXPRESSIONS: NovaFaceName[] = [
+  "idle", "listening", "speaking", "thinking", "concerned", "joyful",
+  "reassured", "empathetic", "surprised", "proud", "sleepy", "playful",
+  "focused", "grateful", "encouraging", "calm",
+];
 
 const PHASE_FACE: Record<AgentPhase, NovaFaceName> = {
   idle: "idle",
@@ -53,7 +62,7 @@ export function NovaFace({
 
   // Preload flap frames so the first swap doesn't flicker.
   useEffect(() => {
-    for (const m of MOUTH) {
+    for (const m of [...MOUTH, ...EXPRESSIONS]) {
       const im = new Image();
       im.src = `/nova/${m}.png`;
     }
