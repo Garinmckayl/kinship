@@ -480,7 +480,20 @@ export default function FamilyPage() {
 
         {/* Escalations */}
         <section>
-          <h2 className="font-bold text-xl mb-1 flex items-center gap-2"><BellIcon className="w-5 h-5" /> Alerts</h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-bold text-xl flex items-center gap-2"><BellIcon className="w-5 h-5" /> Alerts</h2>
+            {s.escalations.length > 0 && (
+              <button
+                onClick={async () => {
+                  await fetch(`${API}/escalations/clear`, { method: "POST" });
+                  setS((prev) => ({ ...prev, escalations: prev.escalations.map((e) => ({ ...e, acked: true })) }));
+                }}
+                className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
           <p className="text-sm text-slate-400 mb-3">
             {s.last_activity
               ? `Last sign of Eleanor: ${s.last_activity.minutesAgo < 1 ? "just now" : `${s.last_activity.minutesAgo} min ago`}. Silence is the emergency — unconfirmed alerts re-fire.`

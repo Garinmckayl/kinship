@@ -233,7 +233,7 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
         log.info(f"Starting ACBT cloud browser in {aws_region}...")
         acbt_client = BrowserClient(region=aws_region)
         acbt_client.start()
-        live_view_url = acbt_client.generate_live_view_url(expires=600)
+        live_view_url = acbt_client.generate_live_view_url(expires=300)
         cdp_ws_url, cdp_headers = acbt_client.generate_ws_headers()
         log.info(f"ACBT browser started. Live view: {live_view_url[:80]}...")
 
