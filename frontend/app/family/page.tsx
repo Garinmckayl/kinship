@@ -125,67 +125,26 @@ export default function FamilyPage() {
     return () => clearInterval(t);
   }, [authChecked, me]);
 
-  // Faster streaming when a browser task is running
+  // Faster polling when a browser task is running (fallback to streaming if available)
   useEffect(() => {
     const hasRunning = browserTasks.some((t) => t.status === "running" || t.status === "approved");
     if (!hasRunning) return;
 
-    let cancelled = false;
-    const startStream = async () => {
-      try {
-        const res = await fetch(`${API}/browser-agent/stream`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
-        });
-
-        if (!res.ok || !res.body) return;
-
-        const reader = res.body.getReader();
-        const dec = new TextDecoder();
-        let buf = "";
-
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done || cancelled) break;
-
-          buf += dec.decode(value, { stream: true });
-          const parts = buf.split("\n\n");
-          buf = parts.pop() ?? "";
-
-          for (const p of parts) {
-            const line = p.trim();
-            if (!line.startsWith("data:")) continue;
-
-            try {
-              const ev = JSON.parse(line.slice(5));
-              if (ev.tasks && Array.isArray(ev.tasks)) {
-                if (!cancelled) setBrowserTasks(ev.tasks);
-              }
-            } catch {
-              // Ignore parse errors
-            }
-          }
-        }
-      } catch {
-        // Fall back to polling on error
-        setTimeout(
-          () => {
-            fetch(`${API}/browser-agent`)
-              .then((r) => (r.ok ? r.json() : null))
-              .then((d) => d?.tasks && !cancelled && setBrowserTasks(d.tasks))
-              .catch(() => {});
-          },
-          1000
-        );
-      }
+    // Start polling every 1s for real-time updates
+    const poll = () => {
+      fetch(`${API}/browser-agent`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d?.tasks && setBrowserTasks(d.tasks))
+        .catch(() => {});
     };
 
-    startStream();
-    return () => {
-      cancelled = true;
-    };
-  }, [browserTasks]);
+    // Initial poll
+    poll();
+
+    // Then poll every 1s while running
+    const t = setInterval(poll, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (!authChecked || !me) return;
