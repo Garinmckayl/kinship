@@ -26,6 +26,24 @@ const API = "/api";
 const LOCAL_HISTORY_KEY = "elderlove:conversation:eleanor-79";
 type Msg = { role: "agent" | "elder"; text: string };
 type CallMode = "off" | "ringing" | "active";
+type ElderSectionId = "live" | "today" | "conversation";
+const DEFAULT_ELDER_ORDER: ElderSectionId[] = ["live", "today", "conversation"];
+const ELDER_SECTION_LABELS: Record<ElderSectionId, string> = { live: "Live call", today: "Today", conversation: "Conversation" };
+const EXPRESSION_CUES: Array<[RegExp, NovaFaceName]> = [
+  [/\b(chest pain|fall|dizzy|scam|urgent|don.?t give|do not give)\b/i, "concerned"],
+  [/\b(sad|lonely|miss|upset|afraid|worried)\b/i, "empathetic"],
+  [/\b(surprise|unexpected|really\?|wow)\b/i, "surprised"],
+  [/\b(took|done|logged|completed|managed|remembered)\b/i, "proud"],
+  [/\b(thank you|thanks|grateful|appreciate)\b/i, "grateful"],
+  [/\b(you can|keep going|one step|try again|we can)\b/i, "encouraging"],
+  [/\b(relax|safe|all right|okay now|handled)\b/i, "reassured"],
+  [/\b(good night|bedtime|sleep|rest well|tired)\b/i, "sleepy"],
+  [/\b(joke|funny|made me laugh|silly)\b/i, "playful"],
+  [/\b(let me check|checking|reviewing|schedule|details)\b/i, "focused"],
+  [/\b(calm|breathe|take your time|no rush)\b/i, "calm"],
+  [/\b(great|wonderful|good news|lovely)\b/i, "joyful"],
+];
+function expressionFor(text: string) { return EXPRESSION_CUES.find(([pattern]) => pattern.test(text))?.[1]; }
 
 export default function ElderPage() {
   const [msgs, setMsgs] = useState<Msg[]>(() => {
@@ -42,6 +60,8 @@ export default function ElderPage() {
   const [avatarExpression, setAvatarExpression] = useState<NovaFaceName | undefined>();
   const [historyState, setHistoryState] = useState<"checking" | "synced" | "device">("checking");
   const [chatExpanded, setChatExpanded] = useState(false);
+  const [sectionOrder, setSectionOrder] = useState<ElderSectionId[]>(DEFAULT_ELDER_ORDER);
+  const [organizing, setOrganizing] = useState(false);
   const [today, setToday] = useState<{
     meds: { id: string; name: string; dosage: string; time: string; taken: boolean }[];
     checkedInToday: boolean; tasksPending: number;
@@ -68,6 +88,12 @@ export default function ElderPage() {
         const parsed = JSON.parse(saved) as Msg[];
         if (Array.isArray(parsed) && parsed.length) setMsgs(parsed);
       }
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("elderlove:elder-layout") || "null");
+      if (Array.isArray(saved) && saved.length === DEFAULT_ELDER_ORDER.length && DEFAULT_ELDER_ORDER.every((id) => saved.includes(id))) setSectionOrder(saved);
     } catch {}
   }, []);
   useEffect(() => {
@@ -119,6 +145,10 @@ export default function ElderPage() {
       return [...current, { role, text }];
     });
     setToolNote("");
+    if (role === "agent") {
+      const next = expressionFor(text) ?? "encouraging";
+      showAvatarExpression(next, 6500);
+    }
   }
 
   function stopAudio() {
@@ -361,6 +391,20 @@ export default function ElderPage() {
     }
   }
 
+  function moveSection(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= sectionOrder.length) return;
+    const next = [...sectionOrder];
+    [next[index], next[target]] = [next[target], next[index]];
+    setSectionOrder(next);
+    localStorage.setItem("elderlove:elder-layout", JSON.stringify(next));
+  }
+
+  function resetSections() {
+    setSectionOrder(DEFAULT_ELDER_ORDER);
+    localStorage.removeItem("elderlove:elder-layout");
+  }
+
   function simulateCall() {
     setCallMode("ringing");
     setPhase("idle");
@@ -382,7 +426,7 @@ export default function ElderPage() {
   const lastAgent = [...msgs].reverse().find((m) => m.role === "agent")?.text ?? "";
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
+    <main className="elder-page min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
       <Nav />
       {callMode === "ringing" && <IncomingCall onAccept={acceptCall} onDecline={() => setCallMode("off")} />}
       {callMode === "active" && (
@@ -398,9 +442,16 @@ export default function ElderPage() {
         />
       )}
 
-      <div className="max-w-xl lg:max-w-6xl mx-auto px-4 pt-6 lg:pt-10 pb-40">
-        <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 lg:items-start">
-        <div className="flex flex-col items-center text-center gap-3 lg:sticky lg:top-24">
+      <div className="elder-shell max-w-xl lg:max-w-6xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6 lg:pt-8 pb-44">
+        <div className="elder-layout-bar"><div><strong>Make this space yours</strong><span>Put the most useful section first.</span></div><button onClick={() => setOrganizing((value) => !value)} aria-expanded={organizing}>{organizing ? "Done" : "Reorganize"}</button></div>
+        {organizing && (
+          <section className="elder-organizer" aria-label="Reorganize Eleanor view">
+            <ol>{sectionOrder.map((id, index) => <li key={id}><span>{ELDER_SECTION_LABELS[id]}</span><span><button onClick={() => moveSection(index, -1)} disabled={index === 0} aria-label={"Move " + ELDER_SECTION_LABELS[id] + " up"}>↑</button><button onClick={() => moveSection(index, 1)} disabled={index === sectionOrder.length - 1} aria-label={"Move " + ELDER_SECTION_LABELS[id] + " down"}>↓</button></span></li>)}</ol>
+            <button className="elder-reset" onClick={resetSections}>Restore default</button>
+          </section>
+        )}
+        <div className="elder-grid lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 lg:items-start">
+        <div className="elder-presence flex flex-col items-center text-center gap-3 lg:sticky lg:top-24">
           <BorderBeam size="pulse-outside" colorVariant="ocean" theme="dark">
             <div className="rounded-full bg-indigo-500/10 px-6 py-4">
               <NovaFace phase={phase} expression={avatarExpression} size={240} />
@@ -424,7 +475,8 @@ export default function ElderPage() {
           </button>
         </div>
 
-        <div className="min-w-0">
+        <div className="elder-content min-w-0 flex flex-col gap-6">
+        <section className="elder-section" style={{ order: sectionOrder.indexOf("live") }}>
         <ElevenAgentPanel
           dynamicContext={{
             medication_focus: today?.meds.filter((m) => !m.taken).map((m) => `${m.name} ${m.dosage}`).join(", ") || "No medication due data yet",
@@ -433,6 +485,8 @@ export default function ElderPage() {
             caregiver_decision_url: typeof window === "undefined" ? "/family?focus=decisions" : `${window.location.origin}/family?focus=decisions`,
           }}
           onMessage={handleElevenMessage}
+          caption={lastAgent}
+          expression={avatarExpression}
           onPhase={(next) => setPhase(next)}
           onTool={(name) => {
             if (name.startsWith("connected:")) setToolNote("Live ElevenAgents session connected");
@@ -440,9 +494,10 @@ export default function ElderPage() {
             else setToolNote(name);
           }}
         />
+        </section>
         {/* Today: quick actions */}
         {today && (
-          <div className="mt-6 bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+          <section className="elder-section bg-white/5 ring-1 ring-white/10 rounded-3xl p-5" style={{ order: sectionOrder.indexOf("today") }}>
             <div className="flex items-center justify-between mb-3">
               <p className="font-bold text-xl">Today</p>
               {today.done ? (
@@ -478,9 +533,10 @@ export default function ElderPage() {
                 </span>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
+        <section className="elder-section" style={{ order: sectionOrder.indexOf("conversation") }}>
         {/* Conversation */}
         <div className="flex items-center justify-between mt-8 mb-2">
           <div><p className="text-xs uppercase tracking-[0.22em] text-teal-200 font-bold">Your conversation</p><p className="text-sm text-slate-400">{historyState === "synced" ? "Synced to Kinship history." : "Backed up on this device; caregiver sync appears when signed in."}</p></div>
@@ -505,12 +561,13 @@ export default function ElderPage() {
           )}
           {toolNote && <p className="text-indigo-300 text-lg animate-pulse">{toolNote}</p>}
         </div>
+        </section>
         </div>
         </div>
       </div>
 
       {/* Bottom dock */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
+      <div className="elder-dock fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
         <div className="max-w-xl lg:max-w-4xl mx-auto space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <button onClick={() => send("Yes, I took my morning pill")} className="py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold flex items-center justify-center gap-2">

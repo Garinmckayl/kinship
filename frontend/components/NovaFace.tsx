@@ -64,7 +64,7 @@ export function NovaFace({
   useEffect(() => {
     for (const m of [...MOUTH, ...EXPRESSIONS]) {
       const im = new Image();
-      im.src = `/nova/${m}.png`;
+      im.src = `/nova/${m}-plain.png`;
     }
   }, []);
 
@@ -117,7 +117,7 @@ export function NovaFace({
     return () => cancelAnimationFrame(raf);
   }, [face]);
 
-  const src = face === "speaking" ? `/nova/${mouth}.png` : `/nova/${face}.png`;
+  const src = face === "speaking" ? `/nova/${mouth}-plain.png` : `/nova/${face}-plain.png`;
 
   const statusLabel = phase === "listening" ? "Listening now" : phase === "speaking" ? "Speaking" : phase === "thinking" ? "Thinking" : phase === "connecting" ? "Connecting" : "Here with you";
   const statusVisible = phase !== "idle" && phase !== "asleep";

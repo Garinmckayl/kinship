@@ -1,15 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Nav } from "@/components/Nav";
 import { NovaFace, type NovaFaceName } from "@/components/NovaFace";
 import { BellIcon, CalendarIcon, HeartIcon, PhoneIcon, PillIcon, PulseIcon } from "@/components/icons";
 
-type SectionId = "hero" | "care" | "expressions" | "steps";
-
-const DEFAULT_ORDER: SectionId[] = ["hero", "care", "expressions", "steps"];
-const SECTION_LABELS: Record<SectionId, string> = { hero: "Welcome", care: "Everyday care", expressions: "Meet ElderLove", steps: "How it works" };
 const EXPRESSIONS: { name: NovaFaceName; label: string }[] = [
   { name: "reassured", label: "Reassured" }, { name: "empathetic", label: "Empathetic" },
   { name: "surprised", label: "Surprised" }, { name: "proud", label: "Proud" },
@@ -64,7 +59,7 @@ function Expressions() {
     <section className="home-section expression-section" aria-labelledby="expressions-title">
       <div className="section-heading"><div><p className="eyebrow">Emotionally aware</p><h2 id="expressions-title">A companion who responds with feeling</h2></div><p>Ten new expressions help ElderLove feel attentive, encouraging, and present.</p></div>
       <div className="expression-grid">
-        {EXPRESSIONS.map(({ name, label }) => <figure key={name} className="expression-card"><img src={`/nova/${name}.png`} alt={`${label} ElderLove expression`} width="384" height="384" loading="lazy" /><figcaption>{label}</figcaption></figure>)}
+        {EXPRESSIONS.map(({ name, label }) => <figure key={name} className="expression-card"><img src={`/nova/${name}-plain.png`} alt={`${label} ElderLove expression`} width="384" height="384" loading="lazy" /><figcaption>{label}</figcaption></figure>)}
       </div>
     </section>
   );
@@ -86,44 +81,14 @@ function Steps() {
 }
 
 export default function Home() {
-  const [order, setOrder] = useState<SectionId[]>(DEFAULT_ORDER);
-  const [organizing, setOrganizing] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(window.localStorage.getItem("elderlove-home-order") || "null");
-      if (Array.isArray(saved) && saved.length === DEFAULT_ORDER.length && DEFAULT_ORDER.every((id) => saved.includes(id))) setOrder(saved);
-    } catch { /* Keep the thoughtful default order. */ }
-  }, []);
-
-  function move(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= order.length) return;
-    const next = [...order];
-    [next[index], next[target]] = [next[target], next[index]];
-    setOrder(next);
-    window.localStorage.setItem("elderlove-home-order", JSON.stringify(next));
-  }
-
-  function reset() {
-    setOrder(DEFAULT_ORDER);
-    window.localStorage.removeItem("elderlove-home-order");
-  }
-
-  const sections: Record<SectionId, React.ReactNode> = { hero: <Hero />, care: <Care />, expressions: <Expressions />, steps: <Steps /> };
   return (
     <main className="home-page min-h-screen">
       <Nav />
       <div className="home-shell">
-        <div className="organizer-bar"><span>Your homepage, your way.</span><button type="button" onClick={() => setOrganizing((value) => !value)} aria-expanded={organizing}>{organizing ? "Done" : "Reorganize"}</button></div>
-        {organizing && (
-          <section className="organizer-panel" aria-label="Reorganize homepage sections">
-            <div><strong>Reorganize homepage</strong><p>Move sections into the order that is most useful to you. Changes are saved on this device.</p></div>
-            <ol>{order.map((id, index) => <li key={id}><span>{SECTION_LABELS[id]}</span><span className="organizer-controls"><button onClick={() => move(index, -1)} disabled={index === 0} aria-label={`Move ${SECTION_LABELS[id]} up`}>↑</button><button onClick={() => move(index, 1)} disabled={index === order.length - 1} aria-label={`Move ${SECTION_LABELS[id]} down`}>↓</button></span></li>)}</ol>
-            <button className="organizer-reset" onClick={reset}>Restore default</button>
-          </section>
-        )}
-        {order.map((id) => <div key={id}>{sections[id]}</div>)}
+        <Hero />
+        <Care />
+        <Expressions />
+        <Steps />
         <footer className="home-footer"><HeartIcon className="w-5 h-5" /> ElderLove · Care with dignity, connection, and context.</footer>
       </div>
     </main>
