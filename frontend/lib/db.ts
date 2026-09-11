@@ -149,6 +149,11 @@ create table if not exists browser_tasks (
   created_at timestamptz default now(),
   completed_at timestamptz
 );
+create table if not exists dismissed_browser_tasks (
+  id text primary key,
+  task_id text not null,
+  dismissed_at timestamptz default now()
+);
 `;
 
 let readyP: Promise<void> | null = null;

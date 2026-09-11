@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listBrowserTasks as listFromDB, saveBrowserTask, updateBrowserTask } from "@/lib/store";
+import { listBrowserTasks as listFromDB, saveBrowserTask, updateBrowserTask, getDismissedBrowserTasks } from "@/lib/store";
 import { type BrowserTaskType } from "@/lib/browser-agent";
 
 const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
@@ -19,6 +19,7 @@ async function fetchSidecar(path: string): Promise<Response | null> {
 export async function GET() {
   try {
     const dbTasks = await listFromDB("eleanor-79");
+    const dismissedIds = await getDismissedBrowserTasks();
 
     // Fetch sidecar tasks
     const sidecarRes = await fetchSidecar("/tasks");
@@ -45,7 +46,11 @@ export async function GET() {
     });
 
     // Add sidecar-only tasks and override status for matching DB ones
+    // BUT: Skip any that were dismissed/deleted by user
     for (const st of sidecarTasks) {
+      const taskId = String(st.task_id);
+      if (dismissedIds.includes(taskId)) continue; // Skip dismissed tasks
+
       const existing = merged.find((m) =>
         m.task_type === st.task_type && (
           m.status === "approved" || m.status === "running" ||

@@ -462,5 +462,19 @@ export async function deleteBrowserTask(id: string): Promise<void> {
     return;
   }
   await ready();
-  await q("delete from browser_tasks where id=$1", [id]);
+  // Mark as dismissed instead of deleting, so we can filter it out from sidecar results
+  await q("insert into dismissed_browser_tasks(id,task_id) values($1,$2) on conflict(id) do nothing", [
+    `dismissed-${id}`,
+    id
+  ]);
 }
+
+export async function getDismissedBrowserTasks(): Promise<string[]> {
+  if (!dbOn()) return [];
+  await ready();
+  const rows = await q<{ task_id: string }>(
+    "select task_id from dismissed_browser_tasks order by dismissed_at desc"
+  );
+  return rows.map((r) => r.task_id);
+}
+
