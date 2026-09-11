@@ -18,7 +18,7 @@ export function Nav() {
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
         <Link href="/" className="flex items-center gap-2 font-black text-xl">
           <HeartIcon className="w-6 h-6 text-rose-400" />
-          <span className="hidden sm:inline tracking-tight">ElderLove</span><span className="hidden xl:inline text-xs font-semibold text-teal-200/80 border-l border-white/15 pl-2">KINSHIP GUARDIAN</span>
+          <span className="hidden sm:inline tracking-tight">Kinship</span><span className="hidden xl:inline text-xs font-semibold text-teal-200/80 border-l border-white/15 pl-2">CARE THAT CLOSES THE LOOP</span>
         </Link>
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         <nav className="flex min-w-0 items-center gap-1 sm:gap-2 overflow-x-auto" aria-label="Primary navigation">

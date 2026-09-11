@@ -1,5 +1,5 @@
 """
-ElderLove Nova Act Sidecar — browser automation for elders.
+Kinship Nova Act Sidecar — browser automation for elders.
 
 A lightweight FastAPI service wrapping Amazon Nova Act to perform
 real-world browser tasks that elderly people struggle with:
@@ -13,6 +13,7 @@ import os
 import json
 import asyncio
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Optional
 from enum import Enum
@@ -23,7 +24,7 @@ from pydantic import BaseModel
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("nova-act-sidecar")
 
-app = FastAPI(title="ElderLove Nova Act Sidecar", version="1.0.0")
+app = FastAPI(title="Kinship Nova Act Sidecar", version="1.1.0")
 
 # --------------- auth ---------------
 
@@ -85,6 +86,35 @@ def next_id() -> str:
     return f"nova-{_counter}-{int(datetime.now(timezone.utc).timestamp())}"
 
 
+def normalize_task_params(task_type: TaskType, raw_params: dict) -> dict:
+    params = dict(raw_params or {})
+    if task_type != TaskType.insurance_check:
+        return params
+
+    raw_medications = params.get("medications") or params.get("medication") or []
+    if isinstance(raw_medications, str):
+        medications = [value.strip() for value in raw_medications.split(",") if value.strip()]
+    elif isinstance(raw_medications, list):
+        medications = [str(value).strip() for value in raw_medications if str(value).strip()]
+    else:
+        medications = []
+    if not medications:
+        medications = ["Lisinopril", "Metformin", "Vitamin D", "Atorvastatin"]
+
+    zip_code = str(params.get("zip_code") or params.get("zip") or "43215").strip()
+    if not re.fullmatch(r"\d{5}", zip_code):
+        raise ValueError("Insurance checks require a valid 5-digit ZIP code.")
+
+    params.update({
+        "insurance_type": str(params.get("insurance_type") or "Medicare"),
+        "zip_code": zip_code,
+        "coverage_year": str(params.get("coverage_year") or datetime.now(timezone.utc).year),
+        "medications": medications,
+        "medications_text": ", ".join(medications),
+    })
+    return params
+
+
 # --------------- workflow definitions ---------------
 # Each workflow is a sequence of Nova Act prompts. The agent executes them
 # step by step in a real browser. Every workflow begins with caregiver
@@ -116,16 +146,31 @@ WORKFLOW_CONFIGS = {
     # ── Scenario 1B: Insurance Formulary Cross-Reference ──────────────
     TaskType.insurance_check: {
         "name": "Insurance Coverage Check",
-        "description": "Cross-reference medications against insurance formulary to detect tier changes or denials.",
-        "starting_page": "https://www.medicare.gov/",
+        "description": "Use Medicare Plan Compare to review Part D coverage for Eleanor's medications.",
+        "starting_page": "https://www.medicare.gov/plan-compare/",
         "safe_sandbox": True,
         "steps": [
-            {"prompt": "Navigate to the drug coverage or formulary lookup section. Look for 'Plan Finder', 'Formulary', or 'Drug Coverage'.", "label": "Find formulary tool"},
-            {"prompt": "Enter the plan name or ID '{plan_id}' if asked, or search for '{plan_name}'.", "label": "Select insurance plan"},
-            {"prompt": "Search for the drug '{medication_1}'. Note the tier level, copay amount, and any restrictions (prior authorization, step therapy, quantity limits).", "label": "Check {medication_1} coverage", "extract": True},
-            {"prompt": "Search for the drug '{medication_2}'. Note the tier level, copay amount, and any restrictions.", "label": "Check {medication_2} coverage", "extract": True},
-            {"prompt": "Search for the drug '{medication_3}'. Note the tier level, copay amount, and any restrictions.", "label": "Check {medication_3} coverage", "extract": True},
-            {"prompt": "Return a JSON summary: for each medication, include drug_name, tier, copay, restrictions (array), generic_alternative (if shown), and generic_copay.", "label": "Coverage summary", "extract": True},
+            {
+                "prompt": "If Medicare asks for a ZIP code or location, enter exactly '{zip_code}' and submit once. Never guess, alter, or cycle through ZIP codes. If the site rejects this exact ZIP, stop and report the visible error.",
+                "label": "Set Eleanor's location ({zip_code})",
+            },
+            {
+                "prompt": "Choose the Medicare drug plan (Part D) comparison path for coverage year {coverage_year}. Do not enroll, sign in, or submit personal identifiers.",
+                "label": "Open Part D plan comparison",
+            },
+            {
+                "prompt": "Add these medications to the drug list, one at a time: {medications_text}. Select the common standard dosage when multiple versions appear. Do not add medications that are not in this list.",
+                "label": "Enter Eleanor's medications",
+            },
+            {
+                "prompt": "Continue to plan results for ZIP {zip_code}. If asked for a pharmacy, choose a nearby preferred in-network pharmacy only to calculate displayed estimates. Do not enroll in or purchase a plan.",
+                "label": "Compare local coverage",
+            },
+            {
+                "prompt": "Return a JSON summary of what is visibly shown: medications_checked, matching_plan_count, lowest_displayed_drug_cost, restrictions, and next_step. If exact coverage is unavailable without Eleanor's current plan details, say so explicitly instead of guessing.",
+                "label": "Coverage summary",
+                "extract": True,
+            },
         ],
     },
 
@@ -332,6 +377,10 @@ async def execute_demo_workflow(task: TaskResult, config: dict, params: dict) ->
 
     for i, step_config in enumerate(config["steps"]):
         step_label = step_config["label"]
+        try:
+            step_label = step_label.format(**params)
+        except (KeyError, ValueError):
+            pass
         await asyncio.sleep(0.5)  # Simulate work
 
         step_record = {
@@ -354,15 +403,13 @@ async def execute_demo_workflow(task: TaskResult, config: dict, params: dict) ->
                     "pharmacy_address": params.get("pharmacy_location", "CVS Pharmacy, 4th Ave, Columbus OH"),
                 })
             elif task.task_type == TaskType.insurance_check:
-                med = params.get("medication_1", "Lisinopril")
+                medications = params.get("medications", ["Lisinopril"])
                 step_record["response"] = json.dumps({
-                    "drug_name": med,
-                    "tier": "Tier 1 - Preferred Generic",
-                    "copay": "$3.00",
+                    "medications_checked": medications,
+                    "matching_plan_count": 18,
+                    "lowest_displayed_drug_cost": "$3.00",
                     "restrictions": [],
-                    "generic_alternative": None,
-                    "generic_copay": "$3.00",
-                    "status": "Covered - no changes from last year",
+                    "next_step": "Confirm Eleanor's current Part D plan before relying on exact copays.",
                 })
             elif task.task_type == TaskType.bill_payment:
                 if "balance" in step_label.lower():
@@ -480,17 +527,22 @@ async def create_task(req: TaskRequest, authorization: Optional[str] = Header(No
     if not config and req.task_type != TaskType.custom:
         raise HTTPException(status_code=400, detail=f"Unknown task type: {req.task_type}")
 
+    try:
+        task_params = normalize_task_params(req.task_type, req.params)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
     task = TaskResult(
         task_id=task_id,
         task_type=req.task_type,
         status=TaskStatus.pending_approval if not req.approved else TaskStatus.approved,
-        params=req.params,
+        params=task_params,
     )
     TASKS[task_id] = task
 
     # If pre-approved (caregiver already approved via dashboard), execute immediately
     if req.approved and config:
-        asyncio.create_task(execute_nova_workflow(task, config, req.params))
+        asyncio.create_task(execute_nova_workflow(task, config, task_params))
 
     return task
 

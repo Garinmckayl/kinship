@@ -5,7 +5,14 @@ import { listAppointments, addAppointment } from "@/lib/store";
 export async function GET() {
   try {
     await requireCaregiver();
-    return NextResponse.json({ appointments: await listAppointments("eleanor-79") });
+    return NextResponse.json({
+      appointments: await listAppointments("eleanor-79"),
+      calendarConnected: Boolean(
+        process.env.GOOGLE_CLIENT_EMAIL &&
+        process.env.GOOGLE_PRIVATE_KEY &&
+        process.env.GOOGLE_CALENDAR_ID
+      ),
+    });
   } catch (e) {
     return e instanceof Response ? e : NextResponse.json({ error: "failed" }, { status: 500 });
   }

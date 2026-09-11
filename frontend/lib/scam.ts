@@ -4,7 +4,7 @@ import { addEscalation } from "./store";
 
 // ScamGuard: fraud-specialist sub-agent. The guardian delegates suspicious
 // money/caller stories here instead of judging them inline.
-const SCAM_PROMPT = `You are ScamGuard, a fraud specialist protecting Eleanor, 79, in Columbus, Ohio.
+const SCAM_PROMPT = `You are Kinship ScamGuard, a fraud specialist protecting Eleanor, 79, in Columbus, Ohio.
 Common senior scams: gift cards (Target/Walmart) to "pay" debts; Treasury/IRS arrest threats;
 Medicare ID "verification"; fake prizes with fees; utility shutoff threats; "grandchild in jail, wire money";
 "don't tell your family"; remote-access apps (AnyDesk/TeamViewer); Zelle/cash-app strangers.
@@ -64,7 +64,7 @@ export const flagScam = tool({
     if (process.env.CAREGIVER_WHATSAPP_NUMBER) {
       try {
         const { sendWaText } = await import("./whatsapp");
-        whatsapp = (await sendWaText(process.env.CAREGIVER_WHATSAPP_NUMBER, `ElderLove SCAM ALERT: Eleanor reported "${input.detail}". Told her to hang up. Call her now.`)).ok ? "sent" : "failed";
+        whatsapp = (await sendWaText(process.env.CAREGIVER_WHATSAPP_NUMBER, `Kinship SCAM ALERT: Eleanor reported "${input.detail}". Told her to hang up. Call her now.`)).ok ? "sent" : "failed";
       } catch { whatsapp = "failed"; }
     }
     return JSON.stringify({ ok: true, whatsapp });
@@ -87,7 +87,7 @@ export const checkScam = tool({
       if (process.env.CAREGIVER_WHATSAPP_NUMBER) {
         try {
           const { sendWaText } = await import("./whatsapp");
-          if ((await sendWaText(process.env.CAREGIVER_WHATSAPP_NUMBER, `ElderLove SCAM ALERT: ${v.familyNote || input.transcript}. Told Eleanor to hang up. Call her now.`)).ok) action = "urgent-alert-sent+whatsapp";
+          if ((await sendWaText(process.env.CAREGIVER_WHATSAPP_NUMBER, `Kinship SCAM ALERT: ${v.familyNote || input.transcript}. Told Eleanor to hang up. Call her now.`)).ok) action = "urgent-alert-sent+whatsapp";
         } catch {}
       }
     }

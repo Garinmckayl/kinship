@@ -31,7 +31,7 @@ The agent's reasoning appears typewriter-style below:
    adverse event. Escalating to Sarah now."
 ```
 
-A phone notification slides in: **"ElderLove URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."**
+A phone notification slides in: **"Kinship URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."**
 
 **[NARRATION]**
 > "Most elder care apps send one alert for one problem. Kinship sees five weak signals, reasons about the combination, and concludes that together they are dangerous. It doesn't wait for a fall. It acts before one happens."
@@ -140,7 +140,7 @@ A phone notification slides in: **"ElderLove URGENT -- Eleanor missed meds, repo
   and has gone quiet. Combination is abnormal. Call her now.
 ```
 
-Sarah's phone shows a WhatsApp message: *"ElderLove URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."*
+Sarah's phone shows a WhatsApp message: *"Kinship URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."*
 
 Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-fire loop stops.
 

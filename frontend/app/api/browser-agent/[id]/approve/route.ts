@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addEscalation, saveBrowserTask, updateBrowserTask } from "@/lib/store";
+import { normalizeBrowserTaskParams } from "@/lib/browser-task";
 
 // Approve and execute a browser task.
 // Priority: 1) Sidecar via NOVA_SIDECAR_URL  2) Inngest -> AgentCore  3) Direct AgentCore
@@ -8,7 +9,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   try {
     body = await req.json().catch(() => ({}));
     const taskType = body.task_type as string | undefined;
-    const taskParams = (body.params ?? {}) as Record<string, unknown>;
+    const taskParams = normalizeBrowserTaskParams(taskType ?? "", (body.params ?? {}) as Record<string, unknown>);
 
     if (!taskType) {
       return NextResponse.json({ error: "task_type required" }, { status: 400 });

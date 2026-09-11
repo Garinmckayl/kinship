@@ -1,7 +1,7 @@
 {
-  "name": "ElderLove",
-  "short_name": "ElderLove",
-  "description": "Autonomous guardian for elders — meds, companionship, memory, escalation.",
+  "name": "Kinship",
+  "short_name": "Kinship",
+  "description": "The AI care companion that closes the loop.",
   "start_url": "/elder",
   "display": "standalone",
   "background_color": "#ffffff",

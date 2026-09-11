@@ -44,7 +44,7 @@ export function AgentOrb({
           size={64}
           theme={dark ? "dark" : "light"}
           speed={speed ?? (phase === "speaking" ? 1.4 : 1)}
-          aria-label={`ElderLove is ${PHASE_LABEL[phase]}`}
+          aria-label={`Kinship is ${PHASE_LABEL[phase]}`}
         />
       </div>
     </div>

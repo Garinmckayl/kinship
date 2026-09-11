@@ -48,6 +48,17 @@ export default function HealthPage() {
   for (const m of [...metrics].reverse()) {
     (byType[m.type] = byType[m.type] ?? []).push(m.value);
   }
+  const latestSteps = trends?.latest.steps?.value;
+  const averageSteps = trends?.weekAvg.steps?.avg;
+  const activityChange = latestSteps != null && averageSteps
+    ? Math.round(((latestSteps - averageSteps) / averageSteps) * 100)
+    : null;
+  const latestStepsAt = trends?.latest.steps?.at;
+  const activityLabel = latestStepsAt && new Date(latestStepsAt).toDateString() === new Date().toDateString()
+    ? "Today's activity"
+    : latestStepsAt
+      ? `The latest activity reading (${new Date(latestStepsAt).toLocaleDateString([], { month: "short", day: "numeric" })})`
+      : "The latest activity reading";
 
   if (!authed) {
     return (
@@ -69,9 +80,23 @@ export default function HealthPage() {
       <Nav />
       <div className="max-w-3xl lg:max-w-5xl mx-auto px-5 py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Health</h1>
+          <div><h1 className="text-3xl font-bold">Health signals</h1><p className="mt-1 text-sm text-slate-400">Patterns Kinship can connect to conversation, medication, and follow-up.</p></div>
           <Link href="/family" className="text-indigo-300 text-sm">← Dashboard</Link>
         </div>
+
+        {activityChange != null && activityChange <= -25 && (
+          <Card>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-amber-300/15 text-2xl ring-1 ring-amber-300/30">↘</div>
+              <div className="flex-1">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Kinship noticed a change</p>
+                <h2 className="mt-1 text-xl font-bold">{activityLabel} is {Math.abs(activityChange)}% below Eleanor&apos;s 7-day average.</h2>
+                <p className="mt-1 text-sm text-slate-300">This is care context, not a diagnosis. Kinship can combine it with symptoms, missed medication, or silence before asking family to step in.</p>
+              </div>
+              <Link href="/family" className="rounded-xl bg-amber-300 px-4 py-2 text-center text-sm font-black text-slate-950">Review care context</Link>
+            </div>
+          </Card>
+        )}
 
         <Card>
           <CardTitle>Vitals overview</CardTitle>

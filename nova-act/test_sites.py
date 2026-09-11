@@ -1,5 +1,5 @@
 """
-ElderLove Site Compatibility Tester
+Kinship Site Compatibility Tester
 Tests public websites for CAPTCHA/bot-blocking to find demo-friendly sites.
 Each site gets a quick 2-3 step test with Nova Act.
 """
@@ -148,7 +148,7 @@ def test_site(workflow, site):
 
 def main():
     print("=" * 70)
-    print("ElderLove Site Compatibility Tester")
+    print("Kinship Site Compatibility Tester")
     print("Testing sites for CAPTCHA/bot-blocking compatibility")
     print("=" * 70)
 

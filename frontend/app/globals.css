@@ -393,7 +393,7 @@ html[data-theme="dark"] .elder-dock { background: linear-gradient(to top, #07121
 .live-phase-speaking .live-face-wrap { filter: drop-shadow(0 24px 38px rgba(45,212,191,.18)); }
 .live-phase-speaking .live-ripple { border-color: rgba(251,191,36,.28); animation: liveSpeakRing .85s ease-in-out infinite; }
 .live-status { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-top: -.5rem; color: #99f6e4; font-size: .85rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.live-caption { max-width: 34ch; min-height: 2.8em; margin: .65rem auto 0; color: #f7fffc; font-size: clamp(1.25rem, 3.3vw, 2.15rem); line-height: 1.28; font-weight: 720; text-wrap: balance; }
+.live-caption { max-width: 48ch; min-height: 2.8em; margin: .65rem auto 0; color: #f7fffc; font-size: clamp(1rem, 2.2vw, 1.45rem); line-height: 1.38; font-weight: 680; text-wrap: balance; }
 .live-immersive-controls { width: min(100%, 42rem); margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: .7rem; }
 .live-type-row { width: 100%; display: flex; gap: .55rem; }
 html[data-theme="light"] .live-type-row input, .live-type-row input { min-width: 0; flex: 1; min-height: 3rem; border: 1px solid rgba(255,255,255,.17); border-radius: .9rem; padding: .65rem .9rem; color: white !important; background: rgba(0,0,0,.18) !important; outline: none; }

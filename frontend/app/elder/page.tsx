@@ -9,7 +9,7 @@ import { Markdown } from "@/components/Markdown";
 import { Nav } from "@/components/Nav";
 import { ElevenAgentPanel } from "@/components/ElevenAgentPanel";
 import { attachMotion, fakePulse, stopMotion } from "@/components/voiceMotion";
-import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon } from "@/components/icons";
+import { BellIcon, ChatIcon, CheckIcon, ClockIcon, HeartIcon, MicIcon, PhoneIcon, XIcon } from "@/components/icons";
 
 const TOOL_LABELS: Record<string, string> = {
   get_med_schedule: "Checking your schedule…",
@@ -124,6 +124,20 @@ export default function ElderPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs, toolNote, phase]);
+
+  useEffect(() => {
+    if (!chatExpanded) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setChatExpanded(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [chatExpanded]);
 
   useEffect(() => {
     if (callMode !== "active") return;
@@ -318,7 +332,7 @@ export default function ElderPage() {
     }
   }
 
-  // Hands-free wake word: Eleanor just says "ElderLove…" from her chair.
+  // Hands-free wake word: Eleanor just says "Kinship…" from her chair.
   // Browser keyword spotting (free, today). Pro path: Porcupine WASM for iOS reliability.
   function chime() {
     try {
@@ -356,7 +370,7 @@ export default function ElderPage() {
       if (phaseRef.current !== "idle" || callActiveRef.current) return;
       let text = "";
       for (let i = e.resultIndex; i < e.results.length; i++) text += e.results[i][0].transcript + " ";
-      if (/elder\s?love/.test(text.toLowerCase())) {
+      if (/\bkinship\b/.test(text.toLowerCase())) {
         try { wakeRecRef.current?.abort(); } catch {}
         wakeRecRef.current = null;
         chime();
@@ -458,7 +472,7 @@ export default function ElderPage() {
             </div>
           </BorderBeam>
           <h1 className="text-4xl font-bold mt-2 flex items-center gap-2">Hi Eleanor <HeartIcon className="w-8 h-8 text-rose-400" /></h1>
-          <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “ElderLove” — I'm listening" : PHASE_LABEL[phase]}</p>
+          <p className="text-indigo-200 text-xl">{wakeOn && phase === "idle" ? "Say “Kinship” — I'm listening" : PHASE_LABEL[phase]}</p>
           <div className="flex gap-3 mt-2">
             <button
               onClick={toggleWake}
@@ -536,18 +550,26 @@ export default function ElderPage() {
           </section>
         )}
 
-        <section className="elder-section" style={{ order: sectionOrder.indexOf("conversation") }}>
+        <section
+          className={chatExpanded
+            ? "fixed inset-0 z-[120] flex min-h-0 flex-col bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] px-4 pb-4 pt-5 sm:px-8"
+            : "elder-section"}
+          style={chatExpanded ? undefined : { order: sectionOrder.indexOf("conversation") }}
+          role={chatExpanded ? "dialog" : undefined}
+          aria-modal={chatExpanded || undefined}
+          aria-label={chatExpanded ? "Full-screen conversation with Kinship" : undefined}
+        >
         {/* Conversation */}
-        <div className="flex items-center justify-between mt-8 mb-2">
-          <div><p className="text-xs uppercase tracking-[0.22em] text-teal-200 font-bold">Your conversation</p><p className="text-sm text-slate-400">{historyState === "synced" ? "Synced to Kinship history." : "Backed up on this device; caregiver sync appears when signed in."}</p></div>
+        <div className={`flex items-center justify-between mb-2 ${chatExpanded ? "mx-auto w-full max-w-4xl" : "mt-8"}`}>
+          <div><p className="text-xs uppercase tracking-[0.22em] text-teal-200 font-bold">{chatExpanded ? "Kinship conversation" : "Your conversation"}</p><p className="text-sm text-slate-400">{historyState === "synced" ? "Synced to Kinship history." : "Backed up on this device; caregiver sync appears when signed in."}</p></div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-full bg-emerald-400/10 text-emerald-200 text-xs font-bold ring-1 ring-emerald-300/20">{historyState === "synced" ? "synced" : "saved"}</span>
-            <button onClick={() => setChatExpanded(!chatExpanded)} className="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs font-bold ring-1 ring-white/10 hover:bg-white/20">
-              {chatExpanded ? "Collapse" : "Expand"}
+            <button onClick={() => setChatExpanded(!chatExpanded)} className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 ring-1 ring-white/10 hover:bg-white/20">
+              {chatExpanded && <XIcon className="h-4 w-4" />} {chatExpanded ? "Close full screen" : "Open full screen"}
             </button>
           </div>
         </div>
-        <div ref={scrollRef} className={`mt-4 space-y-3 overflow-y-auto pr-1 scroll-smooth ${chatExpanded ? "max-h-[75vh]" : "max-h-[42vh]"}`}>
+        <div ref={scrollRef} className={`mt-4 space-y-3 overflow-y-auto pr-1 scroll-smooth ${chatExpanded ? "mx-auto min-h-0 w-full max-w-4xl flex-1 py-4" : "max-h-[42vh]"}`}>
           {msgs.map((m, i) =>
             m.role === "agent" ? (
               <div key={i} className="bg-white/10 backdrop-blur rounded-3xl p-4 sm:p-5 ring-1 ring-white/10">
@@ -561,13 +583,18 @@ export default function ElderPage() {
           )}
           {toolNote && <p className="text-indigo-300 text-lg animate-pulse">{toolNote}</p>}
         </div>
+        {chatExpanded && (
+          <div className="mx-auto w-full max-w-4xl shrink-0 border-t border-white/10 pt-4">
+            <BeamInput value={input} onChange={setInput} onSend={() => send(input)} onMic={voiceInput} micActive={phase === "listening"} placeholder="Message Kinship..." />
+          </div>
+        )}
         </section>
         </div>
         </div>
       </div>
 
       {/* Bottom dock */}
-      <div className="elder-dock fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
+      {!chatExpanded && <div className="elder-dock fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#050418] via-[#0f0d2e] to-transparent pt-8 pb-4 px-4">
         <div className="max-w-xl lg:max-w-4xl mx-auto space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <button onClick={() => send("Yes, I took my morning pill")} className="py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white text-xl font-bold flex items-center justify-center gap-2">
@@ -582,7 +609,7 @@ export default function ElderPage() {
           </div>
           <BeamInput value={input} onChange={setInput} onSend={() => send(input)} onMic={voiceInput} micActive={phase === "listening"} />
         </div>
-      </div>
+      </div>}
     </main>
   );
 }

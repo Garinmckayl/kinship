@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (!cfg.ok) return NextResponse.json({ error: cfg.error }, { status: 503 });
   const to = String(body.to ?? cfg.elder ?? "");
   if (!to) return NextResponse.json({ error: "no destination (set ELDER_WHATSAPP_NUMBER or pass to)" }, { status: 400 });
-  const text = String(body.text ?? "Hi Eleanor, it's ElderLove checking on you. Did you take your morning pill? 💜");
+  const text = String(body.text ?? "Hi Eleanor, it's Kinship checking on you. Did you take your morning pill? 💜");
 
   const base = publicBase(req);
   if (base && process.env.ELEVENLABS_API_KEY) {

@@ -1,7 +1,7 @@
-# ElderLove — Autonomous Guardian for Elders
+# Kinship — The AI Care Companion That Closes the Loop
 
 > Agents for Humans Hackathon — **Everyday Agents** track.
-> Proactive Strands agent (TypeScript SDK) that handles meds, loneliness, memory & escalation in the background. Only pings family when it matters.
+> Proactive Strands agent that listens, acts with human approval, verifies completion, and only asks family to step in when it matters.
 
 Demo persona: **Eleanor, 79, lives alone, 3 meds.**
 

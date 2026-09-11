@@ -89,7 +89,7 @@ function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, 
   };
 
   const statusText = conversation.status === "connected"
-    ? conversation.isSpeaking ? "ElderLove is speaking — interrupt anytime" : "I’m listening"
+    ? conversation.isSpeaking ? "Kinship is speaking — interrupt anytime" : "I’m listening"
     : conversation.status === "connecting" ? "Opening our conversation…" : "Ready for a live conversation";
 
   return (
@@ -113,10 +113,10 @@ function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, 
       </div>
 
       {immersive && (
-        <div className={`live-immersive live-phase-${livePhase}`} role="dialog" aria-modal="true" aria-label="Live ElderLove conversation">
+        <div className={`live-immersive live-phase-${livePhase}`} role="dialog" aria-modal="true" aria-label="Live Kinship conversation">
           <div className="live-ambient live-ambient-one" /><div className="live-ambient live-ambient-two" />
           <header className="live-immersive-header">
-            <div><p className="live-kicker"><span className="status-dot" /> ElderLove live</p><h2>Here with you, {elderName ?? "Eleanor"}</h2></div>
+            <div><p className="live-kicker"><span className="status-dot" /> Kinship live</p><h2>Here with you, {elderName ?? "Eleanor"}</h2></div>
             <button onClick={() => setImmersive(false)} className="live-minimize" aria-label="Minimize live call"><XIcon className="w-6 h-6" /><span>Minimize</span></button>
           </header>
           <main className="live-immersive-stage">
@@ -126,7 +126,7 @@ function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, 
           </main>
           <footer className="live-immersive-controls">
             {conversation.status === "connected" && (
-              <div className="live-type-row"><input value={text} onChange={(event) => { setText(event.target.value); conversation.sendUserActivity(); }} onKeyDown={(event) => event.key === "Enter" && sendText()} placeholder="You can type here too…" aria-label="Message ElderLove" /><button onClick={sendText}>Send</button></div>
+              <div className="live-type-row"><input value={text} onChange={(event) => { setText(event.target.value); conversation.sendUserActivity(); }} onKeyDown={(event) => event.key === "Enter" && sendText()} placeholder="You can type here too…" aria-label="Message Kinship" /><button onClick={sendText}>Send</button></div>
             )}
             <button onClick={end} className="live-end"><PhoneIcon className="w-8 h-8" /><span>End call</span></button>
             <p>You can speak naturally and interrupt at any time.</p>

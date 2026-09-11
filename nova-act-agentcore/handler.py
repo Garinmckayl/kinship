@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ElderLove Nova Act — AgentCore Runtime Handler
+Kinship Nova Act — AgentCore Runtime Handler
 
 Deployed on Bedrock AgentCore with managed browser sessions.
 Receives browser task requests from the Kinship app and executes
@@ -13,6 +13,7 @@ import logging
 import sys
 import os
 import json
+import re
 import boto3
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from bedrock_agentcore.tools.browser_client import browser_session
@@ -23,7 +24,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-log = logging.getLogger("elderlove-nova-act")
+log = logging.getLogger("kinship-nova-act")
 
 app = BedrockAgentCoreApp()
 
@@ -44,11 +45,12 @@ TASK_CONFIGS = {
     "insurance_check": {
         "default_url": "https://www.medicare.gov/plan-compare/",
         "steps": [
-            "Navigate to the drug coverage or formulary lookup section.",
-            "Enter zip code '43201' (Columbus OH) and search for Medicare plans.",
-            "Search for the drug '{medication}' and note the tier level, copay, and any restrictions.",
+            "Enter exactly ZIP code '{zip_code}' once if Medicare asks for a location. Never guess or try another ZIP.",
+            "Choose the Medicare drug plan (Part D) comparison path. Do not enroll or enter personal identifiers.",
+            "Add these drugs one at a time: {medications_text}. Do not add any drug that is not listed.",
+            "Compare local plans and note visible costs and restrictions. If exact coverage requires Eleanor's current plan details, say so instead of guessing.",
         ],
-        "extract": "Return a JSON object: drug_name, tier, copay, restrictions, generic_alternative, coverage_status.",
+        "extract": "Return a JSON object: medications_checked, matching_plan_count, lowest_displayed_drug_cost, restrictions, next_step.",
     },
     "bill_payment": {
         "default_url": "{portal_url}",
@@ -80,7 +82,31 @@ TASK_CONFIGS = {
 
 @app.route("/ping")
 def ping() -> dict[str, str]:
-    return {"status": "healthy", "service": "elderlove-nova-act"}
+    return {"status": "healthy", "service": "kinship-nova-act"}
+
+
+def normalize_params(task_type: str, raw_params: dict) -> dict:
+    params = dict(raw_params or {})
+    if task_type != "insurance_check":
+        return params
+    source = params.get("medications") or params.get("medication") or []
+    if isinstance(source, str):
+        medications = [value.strip() for value in source.split(",") if value.strip()]
+    elif isinstance(source, list):
+        medications = [str(value).strip() for value in source if str(value).strip()]
+    else:
+        medications = []
+    if not medications:
+        medications = ["Lisinopril", "Metformin", "Vitamin D", "Atorvastatin"]
+    zip_code = str(params.get("zip_code") or params.get("zip") or "43215").strip()
+    if not re.fullmatch(r"\d{5}", zip_code):
+        raise ValueError("Insurance checks require a valid 5-digit ZIP code.")
+    params.update({
+        "zip_code": zip_code,
+        "medications": medications,
+        "medications_text": ", ".join(medications),
+    })
+    return params
 
 
 @app.entrypoint
@@ -101,6 +127,10 @@ def handler(payload):
 
     if not config:
         return {"status": "error", "response": f"Unknown task_type: {task_type}"}
+    try:
+        params = normalize_params(task_type, params)
+    except ValueError as error:
+        return {"status": "error", "response": str(error)}
 
     starting_page = payload.get("starting_page") or params.get("portal_url") or config["default_url"]
     try:

@@ -216,4 +216,47 @@ async function seedDemo() {
     }
     await q("insert into escalations(elder_id,level,message) values('eleanor-79','info','Morning Lisinopril confirmed.')");
   }
+
+  const healthCount = await q<{ count: string }>("select count(*) from health_metrics where elder_id='eleanor-79'");
+  if (Number(healthCount[0]?.count ?? 0) === 0) {
+    const days = [
+      { sys: 132, dia: 78, heart: 72, steps: 4210, sleep: 7.2 },
+      { sys: 134, dia: 80, heart: 74, steps: 3980, sleep: 6.9 },
+      { sys: 131, dia: 79, heart: 71, steps: 4470, sleep: 7.4 },
+      { sys: 136, dia: 81, heart: 76, steps: 3620, sleep: 6.7 },
+      { sys: 139, dia: 82, heart: 78, steps: 3210, sleep: 6.5 },
+      { sys: 142, dia: 84, heart: 80, steps: 2760, sleep: 6.3 },
+      { sys: 146, dia: 86, heart: 82, steps: 1380, sleep: 6.1 },
+    ];
+    for (let index = 0; index < days.length; index += 1) {
+      const day = days[index];
+      const offset = days.length - index - 1;
+      for (const [type, value, unit] of [
+        ["blood_pressure_sys", day.sys, "mmHg"],
+        ["blood_pressure_dia", day.dia, "mmHg"],
+        ["heart_rate", day.heart, "bpm"],
+        ["steps", day.steps, "steps"],
+        ["sleep_hours", day.sleep, "hours"],
+      ] as const) {
+        await q(
+          "insert into health_metrics(elder_id,type,value,unit,at,source) values('eleanor-79',$1,$2,$3,now()-($4 * interval '1 day'),'connected watch')",
+          [type, value, unit, offset],
+        );
+      }
+    }
+  }
+
+  const appointmentCount = await q<{ count: string }>("select count(*) from appointments where elder_id='eleanor-79' and status != 'cancelled'");
+  if (Number(appointmentCount[0]?.count ?? 0) === 0) {
+    await q(
+      `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
+       values('demo-followup','eleanor-79','Blood pressure follow-up','Dr. Harrison','Riverside Clinic',date_trunc('day',now())+interval '4 days 10 hours 30 minutes','Kinship connected a week-long upward trend to a routine follow-up.','upcoming')
+       on conflict (id) do nothing`,
+    );
+    await q(
+      `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
+       values('demo-eye-exam','eleanor-79','Annual eye exam','Dr. Patel','Riverside Vision Center',date_trunc('day',now())+interval '10 days 9 hours','Requested by Eleanor; waiting for Sarah before booking.','proposed')
+       on conflict (id) do nothing`,
+    );
+  }
 }

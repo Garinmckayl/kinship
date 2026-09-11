@@ -19,14 +19,14 @@ function Hero() {
       <div className="home-hero-copy">
         <div className="eyebrow"><span className="status-dot" /> Thoughtful care, every day</div>
         <h1 id="home-title">A warm voice for them.<br /><span>Peace of mind for you.</span></h1>
-        <p className="home-lede">ElderLove calls, listens, remembers medications, and keeps family in the loop—while elders stay independent.</p>
+        <p className="home-lede">Kinship listens, understands what matters, gets real work done with family approval, and verifies the outcome.</p>
         <div className="home-actions">
           <Link href="/elder" className="home-button home-button-primary"><PhoneIcon className="w-6 h-6" /> Try Eleanor&apos;s view</Link>
           <Link href="/family" className="home-button home-button-secondary"><HeartIcon className="w-6 h-6" /> Open family view</Link>
         </div>
         <div className="home-proof" aria-label="Product highlights"><span>Voice-first</span><span>Family connected</span><span>Always respectful</span></div>
       </div>
-      <div className="home-portrait-wrap" aria-label="ElderLove caregiver">
+      <div className="home-portrait-wrap" aria-label="Kinship care companion">
         <div className="home-portrait-glow" />
         <div className="home-portrait-card">
           <span className="home-live-pill"><span className="status-dot" /> Ready to check in</span>
@@ -57,9 +57,9 @@ function Care() {
 function Expressions() {
   return (
     <section className="home-section expression-section" aria-labelledby="expressions-title">
-      <div className="section-heading"><div><p className="eyebrow">Emotionally aware</p><h2 id="expressions-title">A companion who responds with feeling</h2></div><p>Ten new expressions help ElderLove feel attentive, encouraging, and present.</p></div>
+      <div className="section-heading"><div><p className="eyebrow">Emotionally aware</p><h2 id="expressions-title">A companion who responds with feeling</h2></div><p>Ten expressions help Kinship feel attentive, encouraging, and present.</p></div>
       <div className="expression-grid">
-        {EXPRESSIONS.map(({ name, label }) => <figure key={name} className="expression-card"><img src={`/nova/${name}-plain.png`} alt={`${label} ElderLove expression`} width="384" height="384" loading="lazy" /><figcaption>{label}</figcaption></figure>)}
+        {EXPRESSIONS.map(({ name, label }) => <figure key={name} className="expression-card"><img src={`/nova/${name}-plain.png`} alt={`${label} Kinship expression`} width="384" height="384" loading="lazy" /><figcaption>{label}</figcaption></figure>)}
       </div>
     </section>
   );
@@ -67,9 +67,9 @@ function Expressions() {
 
 function Steps() {
   const steps = [
-    { n: "01", title: "ElderLove checks in", text: "A familiar voice calls at the right time.", Icon: PhoneIcon },
-    { n: "02", title: "The day stays on track", text: "Meds, wellbeing, and appointments are handled naturally.", Icon: CalendarIcon },
-    { n: "03", title: "Family gets clarity", text: "Useful context appears when attention is actually needed.", Icon: PulseIcon },
+    { n: "01", title: "Kinship understands", text: "A familiar voice hears Eleanor's need in context.", Icon: PhoneIcon },
+    { n: "02", title: "Kinship acts", text: "Real work begins after the right family approval.", Icon: CalendarIcon },
+    { n: "03", title: "Kinship closes the loop", text: "The outcome is verified and family gets useful context.", Icon: PulseIcon },
   ];
   return (
     <section className="home-section steps-section" aria-labelledby="steps-title">
@@ -89,7 +89,7 @@ export default function Home() {
         <Care />
         <Expressions />
         <Steps />
-        <footer className="home-footer"><HeartIcon className="w-5 h-5" /> ElderLove · Care with dignity, connection, and context.</footer>
+        <footer className="home-footer"><HeartIcon className="w-5 h-5" /> Kinship · The AI care companion that closes the loop.</footer>
       </div>
     </main>
   );

@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   const base = publicBase(req);
   const url = new URL(req.url);
   const userId = url.searchParams.get("user_id") ?? "eleanor-79";
-  const greeting = "Hi Eleanor, it's ElderLove calling to check on you. Did you take your morning pill?";
+  const greeting = "Hi Eleanor, it's Kinship calling to check on you. Did you take your morning pill?";
   const action = `${base}/api/voice/respond?user_id=${encodeURIComponent(userId)}`;
   const twiml =
     `<Response>` +

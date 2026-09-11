@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ElderLove — Autonomous Guardian for Elders",
-  description: "Proactive AI agent for medication, loneliness, memory & escalation. Built with Strands Agents SDK.",
+  title: "Kinship — The AI care companion that closes the loop",
+  description: "A proactive AI care companion that listens, acts with approval, verifies completion, and keeps family informed.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
-  appleWebApp: { capable: true, title: "ElderLove", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Kinship", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

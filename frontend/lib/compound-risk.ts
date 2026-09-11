@@ -319,7 +319,7 @@ export async function assessCompoundRisk(elder = "eleanor-79", opts: { escalate?
         const { sendWaText } = await import("./whatsapp");
         await sendWaText(
           to,
-          `ElderLove COMPOUND RISK ALERT:\n${reasoning}\n\nSignals:\n${unique.map((s) => `- ${s.label}: ${s.detail}`).join("\n")}`
+          `Kinship COMPOUND RISK ALERT:\n${reasoning}\n\nSignals:\n${unique.map((s) => `- ${s.label}: ${s.detail}`).join("\n")}`
         );
       }
     } catch {}
@@ -347,7 +347,7 @@ export async function assessCompoundRisk(elder = "eleanor-79", opts: { escalate?
       const to = process.env.CAREGIVER_WHATSAPP_NUMBER;
       if (to) {
         const { sendWaText } = await import("./whatsapp");
-        await sendWaText(to, `ElderLove compound risk: ${reasoning}`);
+        await sendWaText(to, `Kinship compound risk: ${reasoning}`);
       }
     } catch {}
   }

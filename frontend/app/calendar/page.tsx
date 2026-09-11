@@ -17,10 +17,11 @@ export default function CalendarPage() {
   const [form, setForm] = useState({ title: "", doctor: "", location: "", at: "", notes: "" });
   const [authed, setAuthed] = useState(false);
   const [notice, setNotice] = useState("");
+  const [calendarConnected, setCalendarConnected] = useState(false);
 
   const load = () =>
     fetch("/api/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => {
-      if (d) { setAppts(d.appointments ?? []); setAuthed(true); }
+      if (d) { setAppts(d.appointments ?? []); setCalendarConnected(Boolean(d.calendarConnected)); setAuthed(true); }
     }).catch(() => {});
 
   useEffect(() => { load(); }, []);
@@ -81,9 +82,19 @@ export default function CalendarPage() {
       <Nav />
       <div className="max-w-3xl lg:max-w-5xl mx-auto px-5 py-8 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Doctor calendar</h1>
+          <div><h1 className="text-3xl font-bold">Care calendar</h1><p className="mt-1 text-sm text-slate-400">Kinship proposes. Family decides. Every outcome stays visible.</p></div>
           <Link href="/family" className="text-indigo-300 text-sm">← Dashboard</Link>
         </div>
+
+        <Card>
+          <div className="grid gap-3 text-center sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-center">
+            <div><Badge tone="slate">1</Badge><p className="mt-2 font-bold">Eleanor asks</p><p className="text-xs text-slate-400">Voice or chat</p></div>
+            <span className="hidden text-slate-500 sm:block">→</span>
+            <div><Badge tone="amber">2</Badge><p className="mt-2 font-bold">Sarah approves</p><p className="text-xs text-slate-400">Human decision</p></div>
+            <span className="hidden text-slate-500 sm:block">→</span>
+            <div><Badge tone={calendarConnected ? "green" : "slate"}>3</Badge><p className="mt-2 font-bold">Kinship closes the loop</p><p className="text-xs text-slate-400">{calendarConnected ? "Google Calendar connected" : "Saved in Kinship; Google sync optional"}</p></div>
+          </div>
+        </Card>
 
         <Card>
           <div className="flex items-center justify-between mb-3">

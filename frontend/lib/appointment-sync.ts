@@ -7,7 +7,7 @@ export async function syncAppointmentToGoogle(appt: Appt) {
     const end = new Date(new Date(appt.at).getTime() + 60 * 60_000).toISOString();
     const result = await gcalCreate({
       title: appt.title,
-      description: "ElderLove appointment for Eleanor. " + (appt.notes ?? ""),
+      description: "Kinship appointment for Eleanor. " + (appt.notes ?? ""),
       startISO: appt.at,
       endISO: end,
       location: appt.location ?? "",

@@ -5,7 +5,7 @@ import { listMeds, takenMedIds, lastMood, listEscalations, listTasks, listAppoin
 
 // Family-facing agent: answers anything about Eleanor from live data,
 // manages meds, and nudges Eleanor in realtime.
-const CAREGIVER_PROMPT = `You are ElderLove's family assistant, talking to Eleanor's caregiver.
+const CAREGIVER_PROMPT = `You are Kinship's family assistant, talking to Eleanor's caregiver.
 Rules:
 - Answer ONLY from tool data (medications, adherence, mood, alerts, appointments, health). Never invent readings or doses.
 - You can add medications (add_medication), request an appointment (request_appointment), ping Eleanor right now (remind_parent_now), or schedule later nudges (schedule_task).
@@ -73,7 +73,7 @@ export const remindParentNow = tool({
     if (to) {
       try {
         const { sendWaText } = await import("./whatsapp");
-        whatsapp = (await sendWaText(to, `From your family via ElderLove: ${input.message}`)).ok ? "sent" : "failed";
+        whatsapp = (await sendWaText(to, `From your family via Kinship: ${input.message}`)).ok ? "sent" : "failed";
       } catch { whatsapp = "failed"; }
     }
     return JSON.stringify({ ok: true, whatsapp });

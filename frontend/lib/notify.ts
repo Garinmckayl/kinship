@@ -9,7 +9,7 @@ export async function buildDailySummary(elder = "eleanor-79"): Promise<string> {
   ]);
   const active = meds.filter((m) => m.active);
   const lines = [
-    `ElderLove daily report — Eleanor, ${new Date().toLocaleDateString()}`,
+    `Kinship daily report — Eleanor, ${new Date().toLocaleDateString()}`,
     ``,
     `Medication: ${taken.length}/${active.length} taken`,
     ...active.map((m) => `  ${taken.includes(m.id) ? "✓" : "✗"} ${m.time} — ${m.name} ${m.dosage}`),
@@ -28,7 +28,7 @@ export async function buildDailySummary(elder = "eleanor-79"): Promise<string> {
 export async function sendEmailResend(to: string, subject: string, text: string) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false as const, error: "no RESEND_API_KEY" };
-  const from = process.env.EMAIL_FROM ?? "ElderLove <alerts@elderlove.app>";
+  const from = process.env.EMAIL_FROM ?? "Kinship <alerts@elderlove.app>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -50,7 +50,7 @@ export async function sendDailyReport(elder = "eleanor-79") {
   }
   const emailTo = process.env.CAREGIVER_EMAIL;
   if (emailTo) {
-    const sent = await sendEmailResend(emailTo, `ElderLove daily report — Eleanor ${date}`, summary);
+    const sent = await sendEmailResend(emailTo, `Kinship daily report — Eleanor ${date}`, summary);
     channels.push(`email:${sent.ok ? "sent" : "failed"}`);
   }
   if (!channels.length) channels.push("saved-only");

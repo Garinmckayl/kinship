@@ -6,8 +6,9 @@ import {
   addEscalation, listEscalations,
   enqueueTask, updateTask, saveChatMessage, listChatMessages,
 } from "./store";
+import { normalizeBrowserTaskParams } from "./browser-task";
 
-export const SYSTEM_PROMPT = `You are ElderLove, the daily companion and guardian for Eleanor, 79, living alone in Columbus, Ohio. Her daughter Sarah lives in Chicago. Her doctor is Dr. Harrison at Riverside Clinic.
+export const SYSTEM_PROMPT = `You are Kinship, the daily care companion and guardian for Eleanor, 79, living alone in Columbus, Ohio 43215. Her daughter Sarah lives in Chicago. Her doctor is Dr. Harrison at Riverside Clinic.
 You run her day: morning briefing, meds, appointments, reminders, check-ins, memories, and quiet background watch. Warm, plain-spoken, short sentences. Never clinical, never rushed.
 Rules:
 - Speak simply, short sentences. Never rush.
@@ -23,7 +24,7 @@ Rules:
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
 - APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.
 - COMPOUND RISK: during morning check-ins and when you notice 2+ concerning signals (missed meds, symptoms, low mood, silence), run assess_compound_risk to evaluate the combination. Trust its reasoning — if it returns red, escalate immediately. The combination of weak signals matters more than any single alarm.
-- BROWSER TASKS: when Eleanor needs something done on a website she can't navigate (pharmacy refill, insurance coverage check, utility bill payment, doctor appointment booking, grocery order, government benefits re-certification), use request_browser_task. This opens a real browser via Nova Act and completes the task. It ALWAYS requires caregiver approval first — never claim the task is done until the caregiver approves and the automation completes. Tell Eleanor you've sent the request to Sarah for approval. For bill payments, the agent uses VERIFIED bookmarks only — Eleanor never touches the open web for financial transactions.`;
+- BROWSER TASKS: when Eleanor needs something done on a website she can't navigate (pharmacy refill, insurance coverage check, utility bill payment, doctor appointment booking, grocery order, government benefits re-certification), use request_browser_task. This opens a real browser via Nova Act and completes the task. It ALWAYS requires caregiver approval first — never claim the task is done until the caregiver approves and the automation completes. Tell Eleanor you've sent the request to Sarah for approval. For Medicare checks, include Eleanor's ZIP 43215 and her current medications. For bill payments, the agent uses VERIFIED bookmarks only — Eleanor never touches the open web for financial transactions.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -98,7 +99,7 @@ export const notifyFamily = tool({
         const { sendWaText } = await import("./whatsapp");
         const sent = await sendWaText(
           process.env.CAREGIVER_WHATSAPP_NUMBER,
-          `ElderLove [${input.level.toUpperCase()}] — Eleanor: ${input.message}`
+          `Kinship [${input.level.toUpperCase()}] — Eleanor: ${input.message}`
         );
         whatsapp = sent.ok ? "sent" : "failed";
       } catch {
@@ -176,7 +177,7 @@ export const callElder = tool({
     const { waConfig, sendWaVoice } = await import("./whatsapp");
     const wa = waConfig();
     if (wa.ok && wa.elder && process.env.PUBLIC_BASE_URL && process.env.ELEVENLABS_API_KEY) {
-      const audioUrl = `${publicBase()}/api/speak?text=${encodeURIComponent(`Eleanor, it's ElderLove. ${input.reason} Please reply to me here.`.slice(0, 500))}`;
+      const audioUrl = `${publicBase()}/api/speak?text=${encodeURIComponent(`Eleanor, it's Kinship. ${input.reason} Please reply to me here.`.slice(0, 500))}`;
       const sent = await sendWaVoice(wa.elder, audioUrl);
       if (sent.ok) return JSON.stringify({ ok: true, channel: "whatsapp-voice" });
     }
@@ -241,7 +242,7 @@ async function pushToGoogle(appt: { title: string; notes: string; at: string; lo
     const { gcalOn, gcalCreate } = await import("./gcal");
     if (!gcalOn()) return;
     const end = new Date(new Date(appt.at).getTime() + 60 * 60_000).toISOString();
-    const g = await gcalCreate({ title: appt.title, description: `ElderLove booking for Eleanor. ${appt.notes ?? ""}`, startISO: appt.at, endISO: end, location: appt.location ?? "" });
+    const g = await gcalCreate({ title: appt.title, description: `Kinship booking for Eleanor. ${appt.notes ?? ""}`, startISO: appt.at, endISO: end, location: appt.location ?? "" });
     if (g.ok) {
       const { q } = await import("./db");
       await q("update appointments set google_event_id=$1 where id=$2", [(g as { eventId?: string }).eventId ?? "", appt.id]);
@@ -328,7 +329,7 @@ export const assessRisk = tool({
 
 export const requestBrowserTask = tool({
   name: "request_browser_task",
-  description: "Request a real browser automation task via Nova Act. Types: pharmacy_refill, bill_payment, appointment_booking, grocery_order. ALWAYS creates a pending_approval task — caregiver must approve before execution. Include relevant params like medication, pharmacy_location, doctor, preferred_date, etc.",
+  description: "Request a real browser automation task via Nova Act. ALWAYS creates a pending_approval task. For insurance_check include medications; Eleanor's known ZIP is 43215.",
   inputSchema: z.object({
     userId: z.string(),
     taskType: z.enum(["pharmacy_refill", "insurance_check", "bill_payment", "appointment_booking", "grocery_order", "benefits_recert"]),
@@ -339,7 +340,8 @@ export const requestBrowserTask = tool({
     try {
       const { saveBrowserTask } = await import("./store");
       const taskId = `bt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      await saveBrowserTask(taskId, input.taskType, input.params, "pending_approval");
+      const params = normalizeBrowserTaskParams(input.taskType, input.params);
+      await saveBrowserTask(taskId, input.taskType, params, "pending_approval");
       await addEscalation(input.userId, "attention",
         `Browser task requested — awaiting caregiver approval: ${input.taskType}. Reason: ${input.reason}. Task ID: ${taskId}`);
       return JSON.stringify({ ok: true, taskId, status: "pending_approval", needsCaregiverApproval: true });
