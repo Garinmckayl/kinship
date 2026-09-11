@@ -125,12 +125,11 @@ export default function FamilyPage() {
     return () => clearInterval(t);
   }, [authChecked, me]);
 
-  // Faster polling when a browser task is running (fallback to streaming if available)
+  // Faster polling when a browser task is running
   useEffect(() => {
     const hasRunning = browserTasks.some((t) => t.status === "running" || t.status === "approved");
     if (!hasRunning) return;
 
-    // Start polling every 1s for real-time updates
     const poll = () => {
       fetch(`${API}/browser-agent`)
         .then((r) => (r.ok ? r.json() : null))
@@ -138,13 +137,10 @@ export default function FamilyPage() {
         .catch(() => {});
     };
 
-    // Initial poll
     poll();
-
-    // Then poll every 1s while running
     const t = setInterval(poll, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [browserTasks]);
 
   useEffect(() => {
     if (!authChecked || !me) return;
