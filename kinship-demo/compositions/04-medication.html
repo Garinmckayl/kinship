@@ -1,0 +1,87 @@
+<template>
+<style>
+@font-face{font-family:"Archivo Black";src:url("node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2");font-weight:700}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2");font-weight:900}
+@font-face{font-family:"JetBrains Mono";src:url("node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");font-weight:700}
+#root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",sans-serif}
+.m4-ground{position:absolute;inset:0;background:radial-gradient(circle at 18% 15%,#fff 0,#eafbF7 43%,#ddf6f3 100%)}
+.m4-top{position:absolute;left:72px;right:72px;top:38px;display:flex;align-items:flex-end;justify-content:space-between}
+.m4-kicker{font:700 16px "JetBrains Mono";letter-spacing:.16em;color:#0f9f8f}
+.m4-title{margin:8px 0 0;font:400 47px/1 "Archivo Black";letter-spacing:-.035em}
+.m4-loop{display:flex;align-items:center;gap:12px;padding:12px 18px;border:1px solid #b9ded8;border-radius:999px;background:#fff;box-shadow:0 10px 28px rgba(8,47,45,.08);font:700 15px "JetBrains Mono";color:#315b57}
+.m4-loop i{width:10px;height:10px;border-radius:50%;background:#42d7c1;box-shadow:0 0 0 6px #bdf4e8}
+.m4-stage{position:absolute;left:72px;right:72px;top:124px;height:716px}
+.m4-browser{position:absolute;left:0;top:0;width:1110px;height:700px;border:1px solid #b9ded8;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 30px 80px rgba(8,47,45,.16)}
+.m4-chrome{height:50px;display:flex;align-items:center;gap:9px;padding:0 18px;background:#063a38}
+.m4-chrome i{width:11px;height:11px;border-radius:50%;background:#ff6b72}.m4-chrome i:nth-child(2){background:#f4a62a}.m4-chrome i:nth-child(3){background:#42d7c1}
+.m4-url{margin-left:12px;flex:1;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,.1);color:#d9f7f1;font:400 13px "JetBrains Mono"}
+.m4-browser img{display:block;width:100%;height:650px;object-fit:cover;object-position:50% 0}
+.m4-proof{position:absolute;left:22px;bottom:22px;display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:12px;background:#063a38;color:#fff;font:700 13px "JetBrains Mono";box-shadow:0 10px 28px rgba(6,58,56,.25)}
+.m4-proof b{color:#42d7c1}
+.m4-rail{position:absolute;right:0;top:0;width:620px;height:700px;padding:25px;border:1px solid #b9ded8;border-radius:28px;background:rgba(255,255,255,.9);box-shadow:0 30px 80px rgba(8,47,45,.14);backdrop-filter:blur(14px)}
+.m4-railhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.m4-railhead strong{font:400 24px "Archivo Black"}.m4-counter{padding:8px 11px;border-radius:999px;background:#fff3d5;color:#9b6410;font:700 13px "JetBrains Mono"}
+.m4-med{position:relative;display:grid;grid-template-columns:42px 1fr auto;gap:13px;align-items:center;height:104px;margin-top:12px;padding:15px 16px;border:1px solid #cce6e1;border-radius:18px;background:#fff;box-shadow:0 8px 20px rgba(8,47,45,.055);overflow:hidden}
+.m4-med:before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:#b9ded8}
+.m4-mednum{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#eafbF7;color:#0f9f8f;font:700 16px "JetBrains Mono"}
+.m4-medname{font-size:19px;font-weight:900}.m4-meddetail{margin-top:6px;color:#315b57;font-size:14px}.m4-time{font:700 13px "JetBrains Mono";color:#315b57}
+.m4-confirm{position:absolute;right:16px;bottom:12px;padding:6px 9px;border-radius:999px;background:#bdf4e8;color:#087a6d;font:700 11px "JetBrains Mono"}
+.m4-status{position:absolute;left:22px;right:22px;bottom:20px;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-radius:15px;background:#063a38;color:#fff}
+.m4-statusdot{width:12px;height:12px;border-radius:50%;background:#42d7c1}.m4-statuscopy{font-size:14px;font-weight:700}.m4-statuscopy b{color:#42d7c1}.m4-voice{margin-left:auto;padding:8px 12px;border-radius:999px;background:rgba(66,215,193,.15);font:700 12px "JetBrains Mono";color:#bdf4e8}
+.m4-path{position:absolute;left:1090px;top:76px;width:72px;height:480px}.m4-pathline{position:absolute;left:34px;top:0;width:4px;height:100%;border-radius:4px;background:#b9ded8}.m4-pathfill{position:absolute;left:34px;top:0;width:4px;height:100%;border-radius:4px;background:#0f9f8f;transform-origin:top center}
+.m4-node{position:absolute;left:22px;width:28px;height:28px;border:6px solid #eafbF7;border-radius:50%;background:#b9ded8;box-shadow:0 0 0 2px #b9ded8}.m4-node:nth-of-type(3){top:22px}.m4-node:nth-of-type(4){top:138px}.m4-node:nth-of-type(5){top:254px}.m4-node:nth-of-type(6){top:370px}
+</style>
+<div id="root" data-composition-id="04-medication" data-width="1920" data-height="1080" data-duration="13">
+  <div class="m4-ground clip" id="m4-ground" data-start="0" data-duration="13" data-track-index="0"></div>
+  <div class="m4-top">
+    <div><div class="m4-kicker">ELDER HOME · TODAY</div><h1 class="m4-title">Four medications. One calm loop.</h1></div>
+    <div class="m4-loop"><i></i>SHARED WITH FAMILY</div>
+  </div>
+  <div class="m4-stage">
+    <div class="m4-browser" id="m4-browser">
+      <div class="m4-chrome"><i></i><i></i><i></i><div class="m4-url">kinship.care / eleanor / today</div></div>
+      <img src="assets/captures/elder-full.png" alt="Eleanor's Kinship Today screen">
+      <div class="m4-proof"><b>LIVE PRODUCT</b><span>Today surface · Eleanor</span></div>
+    </div>
+    <div class="m4-path"><div class="m4-pathline"></div><div class="m4-pathfill" id="m4-pathfill"></div><i class="m4-node"></i><i class="m4-node"></i><i class="m4-node"></i><i class="m4-node"></i></div>
+    <section class="m4-rail" id="m4-rail">
+      <div class="m4-railhead"><strong>Today</strong><span class="m4-counter" id="m4-counter">4 TO GO</span></div>
+      <div class="m4-med" id="m4-med-1"><span class="m4-mednum">01</span><div><div class="m4-medname">Lisinopril <small>10mg</small></div><div class="m4-meddetail">Voice reminder · tap available</div></div><span class="m4-time">09:00</span><span class="m4-confirm">VOICE CONFIRMED</span></div>
+      <div class="m4-med" id="m4-med-2"><span class="m4-mednum">02</span><div><div class="m4-medname">Vitamin D <small>2000 IU</small></div><div class="m4-meddetail">Shared routine · family visible</div></div><span class="m4-time">13:00</span><span class="m4-confirm">TAP CONFIRMED</span></div>
+      <div class="m4-med" id="m4-med-3"><span class="m4-mednum">03</span><div><div class="m4-medname">Metformin <small>500mg</small></div><div class="m4-meddetail">Same-day context retained</div></div><span class="m4-time">13:00</span><span class="m4-confirm">VOICE CONFIRMED</span></div>
+      <div class="m4-med" id="m4-med-4"><span class="m4-mednum">04</span><div><div class="m4-medname">Atorvastatin <small>20mg</small></div><div class="m4-meddetail">Evening check-in scheduled</div></div><span class="m4-time">21:00</span><span class="m4-confirm">TAP READY</span></div>
+      <div class="m4-status"><span class="m4-statusdot"></span><span class="m4-statuscopy" id="m4-statuscopy"><b>09:00</b> Lisinopril confirmed</span><span class="m4-voice" id="m4-voice">VOICE</span></div>
+    </section>
+  </div>
+</div>
+<script>
+const m4tl=gsap.timeline({paused:true});
+m4tl.fromTo("#m4-browser",{x:-110,autoAlpha:0},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},0);
+m4tl.fromTo("#m4-rail",{x:90,autoAlpha:0},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},.12);
+m4tl.fromTo(["#m4-med-1","#m4-med-2","#m4-med-3","#m4-med-4"],{y:28,autoAlpha:0},{y:0,autoAlpha:1,duration:.42,stagger:.11,ease:"power3.out"},.55);
+m4tl.fromTo("#m4-pathfill",{scaleY:0},{scaleY:1,duration:10.3,ease:"none",transformOrigin:"top center"},1.35);
+const m4states=[
+  {title:"Lisinopril",copy:"<b>09:00</b> Lisinopril confirmed",mode:"VOICE",count:"3 TO GO",start:1.4},
+  {title:"Vitamin D",copy:"<b>13:00</b> Vitamin D confirmed",mode:"TAP",count:"2 TO GO",start:4.0},
+  {title:"Metformin",copy:"<b>13:00</b> Metformin confirmed",mode:"VOICE",count:"1 TO GO",start:6.7},
+  {title:"Atorvastatin",copy:"<b>21:00</b> Evening check ready",mode:"TAP",count:"LOOP SHARED",start:9.4}
+];
+const m4driver={t:0};let m4last=-1;
+m4tl.to(m4driver,{t:11.6,duration:11.6,ease:"none",onUpdate:()=>{
+  let idx=0;for(let i=m4states.length-1;i>=0;i--){if(m4driver.t>=m4states[i].start){idx=i;break}}
+  if(idx===m4last)return;m4last=idx;const state=m4states[idx];
+  document.getElementById("m4-statuscopy").innerHTML=state.copy;
+  document.getElementById("m4-voice").textContent=state.mode;
+  document.getElementById("m4-counter").textContent=state.count;
+  for(let i=0;i<4;i++){
+    const card=document.getElementById(`m4-med-${i+1}`);
+    gsap.set(card,{borderColor:i===idx?"#0f9f8f":"#cce6e1",boxShadow:i===idx?"0 16px 36px rgba(15,159,143,.18)":"0 8px 20px rgba(8,47,45,.055)"});
+    gsap.set(card.querySelector(".m4-mednum"),{backgroundColor:i<=idx?"#0f9f8f":"#eafbf7",color:i<=idx?"#fff":"#0f9f8f"});
+    gsap.set(card.querySelector(".m4-confirm"),{autoAlpha:i<=idx?1:0});
+  }
+}},0);
+m4tl.fromTo(".m4-loop",{scale:.92,autoAlpha:0},{scale:1,autoAlpha:1,duration:.5,ease:"back.out(1.5)"},11.25);
+window.__timelines["04-medication"]=m4tl;
+</script>
+</template>

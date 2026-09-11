@@ -1,0 +1,82 @@
+<template>
+<style>
+@font-face{font-family:"Archivo Black";src:url("node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2");font-weight:700}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2");font-weight:900}
+@font-face{font-family:"JetBrains Mono";src:url("node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");font-weight:700}
+#root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",sans-serif}
+.a6-ground{position:absolute;inset:0;background:radial-gradient(circle at 50% 5%,#fff 0,#eafbf7 46%,#ddf6f3 100%)}
+.a6-head{position:absolute;left:72px;right:72px;top:38px;display:flex;align-items:end;justify-content:space-between}
+.a6-kicker{font:700 16px "JetBrains Mono";letter-spacing:.16em;color:#082f2d}.a6-title{margin:8px 0 0;font:400 47px/1 "Archivo Black";letter-spacing:-.035em}
+.a6-trust{display:flex;align-items:center;gap:10px;padding:12px 17px;border:1px solid #ffb7ba;border-radius:999px;background:#fff;color:#b63139;font:700 13px "JetBrains Mono"}.a6-trust i{width:10px;height:10px;border-radius:50%;background:#ff6b72}
+.a6-window{position:absolute;left:170px;top:142px;width:1580px;height:690px;border:1px solid #b9ded8;border-radius:30px;overflow:hidden;background:#fff;box-shadow:0 34px 90px rgba(8,47,45,.17)}
+.a6-chrome{height:56px;display:flex;align-items:center;gap:10px;padding:0 22px;background:#063a38}.a6-chrome i{width:12px;height:12px;border-radius:50%;background:#ff6b72}.a6-chrome i:nth-child(2){background:#f4a62a}.a6-chrome i:nth-child(3){background:#42d7c1}
+.a6-url{margin-left:14px;flex:1;padding:9px 15px;border-radius:10px;background:rgba(255,255,255,.1);color:#d9f7f1;font:400 13px "JetBrains Mono"}.a6-pending{padding:8px 12px;border-radius:999px;background:#fff3d5;color:#84520b;font:700 12px "JetBrains Mono"}
+.a6-body{display:grid;grid-template-columns:1fr 390px;height:634px}
+.a6-main{padding:38px 46px;background:linear-gradient(135deg,#fff 0,#f5fffc 100%)}
+.a6-label{font:700 13px "JetBrains Mono";letter-spacing:.14em;color:#082f2d}.a6-main h2{margin:13px 0 10px;font:400 38px/1.08 "Archivo Black";letter-spacing:-.03em}.a6-main p{max-width:790px;margin:0;color:#315b57;font-size:17px;line-height:1.5}
+.a6-query{margin-top:26px;padding:20px 22px;border:1px solid #b9ded8;border-radius:20px;background:#fff;box-shadow:0 12px 28px rgba(8,47,45,.07)}
+.a6-queryhead{display:flex;align-items:center;justify-content:space-between}.a6-queryhead b{font-size:18px}.a6-proposed{padding:7px 10px;border-radius:999px;background:#fff1f2;color:#b63139;font:700 11px "JetBrains Mono"}
+.a6-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px}.a6-field{padding:13px 14px;border-radius:13px;background:#eafbf7}.a6-field small{display:block;color:#315b57;font:700 10px "JetBrains Mono";letter-spacing:.08em}.a6-field strong{display:block;margin-top:6px;font-size:15px}
+.a6-disclosure{margin-top:20px;display:flex;align-items:center;gap:12px;padding:15px 17px;border-left:5px solid #ff6b72;border-radius:12px;background:#fff1f2;color:#8d3036;font-size:14px;font-weight:700}
+.a6-actions{padding:36px 30px;border-left:1px solid #d7ebe7;background:#f7fffd}.a6-actions h3{margin:0 0 8px;font-size:20px}.a6-actions>p{margin:0 0 22px;color:#315b57;font-size:13px;line-height:1.45}
+.a6-btn{display:flex;align-items:center;justify-content:center;width:100%;height:62px;margin-top:13px;border:0;border-radius:16px;font:900 17px "Montserrat"}
+#a6-inspect{background:#fff;border:2px solid #0f9f8f;color:#082f2d}#a6-approve{background:#ff6b72;color:#063a38;box-shadow:0 16px 32px rgba(255,107,114,.28)}#a6-dismiss{background:#eafbf7;color:#315b57}
+.a6-details{margin-top:16px;padding:14px;border:1px solid #b9ded8;border-radius:14px;background:#fff;color:#315b57;font-size:12px;line-height:1.45}
+.a6-progress{position:absolute;left:46px;right:436px;bottom:30px;height:78px;display:flex;align-items:center;gap:16px;padding:0 20px;border-radius:18px;background:#063a38;color:#fff}
+.a6-progressbadge{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#0f9f8f;font-size:20px}.a6-progresscopy{flex:1}.a6-progresscopy b{display:block;font-size:15px}.a6-progresscopy span{display:block;margin-top:4px;color:#bdf4e8;font:700 11px "JetBrains Mono"}
+.a6-track{width:250px;height:8px;border-radius:8px;background:rgba(255,255,255,.16);overflow:hidden}.a6-fill{width:100%;height:100%;border-radius:8px;background:#42d7c1;transform-origin:left center}
+.a6-step{padding:7px 10px;border-radius:999px;background:rgba(66,215,193,.13);color:#bdf4e8;font:700 10px "JetBrains Mono"}
+.a6-cursor{position:absolute;left:0;top:0;width:64px;height:76px;pointer-events:none;transform-origin:0 0;filter:drop-shadow(0 8px 12px rgba(8,47,45,.25));z-index:20}
+.a6-ripple{position:absolute;left:1488px;top:605px;width:30px;height:30px;border:3px solid #ff6b72;border-radius:50%;z-index:18}
+</style>
+<div id="root" data-composition-id="06-approval" data-width="1920" data-height="1080" data-duration="14">
+  <div class="a6-ground clip" id="a6-ground" data-start="0" data-duration="14" data-track-index="0"></div>
+  <div class="a6-head"><div><div class="a6-kicker">HUMAN APPROVAL GATE</div><h1 class="a6-title">Kinship proposes. Sarah decides.</h1></div><div class="a6-trust"><i></i>NOTHING CONSEQUENTIAL HAPPENS SILENTLY</div></div>
+  <section class="a6-window" id="a6-window">
+    <div class="a6-chrome"><i></i><i></i><i></i><div class="a6-url">kinship.care / family / approvals</div><span class="a6-pending" id="a6-pending">WAITING FOR SARAH</span></div>
+    <div class="a6-body">
+      <div class="a6-main">
+        <div class="a6-label">PROPOSED EXTERNAL ACTION</div><h2>Search for Internal Medicine providers</h2><p>Kinship has prepared the search parameters. No provider has been contacted and no appointment has been booked.</p>
+        <div class="a6-query" id="a6-query"><div class="a6-queryhead"><b>Provider search</b><span class="a6-proposed">PROPOSED</span></div><div class="a6-fields"><div class="a6-field"><small>SPECIALTY</small><strong>Internal Medicine</strong></div><div class="a6-field"><small>LOCATION</small><strong>Near Eleanor</strong></div><div class="a6-field"><small>SOURCE</small><strong>Medicare directory</strong></div></div></div>
+        <div class="a6-disclosure">Human approval is required before the task can start.</div>
+        <div class="a6-progress" id="a6-progress"><span class="a6-progressbadge">✓</span><div class="a6-progresscopy"><b id="a6-progress-title">Approval received</b><span id="a6-progress-sub">TASK STARTING · SOURCE VISIBLE</span></div><div class="a6-track"><div class="a6-fill" id="a6-fill"></div></div><span class="a6-step" id="a6-step">CONNECTING</span></div>
+      </div>
+      <aside class="a6-actions"><h3>Review the proposal</h3><p>Inspect the scope, approve this one action, or dismiss it.</p><button class="a6-btn" id="a6-inspect">Inspect details</button><div class="a6-details" id="a6-details">Search only · maximum 3 results · no booking · no message sent</div><button class="a6-btn" id="a6-approve">Approve search</button><button class="a6-btn" id="a6-dismiss">Dismiss</button></aside>
+    </div>
+  </section>
+  <div class="a6-ripple" id="a6-ripple"></div>
+  <svg class="a6-cursor" id="a6-cursor" viewBox="0 0 64 76" aria-hidden="true"><path d="M6 4L55 43L32 46L22 68L6 4Z" fill="#063A38" stroke="#fff" stroke-width="5" stroke-linejoin="round"/></svg>
+</div>
+<script>
+const a6tl=gsap.timeline({paused:true});
+a6tl.fromTo("#a6-window",{y:70,autoAlpha:0},{y:0,autoAlpha:1,duration:.72,ease:"power4.out"},0);
+a6tl.fromTo("#a6-query",{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:.45,ease:"power3.out"},.7);
+a6tl.fromTo(["#a6-inspect","#a6-approve","#a6-dismiss"],{x:36,autoAlpha:0},{x:0,autoAlpha:1,duration:.38,stagger:.12,ease:"power3.out"},1.25);
+a6tl.fromTo("#a6-cursor",{x:1830,y:820,autoAlpha:0},{x:1465,y:348,autoAlpha:1,duration:1.05,ease:"power2.inOut"},2.1);
+a6tl.to(["#a6-inspect","#a6-cursor"],{scale:.92,duration:.15,ease:"power1.in"},3.15);
+a6tl.to(["#a6-inspect","#a6-cursor"],{scale:1,duration:.48,ease:"back.out(1.6)"},3.31);
+a6tl.fromTo("#a6-details",{y:-10,autoAlpha:0},{y:0,autoAlpha:1,duration:.42,ease:"power3.out"},3.32);
+a6tl.to("#a6-cursor",{x:1465,y:535,duration:1.15,ease:"power2.inOut"},5.35);
+a6tl.to(["#a6-approve","#a6-cursor"],{scale:.92,duration:.16,ease:"power1.in"},6.5);
+a6tl.to("#a6-approve",{boxShadow:"inset 0 0 0 4px rgba(255,255,255,.35)",duration:.16,ease:"power1.in"},6.5);
+a6tl.fromTo("#a6-ripple",{scale:.2,autoAlpha:.9},{scale:3,autoAlpha:0,duration:.55,ease:"power2.out"},6.5);
+a6tl.to(["#a6-approve","#a6-cursor"],{scale:1,duration:.5,ease:"back.out(1.6)"},6.7);
+a6tl.to("#a6-approve",{boxShadow:"0 16px 32px rgba(15,159,143,.25)",duration:.35,ease:"power2.out"},6.7);
+a6tl.set("#a6-approve",{textContent:"Approved"},6.72);
+a6tl.set("#a6-pending",{textContent:"APPROVED · TASK STARTING"},6.72);
+a6tl.to("#a6-pending",{backgroundColor:"#bdf4e8",color:"#063a38",duration:.3,ease:"power2.out"},6.72);
+a6tl.fromTo("#a6-progress",{y:28,autoAlpha:0},{y:0,autoAlpha:1,duration:.5,ease:"power4.out"},7.45);
+a6tl.fromTo("#a6-fill",{scaleX:0},{scaleX:.28,duration:1.0,ease:"power2.out",transformOrigin:"left center"},8.1);
+a6tl.set("#a6-step",{textContent:"SEARCHING"},9.25);
+a6tl.set("#a6-progress-title",{textContent:"Searching official directory"},9.25);
+a6tl.to("#a6-fill",{scaleX:.68,duration:1.15,ease:"power2.out"},9.25);
+a6tl.set("#a6-step",{textContent:"VERIFYING"},10.65);
+a6tl.set("#a6-progress-title",{textContent:"Verifying provider results"},10.65);
+a6tl.to("#a6-fill",{scaleX:1,duration:1.15,ease:"power2.out"},10.65);
+a6tl.to("#a6-cursor",{x:1700,y:760,autoAlpha:0,duration:.55,ease:"power3.out"},11.1);
+a6tl.set("#a6-progress-sub",{textContent:"APPROVED BY SARAH · ACTION AUDITABLE"},11.9);
+window.__timelines["06-approval"]=a6tl;
+</script>
+</template>

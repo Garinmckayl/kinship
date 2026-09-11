@@ -1,0 +1,103 @@
+<template>
+  <style>
+    @font-face{font-family:"EB Garamond";src:url("node_modules/@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2") format("woff2");font-weight:400}
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-400-normal.woff2") format("woff2");font-weight:400}
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2");font-weight:700}
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2");font-weight:900}
+    @font-face{font-family:"JetBrains Mono";src:url("node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");font-weight:700}
+    *{box-sizing:border-box}
+    #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",sans-serif}
+    .s09-ground{position:absolute;inset:0;background:radial-gradient(circle at 18% 16%,rgba(66,215,193,.24),transparent 31%),radial-gradient(circle at 86% 74%,rgba(189,244,232,.6),transparent 32%),#eafbf7}
+    .s09-header{position:absolute;left:82px;right:82px;top:57px;display:flex;align-items:flex-start;justify-content:space-between}
+    .s09-kicker{font:700 15px/1 "JetBrains Mono";letter-spacing:.16em;color:#082f2d}
+    .s09-title{margin:12px 0 0;font:400 64px/.96 "EB Garamond";letter-spacing:-.04em}
+    .s09-legend{display:flex;gap:10px;padding-top:10px}
+    .s09-legend span{padding:10px 13px;border:1px solid #b9ded8;border-radius:999px;background:rgba(255,255,255,.72);font:700 11px/1 "JetBrains Mono";letter-spacing:.05em}
+    .s09-board{position:absolute;left:82px;right:82px;top:184px;height:704px;display:grid;grid-template-columns:1.05fr .95fr;gap:24px}
+    .s09-proof-card{position:relative;overflow:hidden;padding:35px;border:1px solid #b9ded8;border-radius:29px;background:#063a38;color:#fff;box-shadow:0 28px 78px rgba(6,58,56,.2)}
+    .s09-proof-top{display:flex;align-items:center;justify-content:space-between}
+    .s09-proof-badge{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:999px;background:#ff6b72;color:#082f2d;font:900 12px/1 "Montserrat";letter-spacing:.08em}
+    .s09-live-dot{width:9px;height:9px;border-radius:50%;background:#fff}
+    .s09-proof-index{font:700 13px/1 "JetBrains Mono";color:#bdf4e8}
+    .s09-proof-card h2{margin:52px 0 0;font:900 58px/.98 "Montserrat";letter-spacing:-.05em}
+    .s09-proof-card p{max-width:600px;margin:21px 0 0;font-size:21px;line-height:1.45;color:#bdf4e8}
+    .s09-proof-steps{position:absolute;left:35px;right:35px;bottom:34px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .s09-proof-steps span{padding:13px 12px;border:1px solid rgba(189,244,232,.23);border-radius:12px;background:rgba(255,255,255,.06);font:700 11px/1.25 "JetBrains Mono";color:#fff}
+    .s09-library{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .s09-task{position:relative;min-height:216px;padding:22px;border:1px solid #b9ded8;border-radius:21px;background:rgba(255,255,255,.93);box-shadow:0 13px 34px rgba(8,47,45,.08)}
+    .s09-task-index{font:700 11px/1 "JetBrains Mono";color:#082f2d;letter-spacing:.08em}
+    .s09-task h3{margin:14px 0 20px;font:900 24px/1.05 "Montserrat";letter-spacing:-.03em}
+    .s09-tag{display:block;width:max-content;max-width:100%;padding:8px 10px;border-radius:8px;background:#ddf6f3;color:#063a38;font:700 10px/1 "JetBrains Mono";letter-spacing:.04em}
+    .s09-tag + .s09-tag{margin-top:7px;background:#fff1e3;color:#7b5211;border:1px solid #f4d39c}
+    .s09-not-run{position:absolute;right:18px;top:18px;color:#315b57;font:700 9px/1 "JetBrains Mono";letter-spacing:.08em}
+    .s09-rail{position:absolute;left:82px;right:82px;top:910px;height:5px;overflow:hidden;border-radius:999px;background:#b9ded8}
+    .s09-rail-fill{width:100%;height:100%;background:#0f9f8f;transform-origin:left center}
+    .s09-active-label{position:absolute;left:82px;top:932px;font:700 12px/1 "JetBrains Mono";letter-spacing:.08em;color:#315b57}
+  </style>
+  <div id="root" data-composition-id="09-library" data-width="1920" data-height="1080" data-duration="21.5">
+    <div id="s09-ground" class="s09-ground clip" data-start="0" data-duration="21.5" data-track-index="0"></div>
+    <div class="s09-header">
+      <div><div class="s09-kicker">ONE SAFE PATTERN · MANY TASKS</div><h1 class="s09-title">A library built around permission.</h1></div>
+      <div class="s09-legend"><span>PROOF ≠ PROMISE</span><span>HUMAN APPROVAL STAYS IN THE LOOP</span></div>
+    </div>
+    <div class="s09-board">
+      <section class="s09-proof-card" id="s09-proof-card">
+        <div class="s09-proof-top"><span class="s09-proof-badge"><i class="s09-live-dot"></i>LIVE PROOF</span><span class="s09-proof-index">01 / 07</span></div>
+        <h2>Provider search</h2>
+        <p>The captured Medicare.gov workflow is the demonstrated task.</p>
+        <div class="s09-proof-steps"><span>ZIP 43215</span><span>INTERNAL MEDICINE</span><span>MEDICARE.GOV</span></div>
+      </section>
+      <div class="s09-library">
+        <article class="s09-task" id="s09-task-1"><span class="s09-task-index">02</span><span class="s09-not-run">NOT RUN</span><h3>Refill</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+        <article class="s09-task" id="s09-task-2"><span class="s09-task-index">03</span><span class="s09-not-run">NOT RUN</span><h3>Appointments</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+        <article class="s09-task" id="s09-task-3"><span class="s09-task-index">04</span><span class="s09-not-run">NOT RUN</span><h3>Verified bills</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+        <article class="s09-task" id="s09-task-4"><span class="s09-task-index">05</span><span class="s09-not-run">NOT RUN</span><h3>Benefits</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+        <article class="s09-task" id="s09-task-5"><span class="s09-task-index">06</span><span class="s09-not-run">NOT RUN</span><h3>Groceries</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+        <article class="s09-task" id="s09-task-6"><span class="s09-task-index">07</span><span class="s09-not-run">NOT RUN</span><h3>Follow-up</h3><span class="s09-tag">PLAYBOOK</span><span class="s09-tag">APPROVAL-GATED</span></article>
+      </div>
+    </div>
+    <div class="s09-rail"><div class="s09-rail-fill" id="s09-rail-fill"></div></div>
+    <div class="s09-active-label" id="s09-active-label">LIVE PROOF · Provider search</div>
+  </div>
+  <script>
+    const s09tl=gsap.timeline({paused:true});
+    const s09Items=[
+      {selector:"#s09-task-1",label:"PLAYBOOK · Refill",body:"Refill",hold:.78},
+      {selector:"#s09-task-2",label:"PLAYBOOK · Appointments",body:"Appointments",hold:.9},
+      {selector:"#s09-task-3",label:"PLAYBOOK · Verified bills",body:"Verified bills",hold:1.05},
+      {selector:"#s09-task-4",label:"PLAYBOOK · Benefits",body:"Benefits",hold:.8},
+      {selector:"#s09-task-5",label:"PLAYBOOK · Groceries",body:"Groceries",hold:.86},
+      {selector:"#s09-task-6",label:"PLAYBOOK · Follow-up",body:"Follow-up",hold:1.2}
+    ];
+    let s09Cursor=4.1;
+    const s09Schedule=s09Items.map((item)=>{
+      const duration=1.15+item.body.length*.045+item.hold;
+      const entry={...item,start:s09Cursor,end:s09Cursor+duration};
+      s09Cursor+=duration;
+      return entry;
+    });
+    s09tl.fromTo(".s09-header",{y:-24,autoAlpha:0},{y:0,autoAlpha:1,duration:.48,ease:"power4.out"},0);
+    s09tl.fromTo("#s09-proof-card",{scale:.88,autoAlpha:0},{scale:1,autoAlpha:1,duration:.62,ease:"power4.out"},.42);
+    s09tl.fromTo("#s09-proof-card .s09-proof-steps span",{y:25,autoAlpha:0},{y:0,autoAlpha:1,duration:.32,stagger:.16,ease:"power3.out"},1.65);
+    s09tl.fromTo(".s09-task",{y:42,scale:.97,autoAlpha:0},{y:0,scale:1,autoAlpha:1,duration:.42,stagger:2.38,ease:"power4.out"},4.1);
+    s09tl.fromTo("#s09-rail-fill",{scaleX:0},{scaleX:1,duration:20.1,ease:"none"},.65);
+    const s09Driver={t:0};
+    let s09LastLabel="";
+    s09tl.to(s09Driver,{t:s09Cursor,duration:s09Cursor,ease:"none",onUpdate:()=>{
+      let current={label:"LIVE PROOF · Provider search"};
+      for(let i=s09Schedule.length-1;i>=0;i-=1){
+        if(s09Driver.t>=s09Schedule[i].start){current=s09Schedule[i];break}
+      }
+      if(current.label!==s09LastLabel){
+        document.getElementById("s09-active-label").textContent=current.label;
+        s09LastLabel=current.label;
+      }
+    }},0);
+    s09Schedule.forEach((item)=>{
+      s09tl.to(item.selector,{borderColor:"#0f9f8f",boxShadow:"0 0 0 4px rgba(15,159,143,.11),0 13px 34px rgba(8,47,45,.08)",duration:.28,ease:"power2.out"},item.start);
+      s09tl.to(item.selector,{borderColor:"#b9ded8",boxShadow:"0 13px 34px rgba(8,47,45,.08)",duration:.3,ease:"power2.inOut"},item.end-.35);
+    });
+    window.__timelines=window.__timelines||{};
+    window.__timelines["09-library"]=s09tl;
+  </script>
+</template>

@@ -1,0 +1,70 @@
+<template>
+<style>
+@font-face{font-family:"Archivo Black";src:url("node_modules/@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-400-normal.woff2") format("woff2");font-weight:400}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2");font-weight:700}
+@font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2");font-weight:900}
+@font-face{font-family:"JetBrains Mono";src:url("node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");font-weight:700}
+#root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",sans-serif}
+.c5-ground{position:absolute;inset:0;background:radial-gradient(circle at 83% 30%,#fff 0,#eafbf7 48%,#ddf6f3 100%)}
+.c5-head{position:absolute;left:72px;right:72px;top:38px;display:flex;align-items:end;justify-content:space-between}
+.c5-kicker{font:700 16px "JetBrains Mono";letter-spacing:.16em;color:#0c7f72}.c5-title{margin:8px 0 0;font:400 46px/1 "Archivo Black";letter-spacing:-.035em}
+.c5-boundary{padding:12px 18px;border:1px solid #ffb7ba;border-radius:999px;background:#fff1f2;color:#b63139;font:700 14px "JetBrains Mono"}
+.c5-stage{position:absolute;left:72px;right:72px;top:124px;height:716px}
+.c5-browser{position:absolute;left:0;top:0;width:1040px;height:700px;border:1px solid #b9ded8;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 30px 80px rgba(8,47,45,.15)}
+.c5-chrome{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:#063a38}.c5-chrome i{width:11px;height:11px;border-radius:50%;background:#ff6b72}.c5-chrome i:nth-child(2){background:#f4a62a}.c5-chrome i:nth-child(3){background:#42d7c1}
+.c5-url{margin-left:12px;flex:1;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,.1);color:#d9f7f1;font:400 13px "JetBrains Mono"}
+.c5-crop{position:relative;height:652px;overflow:hidden}.c5-crop img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 8%}
+.c5-scan{position:absolute;left:16px;right:16px;top:78px;height:102px;border:3px solid #f4a62a;border-radius:18px;background:rgba(244,166,42,.08);box-shadow:0 0 0 999px rgba(6,58,56,.1)}
+.c5-scanlabel{position:absolute;left:24px;top:196px;padding:9px 13px;border-radius:10px;background:#063a38;color:#fff;font:700 12px "JetBrains Mono"}.c5-scanlabel b{color:#f4a62a}
+.c5-board{position:absolute;right:0;top:0;width:690px;height:700px;border:1px solid #b9ded8;border-radius:28px;background:rgba(255,255,255,.92);box-shadow:0 30px 80px rgba(8,47,45,.14)}
+.c5-boardtitle{position:absolute;left:28px;top:24px;font:700 14px "JetBrains Mono";letter-spacing:.12em;color:#0c7f72}
+.c5-hub{position:absolute;left:228px;top:260px;width:234px;height:132px;display:grid;place-items:center;padding:20px;border:2px solid #0f9f8f;border-radius:66px;background:#063a38;color:#fff;text-align:center;box-shadow:0 20px 44px rgba(6,58,56,.25);z-index:3}
+.c5-hub strong{display:block;font:400 19px "Archivo Black"}.c5-hub span{display:block;margin-top:8px;color:#bdf4e8;font:700 11px "JetBrains Mono";letter-spacing:.08em}
+.c5-node{position:absolute;width:184px;height:78px;padding:13px 15px;border:1px solid #b9ded8;border-radius:18px;background:#fff;box-shadow:0 10px 25px rgba(8,47,45,.08);z-index:2}
+.c5-node b{display:block;font-size:15px}.c5-node span{display:block;margin-top:6px;color:#315b57;font:700 11px "JetBrains Mono"}
+#c5-node-med{left:32px;top:122px}#c5-node-activity{right:32px;top:122px}#c5-node-mood{left:26px;top:444px}#c5-node-talk{right:26px;top:444px}#c5-node-care{left:253px;top:548px}
+.c5-line{position:absolute;height:3px;width:190px;background:#b9ded8;transform-origin:left center;z-index:1}.c5-linefill{position:absolute;inset:0;background:#0f9f8f;transform-origin:left center}
+#c5-line-1{left:194px;top:192px;rotate:31deg}#c5-line-2{left:495px;top:192px;rotate:149deg}#c5-line-3{left:194px;top:493px;rotate:-31deg}#c5-line-4{left:495px;top:493px;rotate:-149deg}#c5-line-5{left:344px;top:390px;width:160px;rotate:90deg}
+.c5-bars{position:absolute;right:13px;bottom:12px;height:36px;display:flex;align-items:flex-end;gap:4px}.c5-bar{width:7px;border-radius:4px 4px 1px 1px;background:#f4a62a;transform-origin:bottom center}
+.c5-review{position:absolute;left:1090px;top:582px;width:636px;height:118px;display:flex;align-items:center;gap:18px;padding:18px 20px;border:2px solid #0f9f8f;border-radius:20px;background:#eafbf7;box-shadow:0 16px 34px rgba(15,159,143,.15);z-index:5}
+.c5-reviewicon{display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:#0f9f8f;color:#fff;font-size:26px}.c5-reviewcopy{flex:1}.c5-reviewcopy b{display:block;font-size:17px}.c5-reviewcopy span{display:block;margin-top:7px;color:#315b57;font-size:13px}.c5-reviewtag{padding:9px 11px;border-radius:999px;background:#fff;color:#0f9f8f;font:700 11px "JetBrains Mono"}
+</style>
+<div id="root" data-composition-id="05-context" data-width="1920" data-height="1080" data-duration="14">
+  <div class="c5-ground clip" id="c5-ground" data-start="0" data-duration="14" data-track-index="0"></div>
+  <div class="c5-head"><div><div class="c5-kicker">CONNECTED CARE CONTEXT</div><h1 class="c5-title">Signals become a review — not a diagnosis.</h1></div><div class="c5-boundary">CONTEXT ≠ DIAGNOSIS</div></div>
+  <div class="c5-stage">
+    <div class="c5-browser" id="c5-browser"><div class="c5-chrome"><i></i><i></i><i></i><div class="c5-url">kinship.care / health</div></div><div class="c5-crop"><img src="assets/captures/health-full.png" alt="Kinship health signals screen"><div class="c5-scan" id="c5-scan"></div><div class="c5-scanlabel"><b>59% BELOW</b> · REVIEW CONTEXT</div></div></div>
+    <section class="c5-board" id="c5-board">
+      <div class="c5-boardtitle">EXPLAINABLE CONTEXT MAP</div>
+      <div class="c5-line" id="c5-line-1"><i class="c5-linefill"></i></div><div class="c5-line" id="c5-line-2"><i class="c5-linefill"></i></div><div class="c5-line" id="c5-line-3"><i class="c5-linefill"></i></div><div class="c5-line" id="c5-line-4"><i class="c5-linefill"></i></div><div class="c5-line" id="c5-line-5"><i class="c5-linefill"></i></div>
+      <div class="c5-hub"><div><strong>CARE CONTEXT</strong><span>NOT A DIAGNOSIS</span></div></div>
+      <div class="c5-node" id="c5-node-med"><b>Medication</b><span>TODAY · 4 ITEMS</span></div>
+      <div class="c5-node" id="c5-node-activity"><b>Activity</b><span>7-DAY TREND</span><div class="c5-bars"><i class="c5-bar" style="height:33px"></i><i class="c5-bar" style="height:29px"></i><i class="c5-bar" style="height:26px"></i><i class="c5-bar" style="height:18px"></i><i class="c5-bar" style="height:12px"></i></div></div>
+      <div class="c5-node" id="c5-node-mood"><b>Mood</b><span>CHECK-IN CONTEXT</span></div>
+      <div class="c5-node" id="c5-node-talk"><b>Conversation</b><span>RECENT SIGNALS</span></div>
+      <div class="c5-node" id="c5-node-care"><b>Upcoming care</b><span>FAMILY VISIBLE</span></div>
+    </section>
+    <div class="c5-review" id="c5-review"><div class="c5-reviewicon">↗</div><div class="c5-reviewcopy"><b>Family review requested</b><span>Source-linked context is ready for Sarah.</span></div><div class="c5-reviewtag">REVIEW, DON’T DIAGNOSE</div></div>
+  </div>
+</div>
+<script>
+const c5tl=gsap.timeline({paused:true});
+c5tl.fromTo("#c5-browser",{x:-100,autoAlpha:0},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},0);
+c5tl.fromTo("#c5-board",{x:90,autoAlpha:0},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},.12);
+c5tl.fromTo("#c5-scan",{scale:.96,autoAlpha:0},{scale:1,autoAlpha:1,duration:.48,ease:"power3.out"},1.15);
+c5tl.fromTo(".c5-hub",{scale:.82,autoAlpha:0},{scale:1,autoAlpha:1,duration:.58,ease:"back.out(1.5)"},1.7);
+const c5nodes=["#c5-node-med","#c5-node-activity","#c5-node-mood","#c5-node-talk","#c5-node-care"];
+const c5lines=["#c5-line-1 .c5-linefill","#c5-line-2 .c5-linefill","#c5-line-3 .c5-linefill","#c5-line-4 .c5-linefill","#c5-line-5 .c5-linefill"];
+const c5times=[2.6,4.25,5.9,7.55,9.2];
+c5nodes.forEach((node,i)=>{
+  c5tl.fromTo(node,{y:22,autoAlpha:0},{y:0,autoAlpha:1,duration:.42,ease:"power3.out"},c5times[i]);
+  c5tl.fromTo(c5lines[i],{scaleX:0},{scaleX:1,duration:.72,ease:"power2.out",transformOrigin:"left center"},c5times[i]);
+  c5tl.to("#c5-scan",{borderColor:i===1?"#f4a62a":"#0f9f8f",duration:.22,ease:"none"},c5times[i]);
+});
+c5tl.fromTo(".c5-bar",{scaleY:0},{scaleY:1,duration:.9,stagger:.08,ease:"power3.out",transformOrigin:"bottom center"},4.25);
+c5tl.fromTo("#c5-review",{y:38,autoAlpha:0},{y:0,autoAlpha:1,duration:.58,ease:"power4.out"},10.8);
+c5tl.to(".c5-boundary",{backgroundColor:"#063a38",color:"#bdf4e8",borderColor:"#063a38",duration:.35,ease:"power2.out"},11.15);
+window.__timelines["05-context"]=c5tl;
+</script>
+</template>

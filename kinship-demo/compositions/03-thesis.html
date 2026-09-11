@@ -1,0 +1,211 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      color: #082f2d;
+      font-family: Arial, sans-serif;
+    }
+    .thesis-ground {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(66, 215, 193, 0.34), transparent 31%),
+        radial-gradient(circle at 82% 76%, rgba(189, 244, 232, 0.92), transparent 34%),
+        #eafbf7;
+    }
+    .thesis-rule {
+      position: absolute;
+      left: 74px;
+      right: 74px;
+      top: 72px;
+      height: 3px;
+      background: #0f9f8f;
+      transform-origin: left center;
+    }
+    .thesis-meta {
+      position: absolute;
+      left: 76px;
+      top: 105px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: #315b57;
+      font: 700 18px/1 monospace;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .thesis-meta-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #0f9f8f;
+    }
+    .thesis-current {
+      position: absolute;
+      left: 74px;
+      top: 290px;
+      width: 1772px;
+      height: 320px;
+      overflow: hidden;
+    }
+    .thesis-path {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 154px;
+      height: 18px;
+      border-radius: 99px;
+      background: #bdf4e8;
+    }
+    .thesis-flow {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: #0f9f8f;
+      transform-origin: left center;
+    }
+    .thesis-task {
+      position: absolute;
+      top: 94px;
+      min-width: 190px;
+      padding: 22px 24px;
+      border: 2px solid #b9ded8;
+      border-radius: 17px;
+      color: #315b57;
+      background: #fff;
+      box-shadow: 0 14px 36px rgba(8, 47, 45, 0.12);
+      font: 700 19px/1 monospace;
+      text-align: center;
+    }
+    #thesis-task-1 { left: 18px; }
+    #thesis-task-2 { left: 265px; }
+    #thesis-task-3 { left: 520px; }
+    #thesis-task-4 { left: 785px; }
+    .thesis-done {
+      color: #fff;
+      border-color: #0f9f8f;
+      background: #0f9f8f;
+    }
+    .thesis-gate {
+      position: absolute;
+      right: 70px;
+      top: 38px;
+      width: 440px;
+      height: 245px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 36px;
+      border: 4px solid #ff6b72;
+      border-radius: 26px;
+      color: #fff;
+      background: #063a38;
+      box-shadow: 0 25px 62px rgba(8, 47, 45, 0.26);
+    }
+    .thesis-gate-label {
+      color: #ff9da2;
+      font: 700 16px/1 monospace;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .thesis-gate strong {
+      display: block;
+      margin-top: 15px;
+      font: 700 34px/1.08 Georgia, serif;
+    }
+    .thesis-gate span {
+      margin-top: 13px;
+      color: #bdf4e8;
+      font-size: 19px;
+    }
+    .thesis-copy {
+      position: absolute;
+      left: 76px;
+      right: 76px;
+      top: 650px;
+      height: 220px;
+      overflow: hidden;
+    }
+    .thesis-line {
+      position: absolute;
+      left: 0;
+      margin: 0;
+      font: 400 72px/1.02 Georgia, serif;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+    .thesis-line-one { top: 0; color: #315b57; }
+    .thesis-line-two { top: 88px; color: #082f2d; }
+    .thesis-line-two strong {
+      color: #ff6b72;
+      font-weight: 700;
+    }
+    .thesis-endmark {
+      position: absolute;
+      right: 76px;
+      top: 684px;
+      width: 132px;
+      height: 132px;
+      display: grid;
+      place-items: center;
+      border: 3px solid #0f9f8f;
+      border-radius: 50%;
+      color: #fff;
+      background: #0f9f8f;
+      font-size: 58px;
+      font-weight: 900;
+      box-shadow: 0 20px 48px rgba(15, 159, 143, 0.24);
+    }
+  </style>
+
+  <div id="root" data-composition-id="03-thesis" data-width="1920" data-height="1080" data-duration="9">
+    <div class="thesis-ground clip" id="thesis-ground" data-start="0" data-duration="9" data-track-index="0"></div>
+    <div class="thesis-rule" id="thesis-top-rule"></div>
+    <div class="thesis-meta"><span class="thesis-meta-dot"></span>Everyday agent thesis</div>
+
+    <div class="thesis-current" id="thesis-current">
+      <div class="thesis-path"><span class="thesis-flow" id="thesis-flow"></span></div>
+      <div class="thesis-task" id="thesis-task-1" data-layout-allow-overlap>PILLS</div>
+      <div class="thesis-task" id="thesis-task-2" data-layout-allow-overlap>MOVEMENT</div>
+      <div class="thesis-task" id="thesis-task-3" data-layout-allow-overlap>APPOINTMENTS</div>
+      <div class="thesis-task" id="thesis-task-4" data-layout-allow-overlap>MEDICARE</div>
+      <div class="thesis-gate" id="thesis-decision-gate">
+        <div class="thesis-gate-label">Real decision</div>
+        <strong>Sarah chooses what happens next.</strong>
+        <span>Human judgment stays visible.</span>
+      </div>
+    </div>
+
+    <div class="thesis-copy">
+      <p class="thesis-line thesis-line-one" id="thesis-line-one">handles repetitive work quietly;</p>
+      <p class="thesis-line thesis-line-two" id="thesis-line-two">surfaces <strong>real decisions.</strong></p>
+    </div>
+    <div class="thesis-endmark" id="thesis-endmark">✓</div>
+  </div>
+
+  <script>
+    const thesisTl = gsap.timeline({ paused: true });
+    const thesisTasks = ["#thesis-task-1", "#thesis-task-2", "#thesis-task-3", "#thesis-task-4"];
+    thesisTl.fromTo("#thesis-top-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.65, ease: "power3.out" }, 0);
+    thesisTl.fromTo("#thesis-current", { x: 150, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.7, ease: "power4.out" }, 0);
+    thesisTl.fromTo("#thesis-flow", { scaleX: 0 }, { scaleX: 0.7, duration: 2.4, ease: "power2.inOut" }, 0.35);
+    thesisTl.fromTo(thesisTasks, { y: -70, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.32, stagger: 0.32, ease: "power4.out" }, 0.55);
+    thesisTl.to(thesisTasks, { x: 435, scale: 0.72, duration: 0.13, stagger: 0.08, ease: "power3.in" }, 2.15);
+    thesisTl.to(thesisTasks, { x: 1040, duration: 0.12, stagger: 0.08, ease: "none" }, 2.28);
+    thesisTl.to(thesisTasks, { x: 1265, scale: 0.54, autoAlpha: 0, duration: 0.4, stagger: 0.08, ease: "power4.out" }, 2.4);
+    thesisTl.to("#thesis-flow", { scaleX: 1, duration: 0.55, ease: "power4.out" }, 2.75);
+    thesisTl.fromTo("#thesis-line-one", { x: 95, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.55, ease: "power4.out" }, 3.15);
+    thesisTl.fromTo("#thesis-decision-gate", { scale: 0.92, x: 75, autoAlpha: 0 }, { scale: 1, x: 0, autoAlpha: 1, duration: 0.58, ease: "power4.out" }, 4.25);
+    thesisTl.to("#thesis-current", { x: -18, duration: 0.12, ease: "power3.in" }, 5.2);
+    thesisTl.to("#thesis-current", { x: -198, duration: 0.1, ease: "none" }, 5.32);
+    thesisTl.to("#thesis-current", { x: -270, duration: 0.36, ease: "power4.out" }, 5.42);
+    thesisTl.fromTo("#thesis-line-two", { y: 55, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.58, ease: "power4.out" }, 5.36);
+    thesisTl.fromTo("#thesis-endmark", { scale: 0.72, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.48, ease: "back.out(1.45)" }, 6.55);
+    window.__timelines["03-thesis"] = thesisTl;
+  </script>
+</template>

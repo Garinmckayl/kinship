@@ -1,109 +1,116 @@
-# Kinship -- Autonomous AI Guardian for Elders Living Alone
+# Kinship — The AI Care Companion That Closes the Loop
+
+> **Everyday Agents:** quiet background care that surfaces only when a real human decision is needed.
 
 ## Inspiration
 
-Every morning, a daughter in Chicago calls her 79-year-old mother in Columbus to ask if she took her pills. Every evening, she calls again to check if she ate. On a bad day, three calls go unanswered and she is on the highway at midnight, heart pounding -- because silence is the emergency.
+Family caregiving is a second shift made of tiny, repetitive tasks: check the pills, confirm the appointment, search insurance directories, follow up, and remember what happened.
 
-58 million Americans are over 65. That number hits 84 million by 2050. Medication non-adherence costs $300 billion per year. Loneliness kills at the rate of smoking 15 cigarettes a day. And when an elder falls alone, no alarm fires -- because the problem is that nothing happened, and no one noticed.
+Most care tools turn that work into more notifications. They detect a missed medication or low activity, then leave a daughter with more alarms and the same question: **What should I do now?**
 
-Every elder companion app we found was a clinical nagging machine: one push notification per one missed pill. None of them understood that a missed pill plus dizziness plus silence is not three nudges. It is an emergency.
+Kinship closes that gap. It runs quietly in the background, handles the repetitive work, and surfaces only when there is a real human decision to make.
 
-## What It Does
+## What it does
 
-Kinship is an autonomous AI guardian that runs quietly in the background of an elder's day and **only surfaces to the family when there is a real decision to make**.
+Kinship is a voice-first care companion for an older adult and a decision dashboard for family.
 
-The demo persona is Eleanor, 79, living alone in Columbus, Ohio. Her daughter Sarah is in Chicago. Three daily medications.
+Our demo follows Eleanor, 79, living independently in Columbus:
 
-**Core capabilities:**
-- Medication reminders, logging, and double-dose prevention
-- Loneliness detection with companionship and memory sharing
-- Passive symptom tracking from natural conversation
-- Scam protection -- real-time fraud interception for gift-card and IRS scams
-- Welfare monitoring -- silence detection with escalating alerts
-- Appointment management -- human-in-the-loop (agent proposes, caregiver approves)
-- Daily caregiver reports via WhatsApp and email
-- Real phone calls and WhatsApp voice notes to reach Eleanor on her actual devices
+1. Kinship reminds Eleanor about four medications and shares her confirmations without another repetitive caregiver call.
+2. It connects medication, activity, mood, conversation, and upcoming care without claiming a diagnosis.
+3. It proposes one bounded action: find nearby Internal Medicine doctors who accept Medicare.
+4. Sarah explicitly approves the request.
+5. A Strands agent starts a durable task and Amazon Nova Act operates Medicare.gov in a real AgentCore browser.
+6. Sarah watches every step live and receives a readable, source-backed receipt.
+7. The outcome remains connected to appointments, health context, and family follow-through.
 
-**The hero feature: Compound-risk detection.** Most systems react to one alarm. Kinship combines five weak signals -- medication missed, breakfast unconfirmed, activity low, dizziness reported, check-ins unanswered -- reasons about the combination, concludes it is abnormal, explains its reasoning, and begins escalation. It doesn't wait for a fall. It acts before one happens.
+In our production verification, Kinship returned two real providers 0.1 miles from Eleanor: Christopher Barlow and Shannon C. Codispoti, MD, with the practice address and phone number.
 
-## How We Built It
+That is the difference between an AI that talks and an agent that closes the loop.
 
-**Single TypeScript codebase.** Next.js 14 PWA in `frontend/`, no separate backend.
+## Why it matters
 
-**Strands Agents SDK** powers three agents:
-- **Guardian agent** (15 tools): meds, mood, memory, symptoms, family notification, doctor summaries, background tasks, phone calls, appointments, health metrics, refill tracking, scam detection
-- **Caregiver agent** (7 tools): live parent status, add medications, request appointments, remind parent now, schedule tasks
-- **ScamGuard sub-agent**: dedicated fraud specialist with its own prompt and reasoning chain
+Elder care is not one dramatic emergency. It is a thousand recurring uncertainties: Was the pill taken? Is today’s silence normal? Was the appointment confirmed? Who accepts Medicare? Did anyone follow up?
 
-**AWS Bedrock** (Claude Sonnet 4.6) provides the reasoning. Falls back to deterministic rule-based replies when credentials are unavailable -- judges click and it just works.
+More than 50 million Americans provide unpaid family care. Returning even one hour per week would represent more than 2.6 billion hours restored to families each year. Kinship is designed to make that credible by automating bounded tasks while protecting human decisions.
 
-**Bedrock AgentCore** deployment: standalone Express runtime on ARM64, invocation-tested and healthy.
+Kinship is designed around four principles:
 
-**Inngest** handles durable background execution:
-- Morning check-in at 9am ET
-- Welfare sweep every 30 minutes (silence is the emergency)
-- Daily caregiver report at 8pm ET
-- `sleepUntil` for scheduled reminders that survive disconnects
+- **Silence is a signal.** Durable welfare checks notice when expected activity does not happen.
+- **Context beats alarm volume.** Medication, mood, symptoms, activity, and conversation become one explainable picture.
+- **Sent is not saved.** Urgent alerts remain open until a caregiver acknowledges ownership.
+- **Humans authorize consequential action.** The agent proposes; the family decides.
+- **Repetition belongs to the agent.** Checking, remembering, searching, following up, and verifying run as durable background work.
 
-**Communication channels:**
-- ElevenAgents WebRTC -- real-time voice with turn-taking and barge-in
-- Twilio -- real PSTN phone calls
-- WhatsApp Cloud API -- free voice notes
-- Resend -- email delivery
+## How we built it
 
-**Postgres (Neon)** with 13 tables. Falls back to in-memory store when no database is configured.
+- **Strands Agents SDK:** specialized care, safety, and browser agents coordinate typed tools for medication status, mood, memory, symptoms, notifications, appointments, health trends, and browser tasks.
+- **Amazon Bedrock:** provides the companion’s reasoning and tool selection.
+- **Amazon Bedrock AgentCore Browser:** hosts the real browser session used by Nova Act.
+- **Amazon Nova Act:** navigates public websites and extracts structured, source-linked results.
+- **Inngest:** runs durable reminders, welfare sweeps, reports, and browser workflows that survive disconnects.
+- **Next.js + PostgreSQL:** powers the elder experience, family dashboard, approval queue, task history, and care record.
+- **ElevenAgents, Twilio, WhatsApp, and Resend:** provide natural conversation and escalation across the channels families already use.
 
-**Graceful degradation at every layer:** no AWS creds -> rule-based replies. No database -> in-memory. No Twilio -> WhatsApp voice. No WhatsApp -> dashboard escalation. Every channel degrades one step down, never silent.
+The browser workflow correlates each frontend request with its authoritative sidecar task ID, streams step progress and AgentCore live view to the caregiver, extracts typed results, and fails explicitly instead of fabricating a provider.
 
-## Challenges We Ran Into
+## Challenges
 
-**Silence detection is fundamentally different from event handling.** Building a system that notices nothing happened required rethinking the architecture around heartbeats and cron sweeps rather than request-response patterns. The welfare sweep runs every 30 minutes via Inngest and checks when Eleanor last interacted -- not what she said.
+### Making “nothing happened” observable
 
-**Double-dose prevention under concurrent access.** The database uses a unique constraint on `(elder_id, med_id, intake_date)` and `ON CONFLICT DO NOTHING` to guarantee exactly one intake per medication per day, even if Eleanor taps "Yes" twice quickly.
+Silence has no event payload. We built heartbeat records and scheduled welfare sweeps so Kinship can reason about missing expected activity while respecting nighttime and configurable quiet windows.
 
-**Making the demo bulletproof.** Judges don't have our AWS credentials, Twilio number, or database. Every integration needed a working fallback that demonstrates the same safety behavior without external dependencies.
+### Showing real agent work without false completion
 
-## Accomplishments That We're Proud Of
+The frontend originally could confuse tasks of the same type and display completion before the sidecar had finished. We added end-to-end task correlation, durable progress states, explicit failures, and a real DCV/WebSocket live browser view.
 
-- **Compound-risk detection** -- the agent combines missed medication data, symptom tracking, and welfare heartbeats to detect dangerous combinations no single alarm catches
-- **"Sent is not saved" principle** -- unconfirmed urgent alerts re-fire via WhatsApp every 30 minutes until a human taps "I'm on it"
-- **Double-dose guard** -- database-enforced, elder stopped firmly but kindly, attempt logged to family trail
-- **Zero-credential demo mode** -- the full product experience works without any API keys
-- **AgentCore deployed and healthy** -- production-grade Strands agent running on dedicated ARM64 compute
+### Keeping automation safe
 
-## What We Learned
+Provider discovery is useful; silently booking care is not. Browser work, appointment requests, and other consequential actions stop at a clear approval boundary. The completed task preserves its steps, source URL, structured result, and errors.
 
-1. **Tools are the product.** The Strands SDK's tool abstraction forced every agent capability into a discrete, testable unit with Zod schema validation.
-2. **Durable execution matters more than LLM quality.** Eleanor closes the browser. The agent must keep working. Inngest's `sleepUntil` made "remind me in 30 minutes" a kept promise instead of a broken one.
-3. **Silence detection is the hardest problem in elder care.** The heartbeat + welfare sweep architecture was the most important design decision.
-4. **Graceful degradation wins demos.** The fallback system isn't a compromise -- it's what makes the product trustworthy.
+## Accomplishments we are proud of
 
-## What's Next
+- A complete, production-verified care loop from compound risk to real nearby help.
+- Real Medicare.gov navigation through Nova Act—not a mocked browser or fabricated answer.
+- A caregiver can watch the AgentCore browser work in real time.
+- Medication reminders, care context, approval, execution, receipt, and follow-through form one coherent product experience.
+- Human approval remains visible and enforceable.
+- Health trends are presented as care context, never diagnosis.
+- Alerts and completed browser tasks can be durably acknowledged or cleared.
+- The elder experience remains simple, conversational, and full-screen accessible.
 
-- Wearable integration (Apple Watch / Fitbit) for passive health data ingestion
-- Multi-elder support for caregivers managing multiple family members
-- Medication image recognition for physical pill verification
-- Local community network for Good Neighbor Agents track expansion
+## What we learned
 
-## Built With
+The most valuable healthcare agent is not the one with the longest feature list. It is the one that can keep a promise across time:
 
-- Strands Agents SDK (TypeScript)
-- AWS Bedrock (Claude Sonnet 4.6)
-- AWS Bedrock AgentCore
-- Next.js 14
-- Inngest
-- PostgreSQL (Neon)
-- ElevenLabs / ElevenAgents
-- Twilio
-- WhatsApp Cloud API
-- Tailwind CSS
-- Zod
-- Resend
+**notice → understand → ask → act → verify → close the loop**
 
-## Try It
+Reliable execution, explicit approval, truthful failure, and visible receipts matter more than a clever response.
 
-- **Source:** [github.com/Garinmckayl/elderai](https://github.com/Garinmckayl/elderai) (MIT license)
-- **Run locally:** `cd frontend && npm install && npm run dev`
-- Open `/elder` to be Eleanor. Open `/family` to be Sarah.
+## What’s next
 
-**Track:** Everyday Agents -- "runs quietly in the background and only pings you when there's a real decision to make."
+- Confirm provider acceptance and availability with authenticated payer/provider data.
+- Turn an approved provider result into a caregiver-reviewed appointment request.
+- Add production wearable integrations for passive health signals.
+- Expand from one elder to family and community care networks.
+
+## Try it
+
+- **Live app:** https://elderai-omega.vercel.app
+- **Caregiver dashboard:** https://elderai-omega.vercel.app/family
+- **Demo login:** `caregiver@demo.local` / `demo1234`
+- **Source:** https://github.com/Garinmckayl/elderai
+
+### Judge path
+
+1. Sign in and open **Family**.
+2. Scroll to **Browser Automation**.
+3. Click **Find Medicare doctors near Eleanor**.
+4. Review ZIP `43215` and specialty `Internal Medicine`.
+5. Click **Approve & Execute**.
+6. Watch Nova Act work in the live browser window.
+7. Read the completed provider receipt and source URL.
+
+## Built with
+
+Strands Agents SDK, Amazon Bedrock, Amazon Bedrock AgentCore Browser, Amazon Nova Act, Next.js, TypeScript, Inngest, PostgreSQL, ElevenAgents, Twilio, WhatsApp Cloud API, Resend, and Zod.

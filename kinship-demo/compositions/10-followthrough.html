@@ -1,0 +1,84 @@
+<template>
+<style>
+  #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",Arial,sans-serif}
+  #root *{box-sizing:border-box}
+  .f10-ground{position:absolute;inset:0;background:radial-gradient(circle at 76% 12%,rgba(66,215,193,.24),transparent 32%),linear-gradient(135deg,#eafbF7 0%,#ddf6f3 100%)}
+  .f10-current{position:absolute;left:-80px;top:128px;width:2080px;height:3px;background:linear-gradient(90deg,transparent,#42d7c1 15%,#0f9f8f 72%,transparent);transform-origin:left center}
+  .f10-kicker{position:absolute;left:84px;top:48px;font:700 16px/1 "JetBrains Mono",monospace;letter-spacing:.17em;text-transform:uppercase;color:#0c7f72}
+  .f10-title{position:absolute;left:84px;top:76px;margin:0;font:400 62px/.98 "EB Garamond",Georgia,serif;letter-spacing:-.045em}
+  .f10-title b{font-family:"Archivo Black","Arial Black",sans-serif;font-weight:400;color:#0f9f8f}
+  .f10-stage{position:absolute;left:84px;top:178px;width:1752px;height:548px}
+  .f10-browser{position:absolute;inset:0;border:2px solid #b9ded8;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(8,47,45,.14)}
+  .f10-browserbar{position:absolute;left:0;right:0;top:0;height:48px;display:flex;align-items:center;padding:0 20px;gap:9px;background:#063a38;color:#fff;z-index:4}
+  .f10-dot{width:10px;height:10px;border-radius:50%;background:#42d7c1}
+  .f10-address{margin-left:13px;font:700 12px/1 "JetBrains Mono",monospace;letter-spacing:.08em;color:#bdf4e8}
+  .f10-shot{position:absolute;left:0;right:0;top:48px;bottom:0;overflow:hidden;background:#fff}
+  .f10-shot img{width:100%;height:100%;object-fit:cover;object-position:50% 17%;display:block}
+  .f10-health img{object-position:50% 10%}
+  .f10-family img{object-position:50% 4%}
+  .f10-station{position:absolute;right:22px;top:68px;z-index:7;display:flex;gap:8px;padding:7px;border:1px solid #b9ded8;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 10px 30px rgba(8,47,45,.12)}
+  .f10-station span{padding:9px 14px;border-radius:999px;font:700 12px/1 "JetBrains Mono",monospace;color:#315b57}
+  .f10-station span.is-active{background:#42d7c1;color:#082f2d}
+  .f10-callout{position:absolute;z-index:8;max-width:330px;padding:18px 20px;border:2px solid #0f9f8f;border-radius:18px;background:#fff;box-shadow:0 18px 44px rgba(8,47,45,.17)}
+  .f10-callout small{display:block;margin-bottom:7px;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.12em;color:#0c7f72}
+  .f10-callout strong{display:block;font-size:20px;line-height:1.18}
+  .f10-appt{right:80px;bottom:58px}
+  .f10-linked{left:88px;bottom:64px}
+  .f10-family-note{right:100px;bottom:62px}
+  .f10-linkline{position:absolute;left:250px;bottom:121px;width:610px;height:3px;z-index:7;background:linear-gradient(90deg,#0f9f8f,#42d7c1);transform-origin:left center}
+  .f10-receipts{position:absolute;left:84px;right:84px;top:754px;height:72px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .f10-receipt{display:flex;align-items:center;gap:14px;padding:0 20px;border:1px solid #b9ded8;border-radius:16px;background:rgba(255,255,255,.92);box-shadow:0 12px 28px rgba(8,47,45,.08)}
+  .f10-check{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#0f9f8f;color:#fff;font-weight:900}
+  .f10-receipt strong{font-size:16px}.f10-receipt span{margin-left:auto;font:700 11px/1 "JetBrains Mono",monospace;color:#315b57}
+  .f10-outcomes{position:absolute;left:84px;right:84px;top:848px;display:flex;align-items:center;justify-content:center;gap:16px}
+  .f10-outcomes b{padding:12px 20px;border-radius:999px;background:#063a38;color:#fff;font-size:15px;letter-spacing:.01em}
+  .f10-outcomes i{width:44px;height:2px;background:#42d7c1}
+</style>
+<div id="root" data-composition-id="10-followthrough" data-width="1920" data-height="1080" data-duration="13.5">
+  <div id="f10-ground" class="f10-ground clip" data-start="0" data-duration="13.5" data-track-index="0"></div>
+  <div class="f10-current" data-layout-ignore></div>
+  <div class="f10-kicker">FOLLOW-THROUGH · AFTER THE BROWSER CLOSES</div>
+  <h1 class="f10-title">One conversation becomes <b>continued care.</b></h1>
+  <div class="f10-stage">
+    <div class="f10-browser">
+      <div class="f10-browserbar"><i class="f10-dot"></i><i class="f10-dot"></i><i class="f10-dot"></i><span class="f10-address">KINSHIP / CARE CONTINUITY</span></div>
+      <div class="f10-shot f10-calendar" data-layout-allow-overflow><img src="assets/captures/calendar-full.png" alt="Kinship calendar with upcoming appointments"></div>
+      <div class="f10-shot f10-health" data-layout-allow-overflow><img src="assets/captures/health-full.png" alt="Kinship health context linked to conversation"></div>
+      <div class="f10-shot f10-family" data-layout-allow-overflow><img src="assets/captures/family-full.png" alt="Kinship family care surface"></div>
+      <div class="f10-station"><span class="f10-tab-calendar is-active">CALENDAR</span><span class="f10-tab-health">HEALTH</span><span class="f10-tab-family">FAMILY</span></div>
+      <div class="f10-callout f10-appt"><small>APPOINTMENT VISIBLE</small><strong>Provider visit stays on the shared calendar</strong></div>
+      <div class="f10-linkline" data-layout-ignore></div>
+      <div class="f10-callout f10-linked"><small>CONTEXT LINKED</small><strong>Health detail remains attached to the conversation</strong></div>
+      <div class="f10-callout f10-family-note"><small>FAMILY RECEIPT</small><strong>Everyone sees what was completed</strong></div>
+    </div>
+  </div>
+  <div class="f10-receipts">
+    <div class="f10-receipt"><b class="f10-check">✓</b><strong>Appointment added</strong><span>09:42</span></div>
+    <div class="f10-receipt"><b class="f10-check">✓</b><strong>Health context linked</strong><span>SOURCE KEPT</span></div>
+    <div class="f10-receipt"><b class="f10-check">✓</b><strong>Family task closed</strong><span>RECEIPT SENT</span></div>
+  </div>
+  <div class="f10-outcomes"><b>MORE INDEPENDENCE</b><i></i><b>FEWER INTERRUPTIONS</b><i></i><b>BETTER DECISIONS</b></div>
+</div>
+<script>
+  const f10tl=gsap.timeline({paused:true});
+  f10tl.fromTo(".f10-current",{scaleX:0},{scaleX:1,duration:.8,ease:"power4.out"},0)
+    .fromTo(".f10-stage",{x:110,autoAlpha:.2},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},0)
+    .fromTo(".f10-appt",{y:34,autoAlpha:0},{y:0,autoAlpha:1,duration:.48,ease:"power3.out"},1.15)
+    .fromTo(".f10-health",{x:1760,autoAlpha:1},{x:0,autoAlpha:1,duration:.9,ease:"power3.inOut"},3.05)
+    .to(".f10-calendar",{x:-500,autoAlpha:0,duration:.62,ease:"power3.in"},3.05)
+    .to(".f10-tab-calendar",{backgroundColor:"#ffffff",color:"#315b57",duration:.2,ease:"none"},3.55)
+    .to(".f10-tab-health",{backgroundColor:"#42d7c1",color:"#082f2d",duration:.2,ease:"none"},3.55)
+    .fromTo(".f10-linkline",{scaleX:0},{scaleX:1,duration:.72,ease:"power2.out"},4.15)
+    .fromTo(".f10-linked",{x:-42,autoAlpha:0},{x:0,autoAlpha:1,duration:.5,ease:"power3.out"},4.55)
+    .fromTo(".f10-family",{x:1760,autoAlpha:1},{x:0,autoAlpha:1,duration:.9,ease:"power3.inOut"},6.35)
+    .to(".f10-health",{x:-500,autoAlpha:0,duration:.62,ease:"power3.in"},6.35)
+    .to(".f10-tab-health",{backgroundColor:"#ffffff",color:"#315b57",duration:.2,ease:"none"},6.85)
+    .to(".f10-tab-family",{backgroundColor:"#42d7c1",color:"#082f2d",duration:.2,ease:"none"},6.85)
+    .to(".f10-appt",{x:-120,autoAlpha:0,duration:.35,ease:"power3.in"},6.35)
+    .fromTo(".f10-family-note",{y:34,autoAlpha:0},{y:0,autoAlpha:1,duration:.5,ease:"power3.out"},7.2)
+    .fromTo(".f10-receipt",{y:36,autoAlpha:0},{y:0,autoAlpha:1,duration:.48,stagger:.34,ease:"power4.out"},8.35)
+    .fromTo(".f10-outcomes b",{y:28,autoAlpha:0},{y:0,autoAlpha:1,duration:.42,stagger:.48,ease:"power4.out"},10.65)
+    .fromTo(".f10-outcomes i",{scaleX:0},{scaleX:1,duration:.36,stagger:.48,ease:"power2.out"},11.05);
+  window.__timelines["10-followthrough"]=f10tl;
+</script>
+</template>

@@ -1,239 +1,83 @@
-# Kinship -- Demo Video Script (5 min max, target 4:30)
+# Kinship — Competition Demo Film
 
-> **Track:** Everyday Agents
-> **Thesis (say verbatim):** "Runs quietly in the background and only surfaces when there's a real decision to make."
+**Runtime:** 3:16
+**Track:** Everyday Agents
+**Thesis:** Kinship handles repetitive care work quietly, then surfaces the decisions only family can make.
 
----
+## 0:00–0:15 — Real work, right now
 
-## BEAT 0 -- The Truck (0:00 - 0:45)
+**Screen:** Authentic Nova Act browser work on Medicare.gov resolves into a verified provider receipt.
 
-**[SCREEN]** Black screen. Five signal cards appear one by one, stacking vertically with a quiet heartbeat sound:
+**Narration:** “While Sarah works, Kinship is navigating Medicare.gov for her mother, finding nearby doctors, and turning official results into a decision she can use. For Eleanor, this may be the difference between waiting and getting help.”
 
-```
-  [!] Medication missed                     (yellow)
-  [!] Breakfast not confirmed               (yellow)
-  [!] Activity unusually low                (yellow)
-  [!] Elder reports dizziness               (orange)
-  [!] Two check-ins unanswered              (red)
-```
+## 0:15–0:31 — The invisible second shift
 
-Each card fades in with a soft pulse. After the fifth card, a brief pause -- then they all connect with glowing lines to a central node that reads:
+**Screen:** Medication checks, appointments, insurance searches, and follow-up tasks accumulate around Sarah.
 
-```
-  COMPOUND RISK DETECTED
-```
+**Narration:** “Family caregiving is a second shift of relentless tasks. Did Mom take her pills? Has she moved? Was the appointment confirmed? Which doctor accepts Medicare? Each is small. Together, they consume attention and still leave dangerous gaps.”
 
-The agent's reasoning appears typewriter-style below:
+## 0:31–0:40 — The Everyday Agent promise
 
-```
-  "Any one of these is a nudge. All five together are abnormal.
-   Medication non-adherence + dizziness + silence = possible
-   adverse event. Escalating to Sarah now."
-```
+**Screen:** The task avalanche resolves into one calm Kinship current and one visible human decision.
 
-A phone notification slides in: **"Kinship URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."**
+**Narration:** “Kinship is an AI companion for older adults living independently. It handles repetitive work quietly in the background, and surfaces when there is a real decision to make.”
 
-**[NARRATION]**
-> "Most elder care apps send one alert for one problem. Kinship sees five weak signals, reasons about the combination, and concludes that together they are dangerous. It doesn't wait for a fall. It acts before one happens."
+## 0:40–1:07 — Medication and care context
 
-**[SCREEN]** Brief pause. Title card:
+**Screen:** Eleanor’s accessible Today view confirms four medications. Medication, activity, mood, conversation, and upcoming care become an explainable review.
 
-```
-  KINSHIP
-  Autonomous AI Guardian for Elders Living Alone
-  Built with Strands Agents SDK on AWS Bedrock
-```
+**Narration:** “Every morning, Eleanor sees what matters today. Kinship reminds her about four medications. She answers by voice or one tap. Each confirmation becomes shared context, so Sarah does not have to call and ask again.
 
----
+Kinship connects medication, activity, mood, conversation, and upcoming care. If Eleanor goes quiet and activity falls below her pattern, Kinship does not diagnose. It explains the change and asks family to review.”
 
-## BEAT 1 -- The Problem (0:45 - 1:15)
+## 1:07–1:21 — Human approval
 
-**[SCREEN]** Clean text on dark background, stats appear as the narrator reads:
+**Screen:** Sarah reviews a bounded Internal Medicine provider search and explicitly approves it.
 
-```
-  58 million Americans over 65. Growing to 84 million by 2050.
-  Non-adherence costs $300 billion per year.
-  Loneliness kills at the rate of smoking 15 cigarettes a day.
-  And when an elder falls alone... silence is the emergency.
-```
+**Narration:** “Sarah sees one proposed action: find nearby Internal Medicine clinicians who accept Medicare. Nothing consequential happens silently. She can inspect, approve, or dismiss it. One human decision starts the work.”
 
-**[NARRATION]**
-> "Fifty-eight million Americans over 65. Eighty-four million by 2050. Medication non-adherence alone costs three hundred billion dollars a year. And loneliness -- the research is clear -- loneliness kills at the rate of smoking fifteen cigarettes a day."
->
-> "But the real danger is silence. When Eleanor falls and can't reach a button, the problem isn't that an alarm didn't fire. The problem is that no one noticed nothing happened."
->
-> "Every elder companion today is a clinical nagging machine. Kinship is different. It runs quietly in the background and only surfaces when there's a real decision to make."
+## 1:21–1:41 — Live Nova Act proof
 
----
+**Screen:** Full-frame production recording of Nova Act operating Medicare Care Compare inside AgentCore Browser. A readable rail streams each durable task step.
 
-## BEAT 2 -- Morning with Eleanor (1:15 - 2:15)
+**Narration:** “A Strands agent creates a durable task. Amazon Nova Act opens Medicare Care Compare inside an AgentCore Browser. Sarah watches every step live: select clinicians, enter Eleanor’s Columbus ZIP, filter Internal Medicine, and read the results. The task stays running until the work is finished.”
 
-**[SCREEN]** `/elder` page. Nova animated avatar is idle. The Today board shows 3 meds: Lisinopril (pending), Metformin (pending), Amlodipine (pending).
+## 1:41–1:56 — Verified receipt
 
-**[NARRATION]**
-> "Meet Eleanor. She's seventy-nine, lives alone in Columbus, Ohio. Her daughter Sarah is in Chicago. Three daily medications."
+**Screen:** A human-readable, source-labeled receipt:
 
-**[ACTION - show on screen]**
-1. Click **"Start live voice"** (ElevenAgents panel). Nova's face activates.
-2. Eleanor speaks: *"Good morning. I just took my blood pressure pill."*
-3. Agent responds warmly, confirms Lisinopril, the Today board updates (1/3 taken, green check).
-4. Agent shares a memory: *"That reminds me -- do you remember Henry's garden? You once told me the tomatoes were bigger than your fist."*
+- Christopher Barlow — 0.1 miles
+- Shannon C. Codispoti, MD — 0.1 miles
+- 41 S High St, Suite 25, Columbus, OH 43215
+- `(614) 533-6740`
+- Source: Medicare.gov · searched ZIP `43215`
 
-**[NARRATION]**
-> "Eleanor talks to Kinship like a person, not an app. The agent confirms her pill, logs it to the database, and shares a memory moment to keep her company. Real voice, real turn-taking -- this is ElevenAgents WebRTC with native barge-in, not browser speech synthesis."
+**Narration:** “Kinship returns a receipt, not JSON: Christopher Barlow and Shannon Codispoti, both zero point one miles away, with address, phone, search ZIP, and Medicare source attached. The result is specific and auditable.”
 
-**[ACTION - show on screen]**
-5. Eleanor says: *"Yes, I took my blood pressure pill again."* (attempts double dose)
-6. Agent responds firmly but kindly: *"Eleanor, please stop -- you already took your Lisinopril this morning. Another dose could be harmful. I've let Sarah know just in case."*
-7. Cut to the Family dashboard `/family` -- a new alert appears: **[attention] Double-dose prevented: Eleanor tried to log Lisinopril again -- stopped her.**
+## 1:56–2:18 — One pattern, many repetitive tasks
 
-**[NARRATION]**
-> "Double-dose guard. The database enforces one intake per medication per day. Eleanor is stopped firmly, kindly, and the prevented attempt is written to Sarah's trail. This isn't a reminder app. This is a safety system."
+**Screen:** Provider search remains labeled **Live proof**. Refill, appointment, verified bill, benefits, grocery, and follow-up cards remain labeled **Approval-gated playbook**.
 
----
+**Narration:** “The same pattern coordinates refills, appointments, verified bills, benefits, groceries, and follow-up. Kinship gathers context, prepares the task, pauses at the decision, and records the outcome. Here, Medicare provider search is the live browser proof. Other playbooks remain approval-gated until chosen.”
 
-## BEAT 3 -- Compound Risk Detection (2:15 - 3:15)
+## 2:18–2:31 — Follow-through
 
-> **This is the hero beat. Linger here. Show the reasoning.**
+**Screen:** Completed work flows into the shared calendar, health context, family dashboard, and durable receipts.
 
-**[SCREEN]** Split view: left is the `/elder` page (quiet, no messages for a while), right is the `/family` dashboard showing escalations building up.
+**Narration:** “Care continues after the browser closes. Appointments remain visible. Health trends stay connected to conversation. Completed tasks leave receipts. Eleanor keeps her independence; Sarah gets fewer interruptions and better decisions.”
 
-**[NARRATION]**
-> "Now here's what makes Kinship different from every other agent in this competition."
+## 2:31–2:55 — Architecture
 
-**[ACTION - show on screen]** Walk through each signal appearing on the family dashboard:
+**Screen:** Three planes assemble: human context; Strands orchestration with Bedrock reasoning and consented memory; then AgentCore Browser, Nova Act, typed extraction, approval, and audit receipt.
 
-1. **9:00 AM** -- Morning check-in fires. Eleanor doesn't respond. Alert: *"Morning check-in unanswered."*
-2. **9:30 AM** -- Welfare sweep runs (every 30 min via Inngest cron). Heartbeat is stale. Alert: *"Eleanor quiet for 30+ minutes. A call would be wise."*
-3. **10:00 AM** -- Eleanor briefly responds: *"I'm dizzy."* Agent catches it, logs the symptom via `log_symptom`, logs mood as "anxious."
-4. **10:00 AM** -- Agent checks med schedule: Lisinopril missed. Metformin missed.
-5. **10:30 AM** -- Second welfare sweep. Eleanor silent again. Two check-ins unanswered.
+**Narration:** “Under the hood, Strands coordinates care, safety, and browser tools. Amazon Bedrock provides reasoning. Kinship memory holds consented context. Events stream to the family dashboard. AgentCore gives Nova Act a durable, observable browser. Structured extraction turns official pages into typed results. Approvals, audit logs, and source links preserve human control.”
 
-**[SCREEN]** The five signals now stack visually (recreate the opening graphic, but this time it's REAL data from the dashboard):
+## 2:55–3:16 — Impact and vision
 
-```
-  [!] Lisinopril + Metformin missed         -> get_med_schedule
-  [!] Breakfast check-in unanswered          -> welfare sweep / heartbeat
-  [!] Activity unusually low                 -> lastHeartbeat.minutesAgo
-  [!] "I'm dizzy"                            -> log_symptom
-  [!] Two check-ins unanswered               -> welfare sweep escalation
-```
+**Screen:** The potential time returned to more than 50 million unpaid U.S. family caregivers resolves into the Kinship mark.
 
-**[SCREEN]** Agent's reasoning chain (show as an animated trace):
+**Narration:** “More than fifty million Americans provide unpaid family care. Returning one hour each week restores billions of hours to families. Kinship is not another dashboard asking caregivers to do more. It handles the repetition, protects the decision, and closes the loop—from silence, to understanding, to real help.”
 
-```
-  GUARDIAN AGENT REASONING:
-  - get_med_schedule: 0/3 taken (Lisinopril, Metformin pending)
-  - log_symptom: "dizzy" mentioned (mentions7d: 1, first report today)
-  - System prompt rule: "missed dose >= 2 OR dizzy -> escalate URGENT"
-  - Welfare sweep: minutesAgo > quietMinutes threshold
-  - Combination: missed meds + dizziness + silence = possible adverse event
+## Judge takeaway
 
-  ACTION: notify_family(level: "urgent", message: ...)
-  ACTION: call_elder(reason: "unresponsive after dizziness report")
-```
-
-**[SCREEN]** The family dashboard fires an URGENT alert with the glowing red border:
-
-```
-  [URGENT] Eleanor missed 2 medications, reported dizziness,
-  and has gone quiet. Combination is abnormal. Call her now.
-```
-
-Sarah's phone shows a WhatsApp message: *"Kinship URGENT -- Eleanor missed meds, reported dizziness, and has gone quiet. Call her now."*
-
-Sarah taps **"I'm on it"** in the dashboard. The alert is acknowledged. The re-fire loop stops.
-
-**[NARRATION]**
-> "This is compound-risk detection. Any one of these signals alone is a gentle nudge. But the agent sees all five together. It combines missed medication from the schedule tool, a dizziness symptom from passive conversation tracking, and silence from the welfare heartbeat system. The system prompt instructs: two missed doses OR dizziness means escalate urgent. The welfare cron independently flags the silence. Together, the agent concludes the combination is abnormal and begins escalation."
->
-> "It calls Eleanor's real phone through Twilio. It messages Sarah on WhatsApp. And it keeps re-firing that alert every thirty minutes until a human taps 'I'm on it.' A sent alert isn't a saved life. An acknowledged one is."
-
----
-
-## BEAT 4 -- Caregiver Dashboard + Scam Shield (3:15 - 3:55)
-
-**[SCREEN]** `/family` page -- Overview tab showing alerts, adherence, mood, meds. Then switch to Chat tab.
-
-**[NARRATION]**
-> "Sarah sees everything from her dashboard in Chicago. Adherence percentage, mood, alerts with timestamps, background tasks. But she can also talk to the agent directly."
-
-**[ACTION - show on screen]**
-
-1. **Caregiver chat:** Type "How is mom doing today?" Agent responds with live data -- adherence count, mood, recent alerts, pending tasks. All from real database queries.
-
-2. **Scam protection:** On the elder page, Eleanor says: *"Someone from the IRS called and said I owe money in gift cards."* The agent immediately triggers the ScamGuard sub-agent. Response: *"Eleanor, do not pay or share anything. I'm alerting Sarah right now."* An URGENT alert fires on the family dashboard.
-
-3. **Human-in-the-loop:** Show the Calendar page with a proposed appointment. Sarah taps **Approve** -- it promotes to "upcoming" and syncs to Google Calendar. The agent never books without caregiver consent.
-
-**[NARRATION]**
-> "The scam interceptor catches gift-card fraud, IRS threats, Medicare scams -- any pattern that targets elders. It blocks the interaction, alerts the caregiver, and never shames Eleanor. And every appointment, every medication change, every decision goes through the caregiver first. The agent proposes. A human approves."
-
----
-
-## BEAT 5 -- Architecture + AgentCore (3:55 - 4:15)
-
-**[SCREEN]** Architecture diagram from ARCHITECTURE.md (clean Mermaid render), hold for 8 seconds. Highlight:
-
-```
-  Strands TS SDK (guardian: 15 tools, caregiver: 7 tools, scam specialist)
-  AWS Bedrock (Claude Sonnet 4.6)
-  Inngest (durable crons: morning check-in, welfare sweep, daily report)
-  Bedrock AgentCore (deployed, healthy, invocation-tested)
-  Postgres (Neon) -- 13 tables
-  ElevenAgents WebRTC -- real voice
-  Twilio -- real phone calls
-  WhatsApp -- free voice notes
-```
-
-**[NARRATION]**
-> "Single TypeScript codebase. Strands Agents SDK with fifteen tools across three agents. Durable background execution through Inngest -- tasks survive disconnects. Deployed on Bedrock AgentCore, invocation-tested, healthy. And every layer degrades gracefully: no AWS creds, it uses rule-based replies. No database, it uses in-memory. No Twilio, it falls back to WhatsApp. No WhatsApp, it escalates through the dashboard. The demo never dies."
-
----
-
-## BEAT 6 -- Close (4:15 - 4:30)
-
-**[SCREEN]** Eleanor's face (Nova avatar), idle, peaceful. Slow zoom out to show the full elder interface. Then the tagline:
-
-```
-  KINSHIP
-
-  Dignity for elders.
-  Absolute peace of mind for their children.
-```
-
-**[NARRATION]**
-> "Kinship doesn't replace a daughter's love. It makes sure she never has to wonder if her mother is okay."
->
-> "Dignity for elders. Absolute peace of mind for their children."
-
----
-
-## PRODUCTION NOTES
-
-### Screen Recording Order
-1. Record Beat 0 graphic separately (motion graphics or screen capture of a custom page)
-2. Record `/elder` live voice session (Beat 2) -- ensure Today board is visible
-3. Record `/family` dashboard with escalations building (Beat 3)
-4. Record `/family` caregiver chat + scam demo + `/calendar` approval (Beat 4)
-5. Screenshot architecture diagram (Beat 5)
-6. Record closing shot on `/elder` (Beat 6)
-
-### Narration
-- Total narration: ~1,200 words at 160 WPM = ~4:15 with pauses
-- Tone: calm, confident, no hype. Let the product speak.
-- Record with a decent mic in a quiet room. Audacity is fine.
-
-### What NOT to say
-- Don't say "AI-powered" without showing what the AI does
-- Don't say "revolutionary" -- the judges have seen 8,000 entries
-- Don't claim medical advice -- say "reminder and escalation log only"
-
-### Judging Criteria Mapping
-| Criteria | Where it's shown |
-|---|---|
-| Technical Implementation | Beat 3 (compound risk), Beat 5 (architecture + AgentCore) |
-| Design | Beat 2 (full product experience, not a POC) |
-| Potential Impact | Beat 1 (stats), Beat 6 (emotional close) |
-| Creativity & Originality | Beat 0 (compound risk hook), Beat 4 (scam shield/HITL) |
-| Presentation | Beat 0 (opens with a truck), clean narration throughout |
+Kinship is not another alert feed. It quietly handles repetitive care work, pauses for human authority, performs real browser action, and leaves a source-backed receipt.

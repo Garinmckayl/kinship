@@ -1,0 +1,105 @@
+<template>
+<style>
+  #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#082f2d;font-family:"Montserrat",Arial,sans-serif}
+  #root *{box-sizing:border-box}
+  .f11-ground{position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(66,215,193,.2),transparent 38%),linear-gradient(180deg,#eafbf7,#ddf6f3)}
+  .f11-kicker{position:absolute;left:76px;top:43px;font:700 15px/1 "JetBrains Mono",monospace;letter-spacing:.16em;color:#0f9f8f}
+  .f11-title{position:absolute;left:76px;top:70px;margin:0;font:400 54px/1 "EB Garamond",Georgia,serif;letter-spacing:-.04em}
+  .f11-badge{position:absolute;right:76px;top:55px;padding:12px 17px;border-radius:999px;background:#063a38;color:#bdf4e8;font:700 12px/1 "JetBrains Mono",monospace;letter-spacing:.08em}
+  .f11-stack{position:absolute;left:76px;right:76px;top:152px;height:716px;display:grid;grid-template-rows:142px 286px 210px;gap:24px}
+  .f11-plane{position:relative;border:1px solid #b9ded8;border-radius:24px;background:rgba(255,255,255,.78);box-shadow:0 16px 38px rgba(8,47,45,.08);overflow:hidden}
+  .f11-plane-label{position:absolute;left:20px;top:17px;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em;color:#0f9f8f}
+  .f11-row{position:absolute;left:190px;right:24px;top:24px;bottom:20px;display:flex;align-items:center;justify-content:center;gap:18px}
+  .f11-node{position:relative;display:flex;align-items:center;justify-content:center;min-width:176px;height:70px;padding:0 20px;border:1px solid #b9ded8;border-radius:16px;background:#fff;box-shadow:0 10px 24px rgba(8,47,45,.08);font-weight:700;text-align:center}
+  .f11-node small{display:block;font:700 10px/1.3 "JetBrains Mono",monospace;letter-spacing:.09em;color:#315b57}
+  .f11-human .f11-node{min-width:220px}
+  .f11-consent{border-color:#0f9f8f;background:#effcf9}
+  .f11-arrow{color:#0f9f8f;font-size:24px;font-weight:900}
+  .f11-orch{position:absolute;left:214px;top:52px;width:560px;height:202px;padding:25px;border:2px solid #0f9f8f;border-radius:22px;background:#063a38;color:#fff;box-shadow:0 20px 40px rgba(6,58,56,.2)}
+  .f11-orch h2{margin:0;font:900 26px/1 "Montserrat",Arial,sans-serif;letter-spacing:-.03em}
+  .f11-orch p{margin:8px 0 18px;color:#bdf4e8;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em}
+  .f11-specialists{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .f11-specialist{padding:15px 8px;border:1px solid rgba(189,244,232,.3);border-radius:13px;background:rgba(255,255,255,.08);text-align:center;font-size:13px;font-weight:700}
+  .f11-reason{position:absolute;left:810px;top:52px;width:240px;height:92px;border-color:#42d7c1}
+  .f11-memory{position:absolute;left:810px;top:162px;width:240px;height:92px}
+  .f11-stream{position:absolute;left:1090px;top:52px;width:206px;height:202px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px dashed #0f9f8f;border-radius:20px;background:#effcf9}
+  .f11-stream strong{font:900 17px/1.15 "Montserrat",Arial,sans-serif;text-align:center}
+  .f11-stream span{margin-top:10px;font:700 10px/1.5 "JetBrains Mono",monospace;color:#315b57}
+  .f11-gate{position:absolute;left:1334px;top:67px;width:220px;height:172px;border:2px solid #ff6b72;border-radius:22px;background:#fff4f4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .f11-gate b{display:grid;place-items:center;width:48px;height:48px;margin-bottom:12px;border-radius:50%;background:#ff6b72;color:#fff;font-size:23px}
+  .f11-gate strong{font-size:18px}.f11-gate small{margin-top:8px;font:700 10px/1 "JetBrains Mono",monospace;color:#8c3e43}
+  .f11-flow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .f11-flow path{fill:none;stroke:#0f9f8f;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .f11-action .f11-row{left:170px;right:24px;top:42px;bottom:18px;gap:12px}
+  .f11-action .f11-node{min-width:174px;height:84px}
+  .f11-action .f11-node:nth-of-type(4){border-color:#42d7c1}
+  .f11-receipt{min-width:220px!important;border:2px solid #0f9f8f!important;background:#effcf9!important}
+  .f11-proof{position:absolute;left:214px;right:24px;bottom:16px;height:28px;display:flex;align-items:center;gap:12px;font:700 10px/1 "JetBrains Mono",monospace;color:#315b57}
+  .f11-proof i{flex:1;height:2px;background:#42d7c1;transform-origin:left center}
+</style>
+<div id="root" data-composition-id="11-architecture" data-width="1920" data-height="1080" data-duration="24">
+  <div id="f11-ground" class="f11-ground clip" data-start="0" data-duration="24" data-track-index="0"></div>
+  <div class="f11-kicker">BUILT FOR CONSEQUENTIAL CARE</div>
+  <h1 class="f11-title">Context in. Bounded action out. Evidence always.</h1>
+  <div class="f11-badge">AWS-NATIVE · HUMAN-AUTHORIZED</div>
+  <div class="f11-stack">
+    <section class="f11-plane f11-human">
+      <span class="f11-plane-label">PLANE 01 · HUMAN CONTEXT</span>
+      <div class="f11-row">
+        <div class="f11-node">Conversation</div><b class="f11-arrow">+</b>
+        <div class="f11-node">Care history</div><b class="f11-arrow">+</b>
+        <div class="f11-node">Family preferences</div><b class="f11-arrow">→</b>
+        <div class="f11-node f11-consent">Consented context</div>
+      </div>
+    </section>
+    <section class="f11-plane f11-intelligence">
+      <span class="f11-plane-label">PLANE 02 · REASONING + ORCHESTRATION</span>
+      <svg class="f11-flow" viewBox="0 0 1768 286" preserveAspectRatio="none" aria-hidden="true">
+        <path id="f11-path-a" d="M 774 99 L 810 99"/>
+        <path id="f11-path-b" d="M 774 204 L 810 204"/>
+        <path id="f11-path-c" d="M 1050 99 L 1090 99 L 1090 153"/>
+        <path id="f11-path-d" d="M 1050 204 L 1090 204 L 1090 153"/>
+        <path id="f11-path-e" d="M 1296 153 L 1334 153"/>
+      </svg>
+      <div class="f11-orch"><h2>Strands Agents SDK</h2><p>ORCHESTRATES BOUNDED SPECIALISTS</p><div class="f11-specialists"><div class="f11-specialist">Care specialist</div><div class="f11-specialist">Safety specialist</div><div class="f11-specialist">Browser specialist</div></div></div>
+      <div class="f11-node f11-reason"><span><small>FOUNDATION MODEL</small>Amazon Bedrock reasoning</span></div>
+      <div class="f11-node f11-memory"><span><small>CONSENT BOUNDARY</small>Consented memory</span></div>
+      <div class="f11-stream"><strong>Typed event stream</strong><span>PLAN<br>PROGRESS<br>EVIDENCE</span></div>
+      <div class="f11-gate"><b>✓</b><strong>Approval gate</strong><small>HUMAN AUTHORITY</small></div>
+    </section>
+    <section class="f11-plane f11-action">
+      <span class="f11-plane-label">PLANE 03 · DURABLE ACTION + RECEIPT</span>
+      <div class="f11-row">
+        <div class="f11-node"><span><small>SECURE RUNTIME</small>AgentCore Browser</span></div><b class="f11-arrow">→</b>
+        <div class="f11-node"><span><small>WEB ACTION</small>Amazon Nova Act</span></div><b class="f11-arrow">→</b>
+        <div class="f11-node"><span><small>STRUCTURED RESULT</small>Typed extraction</span></div><b class="f11-arrow">→</b>
+        <div class="f11-node f11-receipt"><span><small>SOURCE + TIMESTAMP</small>Audit receipt</span></div>
+      </div>
+      <div class="f11-proof"><span>REQUEST</span><i></i><span>AUTHORIZED ACTION</span><i></i><span>VERIFIABLE SOURCE</span></div>
+    </section>
+  </div>
+</div>
+<script>
+  document.querySelectorAll(".f11-flow path").forEach((p)=>{const len=p.getTotalLength();p.style.strokeDasharray=`${len}`;p.style.strokeDashoffset=`${len}`});
+  const f11tl=gsap.timeline({paused:true});
+  f11tl.fromTo(".f11-human",{x:120,autoAlpha:.25},{x:0,autoAlpha:1,duration:.7,ease:"power4.out"},0)
+    .fromTo(".f11-human .f11-node",{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:.45,stagger:.22,ease:"power3.out"},.65)
+    .fromTo(".f11-intelligence",{x:120,autoAlpha:.2},{x:0,autoAlpha:1,duration:.72,ease:"power4.out"},3.5)
+    .fromTo(".f11-orch",{scale:.92,autoAlpha:0},{scale:1,autoAlpha:1,duration:.58,ease:"power3.out"},4.2)
+    .fromTo(".f11-specialist",{y:20,autoAlpha:0},{y:0,autoAlpha:1,duration:.42,stagger:.3,ease:"power3.out"},5.05)
+    .fromTo(".f11-reason",{x:36,autoAlpha:0},{x:0,autoAlpha:1,duration:.48,ease:"power3.out"},7.1)
+    .to("#f11-path-a",{strokeDashoffset:0,duration:.55,ease:"power2.out"},7.45)
+    .fromTo(".f11-memory",{x:36,autoAlpha:0},{x:0,autoAlpha:1,duration:.48,ease:"power3.out"},8.3)
+    .to("#f11-path-b",{strokeDashoffset:0,duration:.55,ease:"power2.out"},8.65)
+    .to(["#f11-path-c","#f11-path-d"],{strokeDashoffset:0,duration:.7,stagger:.2,ease:"power2.out"},10.1)
+    .fromTo(".f11-stream",{scale:.92,autoAlpha:0},{scale:1,autoAlpha:1,duration:.55,ease:"power3.out"},10.55)
+    .to("#f11-path-e",{strokeDashoffset:0,duration:.6,ease:"power2.out"},12.5)
+    .fromTo(".f11-gate",{x:36,autoAlpha:0},{x:0,autoAlpha:1,duration:.52,ease:"power3.out"},12.85)
+    .to(".f11-gate",{boxShadow:"0 0 0 7px rgba(255,107,114,.16)",duration:.35,ease:"power2.out"},14.1)
+    .fromTo(".f11-action",{x:60,autoAlpha:.2},{x:0,autoAlpha:1,duration:.7,ease:"power4.out"},15.15)
+    .fromTo(".f11-action .f11-node",{x:42,autoAlpha:0},{x:0,autoAlpha:1,duration:.48,stagger:1.05,ease:"power4.out"},16)
+    .fromTo(".f11-proof i",{scaleX:0},{scaleX:1,duration:.65,stagger:1.05,ease:"power2.out"},18.1)
+    .to(".f11-receipt",{boxShadow:"0 0 0 6px rgba(15,159,143,.15),0 12px 28px rgba(8,47,45,.1)",duration:.4,ease:"power2.out"},22.3);
+  window.__timelines["11-architecture"]=f11tl;
+</script>
+</template>

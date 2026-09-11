@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "devpost",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.084Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.141Z"
+    },
+    "language": {
+      "value": "en",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.222Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.311Z"
+    },
+    "storyboard": {
+      "value": "no",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.447Z"
+    },
+    "voice": {
+      "value": "ElevenLabs n1PvBOwxb8X6m7tahp2h",
+      "confirmed_in": [
+        "kinship-demo"
+      ],
+      "updated_at": "2026-09-11T14:18:26.548Z"
+    }
+  },
+  "sightings": {}
+}

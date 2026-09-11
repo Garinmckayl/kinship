@@ -1,0 +1,16 @@
+{
+  "fps": 30,
+  "seams": [
+    {"id":"proof-to-burden","cut":15,"technique":"inverse zoom-through","blur":18,"exit":{"selector":"#scene-1","axis":"z","dir":-1,"dur":0.22},"entry":{"selector":"#scene-2","axis":"z","dir":-1,"dur":0.5,"scanRoot":"#scene-2"}},
+    {"id":"burden-to-thesis","cut":31.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-2","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-3","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"thesis-to-medication","cut":40.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-3","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-4","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"medication-to-context","cut":53.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-4","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-5","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"context-to-approval","cut":67.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-5","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-6","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"approval-to-live","cut":81.5,"technique":"zoom-through","blur":18,"exit":{"selector":"#scene-6","axis":"z","dir":1,"dur":0.22},"entry":{"selector":"#scene-7","axis":"z","dir":1,"dur":0.5,"scanRoot":"#scene-7"}},
+    {"id":"live-to-receipt","cut":101,"technique":"inverse zoom-through","blur":18,"exit":{"selector":"#scene-7","axis":"z","dir":-1,"dur":0.22},"entry":{"selector":"#scene-8","axis":"z","dir":-1,"dur":0.5,"scanRoot":"#scene-8"}},
+    {"id":"receipt-to-library","cut":116.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-8","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-9","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"library-to-followthrough","cut":138,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-9","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-10","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"followthrough-to-architecture","cut":151.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-10","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-11","axis":"x","dir":-1,"dur":0.34,"travel":12}},
+    {"id":"architecture-to-impact","cut":175.5,"technique":"cut-the-curve LEFT","exit":{"selector":"#scene-11","axis":"x","dir":-1,"dur":0.34},"entry":{"selector":"#scene-12","axis":"x","dir":-1,"dur":0.34,"travel":12}}
+  ]
+}

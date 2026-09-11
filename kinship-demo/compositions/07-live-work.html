@@ -1,0 +1,69 @@
+<template>
+  <style>
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-400-normal.woff2") format("woff2");font-weight:400}
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-700-normal.woff2") format("woff2");font-weight:700}
+    @font-face{font-family:"Montserrat";src:url("node_modules/@fontsource/montserrat/files/montserrat-latin-900-normal.woff2") format("woff2");font-weight:900}
+    @font-face{font-family:"JetBrains Mono";src:url("node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2") format("woff2");font-weight:700}
+    *{box-sizing:border-box}
+    #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#fff;font-family:"Montserrat",sans-serif}
+    .s07-ground{position:absolute;inset:0;background:#063a38}
+    .s07-stage{position:absolute;inset:0;overflow:hidden}
+    .s07-camera{position:absolute;inset:0;transform-origin:52% 45%;will-change:transform}
+    .s07-browser{position:absolute;left:42px;right:42px;top:76px;height:824px;overflow:hidden;border:2px solid rgba(189,244,232,.72);border-radius:28px;background:#fff;box-shadow:0 35px 110px rgba(1,27,26,.42)}
+    .s07-video{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 44%}
+    .s07-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,58,56,.03) 0%,rgba(6,58,56,0) 55%,rgba(6,58,56,.15) 100%);pointer-events:none}
+    .s07-proof{position:absolute;left:68px;top:42px;display:flex;align-items:center;gap:13px;padding:13px 18px;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:#063a38;box-shadow:0 14px 36px rgba(0,0,0,.24);font:900 16px/1 "Montserrat";letter-spacing:.08em}
+    .s07-proof-dot{width:12px;height:12px;border-radius:50%;background:#ff6b72;box-shadow:0 0 0 5px rgba(255,107,114,.18)}
+    .s07-system{position:absolute;right:68px;top:42px;padding:13px 18px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:#063a38;font:700 15px/1 "JetBrains Mono";letter-spacing:.05em}
+    .s07-source{position:absolute;left:70px;top:836px;padding:12px 17px;border-radius:11px;background:#063a38;font:700 15px/1 "JetBrains Mono";letter-spacing:.04em;box-shadow:0 12px 30px rgba(0,0,0,.26)}
+    .s07-rail{position:absolute;right:70px;top:154px;width:448px;padding:25px 25px 23px;border:1px solid rgba(255,255,255,.22);border-radius:22px;background:#063a38;box-shadow:0 26px 70px rgba(0,0,0,.42)}
+    .s07-rail-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font:700 13px/1 "JetBrains Mono";letter-spacing:.13em;color:#bdf4e8}
+    .s07-rail-head b{padding:7px 10px;border-radius:999px;background:#42d7c1;color:#082f2d;font-size:12px}
+    .s07-step{position:relative;display:grid;grid-template-columns:34px 1fr;gap:13px;align-items:center;min-height:67px;padding:9px 0;color:rgba(255,255,255,.5)}
+    .s07-step:not(:last-child)::after{content:"";position:absolute;left:15px;top:51px;width:2px;height:31px;background:rgba(189,244,232,.22)}
+    .s07-node{display:grid;place-items:center;width:31px;height:31px;border:2px solid rgba(189,244,232,.38);border-radius:50%;font:700 12px "JetBrains Mono";color:#dffdf8}
+    .s07-step strong{display:block;font-size:19px;line-height:1.05}
+    .s07-step small{display:block;margin-top:6px;font:700 12px/1 "JetBrains Mono";letter-spacing:.04em;color:#bdf4e8}
+    .s07-progress{height:5px;margin-top:19px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.13)}
+    .s07-progress-fill{height:100%;width:100%;border-radius:inherit;background:#42d7c1;transform-origin:left center}
+  </style>
+  <div id="root" data-composition-id="07-live-work" data-width="1920" data-height="1080" data-duration="19.5">
+    <div id="s07-ground" class="s07-ground clip" data-start="0" data-duration="19.5" data-track-index="0"></div>
+    <div class="s07-stage">
+      <div class="s07-camera" id="s07-camera" data-layout-allow-overflow>
+        <div class="s07-browser">
+          <video class="s07-video" id="s07-proof-video" src="assets/captures/nova-live-proof.mp4" data-start="0" data-duration="19.08" muted playsinline></video>
+          <div class="s07-shade"></div>
+        </div>
+      </div>
+      <div class="s07-proof"><span class="s07-proof-dot"></span><span>LIVE PROOF</span></div>
+      <div class="s07-system">AgentCore Browser</div>
+      <div class="s07-source">Medicare.gov</div>
+      <div class="s07-rail" id="s07-rail">
+        <div class="s07-rail-head"><span>DURABLE TASK PROGRESS</span><b>LIVE</b></div>
+        <div class="s07-step" id="s07-step-1"><span class="s07-node">01</span><div><strong>Select clinicians</strong><small>OFFICIAL DIRECTORY</small></div></div>
+        <div class="s07-step" id="s07-step-2"><span class="s07-node">02</span><div><strong>ZIP 43215</strong><small>SEARCH AREA</small></div></div>
+        <div class="s07-step" id="s07-step-3"><span class="s07-node">03</span><div><strong>Internal Medicine</strong><small>SPECIALTY FILTER</small></div></div>
+        <div class="s07-step" id="s07-step-4"><span class="s07-node">04</span><div><strong>Read results</strong><small>SOURCE REMAINS VISIBLE</small></div></div>
+        <div class="s07-progress"><div class="s07-progress-fill" id="s07-progress-fill"></div></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const s07tl=gsap.timeline({paused:true});
+    s07tl.fromTo("#s07-camera",{scale:1,x:0,y:0},{scale:1.13,x:-86,y:-38,duration:19.5,ease:"power1.inOut"},0);
+    s07tl.fromTo("#s07-progress-fill",{scaleX:0},{scaleX:1,duration:18.2,ease:"none"},.6);
+    [
+      {id:"#s07-step-1",time:1.2},
+      {id:"#s07-step-2",time:5.15},
+      {id:"#s07-step-3",time:9.25},
+      {id:"#s07-step-4",time:13.45}
+    ].forEach((item)=>{
+      s07tl.to(item.id,{color:"#ffffff",duration:.22,ease:"none"},item.time);
+      s07tl.to(`${item.id} .s07-node`,{backgroundColor:"#42d7c1",borderColor:"#42d7c1",color:"#082f2d",scale:1.08,duration:.28,ease:"back.out(1.45)"},item.time);
+      s07tl.to(`${item.id} .s07-node`,{scale:1,duration:.22,ease:"power2.out"},item.time+.28);
+    });
+    window.__timelines=window.__timelines||{};
+    window.__timelines["07-live-work"]=s07tl;
+  </script>
+</template>

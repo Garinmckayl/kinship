@@ -1,0 +1,255 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      color: #082f2d;
+      font-family: Arial, sans-serif;
+    }
+    .burden-ground {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.96), transparent 28%),
+        radial-gradient(circle at 83% 10%, rgba(66, 215, 193, 0.28), transparent 34%),
+        #eafbf7;
+    }
+    .burden-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.24;
+      background-image: radial-gradient(#0f9f8f 1.4px, transparent 1.4px);
+      background-size: 38px 38px;
+    }
+    .burden-header {
+      position: absolute;
+      left: 72px;
+      right: 72px;
+      top: 52px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding-bottom: 24px;
+      border-bottom: 3px solid #b9ded8;
+    }
+    .burden-kicker {
+      font: 700 18px/1 monospace;
+      letter-spacing: 0.14em;
+      color: #0f9f8f;
+      text-transform: uppercase;
+    }
+    .burden-header h1 {
+      margin: 14px 0 0;
+      font: 400 65px/0.98 Georgia, serif;
+      letter-spacing: -0.04em;
+    }
+    .burden-counter {
+      min-width: 250px;
+      padding: 18px 22px;
+      border: 2px solid #ff6b72;
+      border-radius: 18px;
+      color: #ff6b72;
+      background: #fff;
+      font: 900 24px/1 Arial, sans-serif;
+      text-align: center;
+      box-shadow: 0 14px 34px rgba(8, 47, 45, 0.09);
+    }
+    .burden-orbit {
+      position: absolute;
+      left: 610px;
+      top: 246px;
+      width: 700px;
+      height: 610px;
+      border: 3px solid #b9ded8;
+      border-radius: 50%;
+    }
+    .burden-orbit::before,
+    .burden-orbit::after {
+      content: "";
+      position: absolute;
+      border: 2px solid rgba(15, 159, 143, 0.22);
+      border-radius: 50%;
+    }
+    .burden-orbit::before { inset: 55px; }
+    .burden-orbit::after { inset: 118px; }
+    .burden-sarah {
+      position: absolute;
+      left: 755px;
+      top: 340px;
+      width: 410px;
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #0f9f8f;
+      border-radius: 50%;
+      color: #fff;
+      background: #063a38;
+      box-shadow: 0 28px 70px rgba(8, 47, 45, 0.28);
+      text-align: center;
+    }
+    .burden-avatar {
+      width: 92px;
+      height: 92px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #063a38;
+      background: #bdf4e8;
+      font: 900 34px/1 Arial, sans-serif;
+    }
+    .burden-sarah h2 {
+      margin: 22px 0 7px;
+      font: 700 51px/1 Georgia, serif;
+    }
+    .burden-sarah p {
+      width: 280px;
+      margin: 0;
+      color: #bdf4e8;
+      font-size: 21px;
+      line-height: 1.32;
+    }
+    .burden-load {
+      position: absolute;
+      left: 810px;
+      top: 724px;
+      width: 300px;
+      height: 9px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .burden-load-fill {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #ff6b72;
+      transform-origin: left center;
+    }
+    .burden-chip {
+      position: absolute;
+      min-width: 275px;
+      display: flex;
+      align-items: center;
+      gap: 17px;
+      padding: 19px 22px;
+      border: 2px solid #b9ded8;
+      border-radius: 18px;
+      color: #082f2d;
+      background: #fff;
+      box-shadow: 0 18px 42px rgba(8, 47, 45, 0.14);
+      font-size: 23px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .burden-chip-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      flex: 0 0 48px;
+      place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      background: #0f9f8f;
+      font: 900 18px/1 monospace;
+    }
+    .burden-chip small {
+      display: block;
+      margin-top: 5px;
+      color: #315b57;
+      font: 700 14px/1 monospace;
+      letter-spacing: 0.05em;
+    }
+    .burden-chip.attention {
+      border-color: #f4a62a;
+    }
+    .burden-chip.attention .burden-chip-icon {
+      color: #082f2d;
+      background: #f4a62a;
+    }
+    #burden-chip-1 { left: 76px; top: 248px; }
+    #burden-chip-2 { left: 130px; top: 425px; }
+    #burden-chip-3 { left: 65px; top: 616px; }
+    #burden-chip-4 { right: 88px; top: 230px; }
+    #burden-chip-5 { right: 140px; top: 415px; }
+    #burden-chip-6 { right: 64px; top: 608px; }
+    #burden-chip-7 { left: 325px; top: 760px; }
+    #burden-chip-8 { right: 315px; top: 770px; }
+    .burden-emotion {
+      position: absolute;
+      left: 535px;
+      top: 788px;
+      width: 850px;
+      padding: 22px 30px;
+      border: 3px solid #ff6b72;
+      border-radius: 22px;
+      color: #fff;
+      background: #063a38;
+      box-shadow: 0 24px 58px rgba(8, 47, 45, 0.24);
+      font: 700 28px/1.25 Georgia, serif;
+      text-align: center;
+    }
+    .burden-emotion strong { color: #ff9da2; }
+  </style>
+
+  <div id="root" data-composition-id="02-burden" data-width="1920" data-height="1080" data-duration="16.5">
+    <div class="burden-ground clip" id="burden-ground" data-start="0" data-duration="16.5" data-track-index="0"></div>
+    <div class="burden-grid"></div>
+    <header class="burden-header" id="burden-header">
+      <div>
+        <div class="burden-kicker">Sarah's invisible second shift</div>
+        <h1>The care list never clocks out.</h1>
+      </div>
+      <div class="burden-counter" id="burden-counter">8 OPEN LOOPS</div>
+    </header>
+
+    <div class="burden-orbit" id="burden-orbit"></div>
+    <div class="burden-sarah" id="burden-sarah">
+      <div class="burden-avatar">S</div>
+      <h2>Sarah</h2>
+      <p>Daughter. Advocate. Always keeping the whole list in her head.</p>
+      <div class="burden-load"><span class="burden-load-fill" id="burden-load-fill"></span></div>
+    </div>
+
+    <div class="burden-chip" id="burden-chip-1"><span class="burden-chip-icon">RX</span><span>Pills at 8 AM<small>EVERY MORNING</small></span></div>
+    <div class="burden-chip" id="burden-chip-2"><span class="burden-chip-icon">12</span><span>Refill pills<small>COUNT · CALL · COLLECT</small></span></div>
+    <div class="burden-chip attention" id="burden-chip-3"><span class="burden-chip-icon">!</span><span>Movement check<small>NO WALK LOGGED</small></span></div>
+    <div class="burden-chip" id="burden-chip-4"><span class="burden-chip-icon">CAL</span><span>Book appointment<small>FIND AN OPENING</small></span></div>
+    <div class="burden-chip" id="burden-chip-5"><span class="burden-chip-icon">RES</span><span>Move appointment<small>CALL AGAIN</small></span></div>
+    <div class="burden-chip attention" id="burden-chip-6"><span class="burden-chip-icon">M</span><span>Check Medicare<small>VERIFY COVERAGE</small></span></div>
+    <div class="burden-chip" id="burden-chip-7"><span class="burden-chip-icon">RX</span><span>Confirm pills<small>TONIGHT</small></span></div>
+    <div class="burden-chip" id="burden-chip-8"><span class="burden-chip-icon">↗</span><span>Track movement<small>TOMORROW</small></span></div>
+
+    <div class="burden-emotion" id="burden-emotion">Every small task asks the same thing: <strong>Sarah, remember everything.</strong></div>
+  </div>
+
+  <script>
+    const burdenTl = gsap.timeline({ paused: true });
+    const burdenChips = [
+      "#burden-chip-1", "#burden-chip-4", "#burden-chip-2", "#burden-chip-5",
+      "#burden-chip-3", "#burden-chip-6", "#burden-chip-7", "#burden-chip-8"
+    ];
+    burdenTl.fromTo("#burden-header", { y: -45, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.52, ease: "power4.out" }, 0);
+    burdenTl.fromTo("#burden-sarah", { scale: 0.82, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: "back.out(1.45)" }, 0.1);
+    burdenTl.fromTo("#burden-orbit", { scale: 0.72, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.8, ease: "power3.out" }, 0.25);
+    burdenTl.set(burdenChips, { opacity: 0 }, 0);
+    burdenChips.forEach((selector, index) => {
+      const start = 1.45 + index * 1.08;
+      const travel = index < 2 ? 80 : index < 6 ? 52 : 42;
+      const duration = index < 2 ? 0.19 : index < 6 ? 0.15 : 0.12;
+      burdenTl.set(selector, { opacity: 1, y: travel, scale: 1.08 }, start);
+      burdenTl.to(selector, { y: 0, scale: 1, duration, ease: "power4.out" }, start);
+      burdenTl.fromTo(selector, { x: index % 2 === 0 ? -74 : 74 }, { x: 0, duration: 0.42, ease: "power3.out", immediateRender: false }, start);
+    });
+    burdenTl.fromTo("#burden-load-fill", { scaleX: 0.12 }, { scaleX: 1, duration: 9.8, ease: "power2.in" }, 1.5);
+    burdenTl.to("#burden-counter", { color: "#ffffff", backgroundColor: "#ff6b72", duration: 0.34, ease: "power2.out" }, 10.3);
+    burdenTl.fromTo("#burden-emotion", { y: 75, scale: 0.96, autoAlpha: 0 }, { y: 0, scale: 1, autoAlpha: 1, duration: 0.62, ease: "power4.out" }, 11.15);
+    burdenTl.to(burdenChips, { x: (i) => i % 2 === 0 ? 28 : -28, duration: 1.3, stagger: 0.08, ease: "power3.inOut" }, 12.25);
+    burdenTl.to("#burden-sarah", { boxShadow: "0 34px 90px rgba(255,107,114,.34)", duration: 1.1, ease: "power2.out" }, 13.4);
+    window.__timelines["02-burden"] = burdenTl;
+  </script>
+</template>
