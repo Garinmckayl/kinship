@@ -44,18 +44,22 @@ export const confirmIntake = tool({
   description: "Log that elder confirmed taking a medication. NEVER log the same med twice in one day — if alreadyTaken, STOP her firmly and kindly.",
   inputSchema: z.object({
     userId: z.string(),
-    medId: z.string().describe("Medication id from schedule"),
+    medId: z.string().describe("Medication id from schedule, or the exact medication name when the id is unavailable"),
   }),
   callback: async (input) => {
     const taken = await takenMedIds(input.userId);
     const meds = await listMeds(input.userId);
-    const med = meds.find((m) => m.id === input.medId && m.active);
+    const medicationKey = input.medId.trim().toLowerCase();
+    const med = meds.find((m) =>
+      m.active &&
+      [m.id, m.name, m.label].some((value) => value?.trim().toLowerCase() === medicationKey)
+    );
     if (!med) return JSON.stringify({ ok: false, error: "Medication was not found on the active schedule." });
-    if (taken.includes(input.medId)) {
-      await addEscalation(input.userId, "attention", `Double-dose prevented: Eleanor tried to log ${med?.name ?? input.medId} again — stopped her.`);
+    if (taken.includes(med.id)) {
+      await addEscalation(input.userId, "attention", `Double-dose prevented: Eleanor tried to log ${med.name} again — stopped her.`);
       return JSON.stringify({ ok: false, alreadyTaken: true, takenToday: taken });
     }
-    const takenCount = await storeConfirmIntake(input.userId, input.medId, "agent");
+    const takenCount = await storeConfirmIntake(input.userId, med.id, "agent");
     return JSON.stringify({ ok: true, takenCount });
   },
 });
