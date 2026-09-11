@@ -423,7 +423,11 @@ export async function saveBrowserTask(id: string, taskType: string, params: Reco
   const row: BrowserTaskRow = { id, task_type: taskType, status, sidecar_task_id: null, params, steps: [], result: null, error: null, created_at: new Date().toISOString(), completed_at: null };
   if (!dbOn()) { MEM_BROWSER_TASKS.unshift(row); return row; }
   await ready();
-  await q("insert into browser_tasks(id,task_type,status,params) values($1,$2,$3,$4) on conflict(id) do nothing", [id, taskType, status, JSON.stringify(params)]);
+  await q(
+    `insert into browser_tasks(id,task_type,status,params) values($1,$2,$3,$4)
+     on conflict(id) do update set task_type=excluded.task_type,status=excluded.status,params=excluded.params`,
+    [id, taskType, status, JSON.stringify(params)],
+  );
   return row;
 }
 

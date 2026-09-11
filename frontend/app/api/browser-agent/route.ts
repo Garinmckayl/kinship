@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { listBrowserTasks as listFromDB, saveBrowserTask, updateBrowserTask, getDismissedBrowserTasks } from "@/lib/store";
 import { type BrowserTaskType } from "@/lib/browser-agent";
+import { normalizeBrowserTaskParams } from "@/lib/browser-task";
 
 const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
 const SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
@@ -95,7 +96,7 @@ export async function POST(req: Request) {
   if (!task_type) return NextResponse.json({ error: "task_type required" }, { status: 400 });
 
   const taskId = `bt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const task = await saveBrowserTask(taskId, task_type, params ?? {}, "pending_approval");
+  const task = await saveBrowserTask(taskId, task_type, normalizeBrowserTaskParams(task_type, params ?? {}), "pending_approval");
   return NextResponse.json({
     task_id: task.id, task_type: task.task_type, status: task.status,
     params: task.params, steps: [], result: null, error: null,
