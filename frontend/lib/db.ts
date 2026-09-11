@@ -246,17 +246,14 @@ async function seedDemo() {
     }
   }
 
-  const appointmentCount = await q<{ count: string }>("select count(*) from appointments where elder_id='eleanor-79' and status != 'cancelled'");
-  if (Number(appointmentCount[0]?.count ?? 0) === 0) {
-    await q(
-      `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
-       values('demo-followup','eleanor-79','Blood pressure follow-up','Dr. Harrison','Riverside Clinic',date_trunc('day',now())+interval '4 days 10 hours 30 minutes','Kinship connected a week-long upward trend to a routine follow-up.','upcoming')
-       on conflict (id) do nothing`,
-    );
-    await q(
-      `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
-       values('demo-eye-exam','eleanor-79','Annual eye exam','Dr. Patel','Riverside Vision Center',date_trunc('day',now())+interval '10 days 9 hours','Requested by Eleanor; waiting for Sarah before booking.','proposed')
-       on conflict (id) do nothing`,
-    );
-  }
+  await q(
+    `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
+     values('demo-followup','eleanor-79','Blood pressure follow-up','Dr. Harrison','Riverside Clinic',date_trunc('day',now())+interval '4 days 10 hours 30 minutes','Kinship connected a week-long upward trend to a routine follow-up.','upcoming')
+     on conflict (id) do nothing`,
+  );
+  await q(
+    `insert into appointments(id,elder_id,title,doctor,location,at,notes,status)
+     values('demo-eye-exam','eleanor-79','Annual eye exam','Dr. Patel','Riverside Vision Center',date_trunc('day',now())+interval '10 days 9 hours','Requested by Eleanor; waiting for Sarah before booking.','proposed')
+     on conflict (id) do nothing`,
+  );
 }
