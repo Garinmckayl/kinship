@@ -15,6 +15,7 @@ type Props = {
   onPhase?: (phase: "idle" | "connecting" | "listening" | "speaking") => void;
   onTool?: (name: string) => void;
   caption?: string;
+  elderCaption?: string;
   activity?: string;
   expression?: NovaFaceName;
 };
@@ -24,7 +25,7 @@ function fmt(seconds: number) {
   return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}`;
 }
 
-function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, caption, activity, expression }: Props) {
+function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, caption, elderCaption, activity, expression }: Props) {
   const conversation = useConversation();
   const [notice, setNotice] = useState("");
   const [text, setText] = useState("");
@@ -121,10 +122,11 @@ function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, 
             <button onClick={() => setImmersive(false)} className="live-minimize" aria-label="Minimize live call"><XIcon className="w-6 h-6" /><span>Minimize</span></button>
           </header>
           <main className="live-immersive-stage">
-            <div className="live-face-wrap"><div className="live-ripple live-ripple-one" /><div className="live-ripple live-ripple-two" /><NovaFace phase={livePhase} expression={expression} size={480} /></div>
-            <div className="live-status"><span>{PHASE_LABEL[livePhase]}</span><span aria-hidden="true">·</span><span>{fmt(seconds)}</span></div>
-            {activity && <div className="live-tool-status" aria-live="polite"><span className="live-tool-dot" />{activity}</div>}
-            <p className="live-caption" aria-live="polite">{caption ? `“${caption}”` : conversation.status === "connecting" ? "Just a moment, I’m joining you." : "I’m right here. Take your time."}</p>
+             <div className="live-face-wrap"><div className="live-ripple live-ripple-one" /><div className="live-ripple live-ripple-two" /><NovaFace phase={livePhase} expression={expression} size={480} /></div>
+             <div className="live-status"><span>{PHASE_LABEL[livePhase]}</span><span aria-hidden="true">·</span><span>{fmt(seconds)}</span></div>
+             {activity && <div className="live-tool-status" aria-live="polite"><span className="live-tool-dot" />{activity}</div>}
+             {elderCaption && <p className="max-w-xl rounded-2xl rounded-br-md bg-indigo-400/15 px-4 py-3 text-sm leading-relaxed text-indigo-50 ring-1 ring-indigo-300/20"><span className="mr-2 text-[11px] font-black uppercase tracking-[0.18em] text-indigo-200">You</span>“{elderCaption}”</p>}
+             <p className="live-caption" aria-live="polite">{caption ? `“${caption}”` : conversation.status === "connecting" ? "Just a moment, I’m joining you." : "I’m right here. Take your time."}</p>
           </main>
           <footer className="live-immersive-controls">
             {conversation.status === "connected" && (

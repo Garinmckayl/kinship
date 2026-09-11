@@ -438,6 +438,7 @@ export default function ElderPage() {
   }
 
   const lastAgent = [...msgs].reverse().find((m) => m.role === "agent")?.text ?? "";
+  const lastElder = [...msgs].reverse().find((m) => m.role === "elder")?.text ?? "";
 
   return (
     <main className="elder-page min-h-screen bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white">
@@ -447,6 +448,7 @@ export default function ElderPage() {
         <CallScreen
           phase={phase}
           caption={lastAgent}
+          elderCaption={lastElder}
           activity={toolNote}
           seconds={seconds}
           onTalk={voiceInput}
@@ -501,6 +503,7 @@ export default function ElderPage() {
           }}
           onMessage={handleElevenMessage}
           caption={lastAgent}
+          elderCaption={lastElder}
           activity={toolNote}
           expression={avatarExpression}
           onPhase={(next) => setPhase(next)}

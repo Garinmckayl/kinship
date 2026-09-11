@@ -13,6 +13,7 @@ function fmt(s: number) {
 export function CallScreen({
   phase,
   caption,
+  elderCaption,
   activity,
   seconds,
   onTalk,
@@ -23,6 +24,7 @@ export function CallScreen({
 }: {
   phase: AgentPhase;
   caption: string;
+  elderCaption?: string;
   activity?: string;
   seconds: number;
   onTalk: () => void;
@@ -45,9 +47,18 @@ export function CallScreen({
         <div className="rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
           <NovaFace phase={phase} size={260} />
         </div>
-        <p className="max-w-lg min-h-[2.75rem] text-center text-base font-medium leading-relaxed text-slate-200">
-          “{caption}”
-        </p>
+        <div className="w-full max-w-2xl space-y-3">
+          {elderCaption && (
+            <div className="ml-auto max-w-lg rounded-2xl rounded-br-md bg-indigo-400/15 px-4 py-3 text-right ring-1 ring-indigo-300/20">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-200">Eleanor</p>
+              <p className="mt-1 text-sm leading-relaxed text-white">“{elderCaption}”</p>
+            </div>
+          )}
+          <div className="max-w-lg rounded-2xl rounded-bl-md bg-white/5 px-4 py-3 ring-1 ring-white/10">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-teal-200">Kinship</p>
+            <p className="mt-1 min-h-[1.5rem] text-sm font-medium leading-relaxed text-slate-200">“{caption}”</p>
+          </div>
+        </div>
         {activity && <p className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-200 ring-1 ring-emerald-300/20">{activity}</p>}
       </div>
 
