@@ -3,6 +3,7 @@ import { PHASE_LABEL, type AgentPhase } from "./AgentOrb";
 import { NovaFace } from "./NovaFace";
 import { BeamInput } from "./BeamInput";
 import { PhoneIcon, XIcon } from "./icons";
+import { Markdown } from "./Markdown";
 
 function fmt(s: number) {
   const m = Math.floor(s / 60);
@@ -34,7 +35,7 @@ export function CallScreen({
   onSend: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white px-6 py-10">
+    <div className="legacy-call-screen fixed inset-0 z-50 flex flex-col items-center justify-between bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white px-6 py-10">
       <div className="text-center space-y-1 pt-4">
         <p className="text-sm uppercase tracking-[0.3em] text-indigo-300">Kinship call</p>
         <h2 className="text-4xl font-bold">Eleanor</h2>
@@ -56,7 +57,7 @@ export function CallScreen({
           )}
           <div className="max-w-lg rounded-2xl rounded-bl-md bg-white/5 px-4 py-3 ring-1 ring-white/10">
             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-teal-200">Kinship</p>
-            <p className="mt-1 min-h-[1.5rem] text-sm font-medium leading-relaxed text-slate-200">“{caption}”</p>
+            <div className="mt-1 min-h-[1.5rem] text-sm font-medium leading-relaxed text-slate-200"><Markdown text={caption} /></div>
           </div>
         </div>
         {activity && <p className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-200 ring-1 ring-emerald-300/20">{activity}</p>}
@@ -87,7 +88,7 @@ export function CallScreen({
 
 export function IncomingCall({ onAccept, onDecline }: { onAccept: () => void; onDecline: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white px-6">
+    <div className="legacy-call-screen fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_top,#312e81_0%,#0f0d2e_55%,#050418_100%)] text-white px-6">
       <div className="animate-pulse rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
         <NovaFace phase="idle" expression="joyful" size={260} />
       </div>

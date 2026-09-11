@@ -373,6 +373,7 @@ html[data-theme="light"] .nova-activity { background: rgba(255,255,255,.92); col
 .elder-dock { z-index: 45; }
 html[data-theme="light"] .elder-dock { background: linear-gradient(to top, rgba(237,247,243,.98) 0%, rgba(247,251,249,.94) 66%, transparent 100%) !important; }
 html[data-theme="dark"] .elder-dock { background: linear-gradient(to top, #071216 0%, rgba(11,27,32,.97) 66%, transparent 100%) !important; }
+html[data-theme="light"] .legacy-call-screen { background: radial-gradient(ellipse at top, #312e81 0%, #0f0d2e 55%, #050418 100%) !important; }
 
 .live-immersive { position: fixed; inset: 0; z-index: 100; min-height: 100vh; height: 100dvh; overflow: hidden auto; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; isolation: isolate; padding: clamp(1rem, 3vw, 2rem); color: #f7fffc; background: radial-gradient(circle at 50% 42%, rgba(22,163,138,.30), transparent 28rem), radial-gradient(circle at 12% 5%, rgba(56,189,248,.14), transparent 24rem), linear-gradient(145deg, #061519, #0a2529 58%, #071418); }
 .live-ambient { position: absolute; z-index: -2; border-radius: 999px; filter: blur(70px); opacity: .25; pointer-events: none; }
