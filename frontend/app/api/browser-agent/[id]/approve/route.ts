@@ -33,8 +33,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
         if (createRes.ok) {
           const sidecarTask = await createRes.json();
+          const sidecarTaskId = String(sidecarTask.task_id ?? "");
+          if (!sidecarTaskId) {
+            throw new Error("Sidecar created a task without a task_id");
+          }
           await addEscalation("eleanor-79", "info", `Browser task approved and executing via Nova Act sidecar: ${taskType}`);
-          await updateBrowserTask(taskId, { status: "running" });
+          await updateBrowserTask(taskId, { status: "running", sidecar_task_id: sidecarTaskId });
 
           return NextResponse.json({
             task_id: taskId,
@@ -44,7 +48,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             steps: [],
             result: null,
             error: null,
-            sidecar_task_id: sidecarTask.task_id,
+            sidecar_task_id: sidecarTaskId,
             mode: "sidecar",
           });
         }

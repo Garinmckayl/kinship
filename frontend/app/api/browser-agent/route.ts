@@ -35,47 +35,42 @@ export async function GET() {
       sidecarMap.set(String(st.task_id), st);
     }
 
-    const merged: Record<string, unknown>[] = dbTasks.map((dt) => {
-      // Check if any sidecar task matches (by scanning for same task_type created around same time)
-      // For direct matches (sidecar_task_id stored in DB), we'd check that
-      return {
-        task_id: dt.id, task_type: dt.task_type, status: dt.status,
-        params: dt.params, steps: dt.steps ?? [], result: dt.result, error: dt.error,
-        started_at: dt.created_at, completed_at: dt.completed_at, recording_url: null,
-      };
-    });
+    const linkedSidecarIds = new Set(dbTasks.map((task) => task.sidecar_task_id).filter(Boolean));
+    const merged: Record<string, unknown>[] = dbTasks
+      .filter((dt) => !dismissedIds.includes(dt.id) && (!dt.sidecar_task_id || !dismissedIds.includes(dt.sidecar_task_id)))
+      .map((dt) => {
+        const sidecarTask = dt.sidecar_task_id ? sidecarMap.get(dt.sidecar_task_id) : undefined;
+        const task: Record<string, unknown> = {
+          task_id: dt.id, task_type: dt.task_type, status: String(sidecarTask?.status ?? dt.status),
+          sidecar_task_id: dt.sidecar_task_id,
+          params: dt.params,
+          steps: (sidecarTask?.steps as Record<string, unknown>[]) ?? dt.steps ?? [],
+          result: (sidecarTask?.result as Record<string, unknown>) ?? dt.result,
+          error: sidecarTask?.error != null ? String(sidecarTask.error) : dt.error,
+          started_at: String(sidecarTask?.started_at ?? dt.created_at),
+          completed_at: sidecarTask?.completed_at ? String(sidecarTask.completed_at) : dt.completed_at,
+          recording_url: sidecarTask?.recording_url ? String(sidecarTask.recording_url) : null,
+        };
+        if (!sidecarTask) return task;
 
-    // Add sidecar-only tasks and override status for matching DB ones
-    // BUT: Skip any that were dismissed/deleted by user
+        if (sidecarTask.status === "completed" || sidecarTask.status === "failed") {
+          updateBrowserTask(dt.id, {
+            status: String(sidecarTask.status),
+            steps: (sidecarTask.steps as Record<string, unknown>[]) ?? [],
+            result: (sidecarTask.result as Record<string, unknown>) ?? undefined,
+            error: sidecarTask.error != null ? String(sidecarTask.error) : undefined,
+          }).catch((error) => console.error("[browser-agent] Failed to sync task:", error));
+        }
+        return task;
+      });
+
+    // Include tasks created directly on the sidecar, but never guess associations by task type.
     for (const st of sidecarTasks) {
       const taskId = String(st.task_id);
-      if (dismissedIds.includes(taskId)) continue; // Skip dismissed tasks
-
-      const existing = merged.find((m) =>
-        m.task_type === st.task_type && (
-          m.status === "approved" || m.status === "running" ||
-          m.status === "completed" || m.status === "failed"
-        )
-      );
-      if (existing) {
-        // Sidecar has the real status -- override
-        existing.status = String(st.status ?? existing.status);
-        existing.steps = (st.steps as unknown[]) ?? existing.steps;
-        existing.result = (st.result as Record<string, unknown>) ?? existing.result;
-        existing.error = (st.error as string) ?? existing.error;
-        if (st.recording_url) existing.recording_url = String(st.recording_url);
-        // Sync completed status back to DB
-        if (st.status === "completed" || st.status === "failed") {
-          updateBrowserTask(String(existing.task_id), {
-            status: String(st.status),
-            steps: (st.steps as Record<string, unknown>[]) ?? [],
-            result: (st.result as Record<string, unknown>) ?? undefined,
-            error: st.error != null ? String(st.error) : undefined,
-          }).catch(() => {});
-        }
-      } else if (!merged.find((m) => m.task_id === String(st.task_id))) {
+      if (dismissedIds.includes(taskId) || linkedSidecarIds.has(taskId)) continue;
+      if (!merged.find((m) => m.task_id === taskId)) {
         merged.unshift({
-          task_id: String(st.task_id), task_type: String(st.task_type), status: String(st.status),
+          task_id: taskId, task_type: String(st.task_type), status: String(st.status),
           params: (st.params as Record<string, unknown>) ?? {},
           steps: (st.steps as unknown[]) ?? [],
           result: (st.result as Record<string, unknown>) ?? null,

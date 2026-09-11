@@ -261,15 +261,14 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
                 with NovaAct(**nova_kwargs) as nova:
                     for i, step_config in enumerate(config["steps"]):
                         step_label = step_config["label"]
-                    step_label = step_config["label"]
-                    try:
-                        step_label = step_label.format(**params)
-                    except (KeyError, ValueError):
-                        pass
-                    try:
-                        prompt = step_config["prompt"].format(**params)
-                    except (KeyError, ValueError):
-                        prompt = step_config["prompt"]
+                        try:
+                            step_label = step_label.format(**params)
+                        except (KeyError, ValueError):
+                            pass
+                        try:
+                            prompt = step_config["prompt"].format(**params)
+                        except (KeyError, ValueError):
+                            prompt = step_config["prompt"]
 
                         log.info(f"Step {i+1}/{len(config['steps'])}: {step_label}")
 
@@ -296,8 +295,7 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
                             step_record["status"] = "failed"
                             step_record["error"] = str(step_err)[:500]
                             log.error(f"Step {step_label} failed: {step_err}")
-                            if "authenticate" in step_label.lower() or "sign in" in step_label.lower():
-                                raise
+                            raise
 
                         step_record["completed_at"] = datetime.now(timezone.utc).isoformat()
 

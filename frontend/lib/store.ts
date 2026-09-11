@@ -411,6 +411,7 @@ export async function getUserByEmail(email: string) {
 // ---------- browser tasks (Nova Act) ----------
 export type BrowserTaskRow = {
   id: string; task_type: string; status: string;
+  sidecar_task_id: string | null;
   params: Record<string, unknown>; steps: Record<string, unknown>[];
   result: Record<string, unknown> | null; error: string | null;
   created_at: string; completed_at: string | null;
@@ -419,14 +420,14 @@ export type BrowserTaskRow = {
 const MEM_BROWSER_TASKS: BrowserTaskRow[] = [];
 
 export async function saveBrowserTask(id: string, taskType: string, params: Record<string, unknown>, status = "pending_approval"): Promise<BrowserTaskRow> {
-  const row: BrowserTaskRow = { id, task_type: taskType, status, params, steps: [], result: null, error: null, created_at: new Date().toISOString(), completed_at: null };
+  const row: BrowserTaskRow = { id, task_type: taskType, status, sidecar_task_id: null, params, steps: [], result: null, error: null, created_at: new Date().toISOString(), completed_at: null };
   if (!dbOn()) { MEM_BROWSER_TASKS.unshift(row); return row; }
   await ready();
   await q("insert into browser_tasks(id,task_type,status,params) values($1,$2,$3,$4) on conflict(id) do nothing", [id, taskType, status, JSON.stringify(params)]);
   return row;
 }
 
-export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserTaskRow, "status" | "steps" | "result" | "error">>): Promise<void> {
+export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserTaskRow, "status" | "sidecar_task_id" | "steps" | "result" | "error">>): Promise<void> {
   if (!dbOn()) {
     const t = MEM_BROWSER_TASKS.find((t) => t.id === id);
     if (t) Object.assign(t, patch, patch.status === "completed" || patch.status === "failed" ? { completed_at: new Date().toISOString() } : {});
@@ -434,6 +435,7 @@ export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserT
   }
   await ready();
   if (patch.status) await q("update browser_tasks set status=$1 where id=$2", [patch.status, id]);
+  if (patch.sidecar_task_id) await q("update browser_tasks set sidecar_task_id=$1 where id=$2", [patch.sidecar_task_id, id]);
   if (patch.steps) await q("update browser_tasks set steps=$1 where id=$2", [JSON.stringify(patch.steps), id]);
   if (patch.result) await q("update browser_tasks set result=$1 where id=$2", [JSON.stringify(patch.result), id]);
   if (patch.error !== undefined) await q("update browser_tasks set error=$1 where id=$2", [patch.error, id]);
@@ -443,11 +445,11 @@ export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserT
 export async function listBrowserTasks(elder = "eleanor-79"): Promise<BrowserTaskRow[]> {
   if (!dbOn()) return MEM_BROWSER_TASKS.slice(0, 20);
   await ready();
-  const rows = await q<{ id: string; task_type: string; status: string; params: string; steps: string; result: string; error: string; created_at: string; completed_at: string }>(
-    "select id,task_type,status,params,steps,result,error,created_at,completed_at from browser_tasks where elder_id=$1 order by created_at desc limit 20", [elder]
+  const rows = await q<{ id: string; task_type: string; status: string; sidecar_task_id: string | null; params: string; steps: string; result: string; error: string; created_at: string; completed_at: string }>(
+    "select id,task_type,status,sidecar_task_id,params,steps,result,error,created_at,completed_at from browser_tasks where elder_id=$1 order by created_at desc limit 20", [elder]
   );
   return rows.map((r) => ({
-    id: r.id, task_type: r.task_type, status: r.status,
+    id: r.id, task_type: r.task_type, status: r.status, sidecar_task_id: r.sidecar_task_id,
     params: typeof r.params === "string" ? JSON.parse(r.params) : (r.params ?? {}),
     steps: typeof r.steps === "string" ? JSON.parse(r.steps) : (r.steps ?? []),
     result: r.result ? (typeof r.result === "string" ? JSON.parse(r.result) : r.result) : null,
@@ -462,11 +464,12 @@ export async function deleteBrowserTask(id: string): Promise<void> {
     return;
   }
   await ready();
-  // Mark as dismissed instead of deleting, so we can filter it out from sidecar results
-  await q("insert into dismissed_browser_tasks(id,task_id) values($1,$2) on conflict(id) do nothing", [
-    `dismissed-${id}`,
-    id
-  ]);
+  const rows = await q<{ sidecar_task_id: string | null }>("select sidecar_task_id from browser_tasks where id=$1", [id]);
+  const taskIds = [id, rows[0]?.sidecar_task_id].filter((taskId): taskId is string => Boolean(taskId));
+  for (const taskId of taskIds) {
+    await q("insert into dismissed_browser_tasks(id,task_id) values($1,$2) on conflict(id) do nothing", [`dismissed-${taskId}`, taskId]);
+  }
+  await q("delete from browser_tasks where id=$1", [id]);
 }
 
 export async function getDismissedBrowserTasks(): Promise<string[]> {
@@ -477,4 +480,3 @@ export async function getDismissedBrowserTasks(): Promise<string[]> {
   );
   return rows.map((r) => r.task_id);
 }
-

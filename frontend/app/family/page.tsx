@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BorderBeam } from "border-beam";
 import { AgentOrb } from "@/components/AgentOrb";
@@ -10,6 +11,10 @@ import { Nav } from "@/components/Nav";
 import { BellIcon, CheckIcon, ClockIcon, HeartIcon, LogoutIcon, PillIcon, PlusIcon, TrashIcon } from "@/components/icons";
 
 const API = "/api";
+const BrowserLiveView = dynamic(
+  () => import("bedrock-agentcore/browser/live-view").then((module) => module.BrowserLiveView),
+  { ssr: false },
+);
 
 type Status = {
   elder: string;
@@ -63,6 +68,7 @@ export default function FamilyPage() {
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [risk, setRisk] = useState<CompoundRisk | null>(null);
   const [browserTasks, setBrowserTasks] = useState<{ task_id: string; task_type: string; status: string; params: Record<string, unknown>; steps: { label: string; status: string }[]; result: Record<string, string> | null; error: string | null; recording_url?: string | null }[]>([]);
+  const hasRunningBrowserTask = browserTasks.some((task) => task.status === "running" || task.status === "approved");
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
   const [tab, setTab] = useState("Overview");
@@ -127,8 +133,7 @@ export default function FamilyPage() {
 
   // Faster polling when a browser task is running
   useEffect(() => {
-    const hasRunning = browserTasks.some((t) => t.status === "running" || t.status === "approved");
-    if (!hasRunning) return;
+    if (!hasRunningBrowserTask) return;
 
     const poll = () => {
       fetch(`${API}/browser-agent`)
@@ -140,7 +145,7 @@ export default function FamilyPage() {
     poll();
     const t = setInterval(poll, 1000);
     return () => clearInterval(t);
-  }, [browserTasks]);
+  }, [hasRunningBrowserTask]);
 
   useEffect(() => {
     if (!authChecked || !me) return;
@@ -525,9 +530,12 @@ export default function FamilyPage() {
                   <button
                     onClick={() => {
                       const toDelete = browserTasks.filter((t) => t.status === "completed" || t.status === "failed");
-                      Promise.all(toDelete.map((t) => fetch(`${API}/browser-agent/${t.task_id}`, { method: "DELETE" })))
+                      Promise.all(toDelete.map(async (task) => {
+                        const response = await fetch(`${API}/browser-agent/${task.task_id}`, { method: "DELETE" });
+                        if (!response.ok) throw new Error(`Failed to dismiss ${task.task_id}`);
+                      }))
                         .then(() => setBrowserTasks((ts) => ts.filter((t) => t.status !== "completed" && t.status !== "failed")))
-                        .catch(() => {});
+                        .catch((error) => console.error("[family] Failed to clear browser tasks:", error));
                     }}
                     className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
                   >
@@ -572,8 +580,11 @@ export default function FamilyPage() {
                           <button
                             onClick={() => {
                               fetch(`${API}/browser-agent/${bt.task_id}`, { method: "DELETE" })
-                                .then(() => setBrowserTasks((ts) => ts.filter((t) => t.task_id !== bt.task_id)))
-                                .catch(() => {});
+                                .then((response) => {
+                                  if (!response.ok) throw new Error(`Failed to dismiss ${bt.task_id}`);
+                                  setBrowserTasks((ts) => ts.filter((t) => t.task_id !== bt.task_id));
+                                })
+                                .catch((error) => console.error("[family] Failed to dismiss browser task:", error));
                             }}
                             className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-red-950/50 hover:text-red-200"
                             title="Dismiss this task"
@@ -611,22 +622,15 @@ export default function FamilyPage() {
                     {/* Live browser view via ACBT -- only while task is RUNNING */}
                     {bt.recording_url && isRunning && (
                       <div className="mt-3 rounded-xl overflow-hidden ring-1 ring-sky-400/30">
-                        <div className="flex items-center justify-between bg-sky-950/60 px-3 py-1.5">
+                        <div className="flex items-center bg-sky-950/60 px-3 py-1.5">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-xs font-bold text-sky-200 uppercase tracking-wider">Live Browser Session</span>
                           </div>
-                          <a href={bt.recording_url} target="_blank" rel="noopener noreferrer" className="text-xs text-sky-300 hover:text-sky-100 underline">
-                            Open fullscreen
-                          </a>
                         </div>
-                        <iframe
-                          src={bt.recording_url}
-                          className="w-full border-0"
-                          style={{ height: "500px" }}
-                          allow="autoplay"
-                          sandbox="allow-scripts allow-same-origin"
-                        />
+                        <div className="w-full bg-slate-950" style={{ aspectRatio: "16 / 9" }}>
+                          <BrowserLiveView signedUrl={bt.recording_url} remoteWidth={1920} remoteHeight={1080} />
+                        </div>
                       </div>
                     )}
                   </div>

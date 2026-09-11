@@ -142,6 +142,7 @@ create table if not exists browser_tasks (
   elder_id text not null default 'eleanor-79',
   task_type text not null,
   status text default 'pending_approval',
+  sidecar_task_id text,
   params jsonb default '{}',
   steps jsonb default '[]',
   result jsonb,
@@ -181,6 +182,7 @@ async function init() {
   `);
   await getPool().query("create unique index if not exists intakes_one_per_day_idx on intakes(elder_id,med_id,intake_date)");
   await getPool().query("alter table medications add column if not exists pills_left int default 30");
+  await getPool().query("alter table browser_tasks add column if not exists sidecar_task_id text");
   // One-time persona rename: ruth-78 -> eleanor-79. Parent first (FK), then children.
   await getPool().query("insert into elders(id,name,age) values('eleanor-79','Eleanor',79) on conflict (id) do nothing");
   const tables = ["medications", "intakes", "moods", "memories", "escalations", "tasks", "reports", "appointments", "health_metrics", "heartbeats", "symptoms"];
