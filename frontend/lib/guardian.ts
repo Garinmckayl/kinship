@@ -24,7 +24,7 @@ Rules:
 - REAL CALLS: if she misses critical meds or says something urgent and is unresponsive in chat, use call_elder to reach her real devices.
 - APPOINTMENTS: propose first via manage_appointments propose, book only after Eleanor says yes (confirm). Tell her date + time simply. Cancel anytime she asks.
 - COMPOUND RISK: during morning check-ins and when you notice 2+ concerning signals (missed meds, symptoms, low mood, silence), run assess_compound_risk to evaluate the combination. Trust its reasoning — if it returns red, escalate immediately. The combination of weak signals matters more than any single alarm.
-- BROWSER TASKS: when Eleanor needs something done on a website she can't navigate (pharmacy refill, insurance coverage check, utility bill payment, doctor appointment booking, grocery order, government benefits re-certification), use request_browser_task. This opens a real browser via Nova Act and completes the task. It ALWAYS requires caregiver approval first — never claim the task is done until the caregiver approves and the automation completes. Tell Eleanor you've sent the request to Sarah for approval. For Medicare checks, include Eleanor's ZIP 43215 and her current medications. For bill payments, the agent uses VERIFIED bookmarks only — Eleanor never touches the open web for financial transactions.`;
+- BROWSER TASKS: when Eleanor needs something done on a website she can't navigate (finding Medicare doctors, pharmacy refill, insurance research, utility bill payment, doctor appointment booking, grocery order, government benefits re-certification), use request_browser_task. This opens a real browser via Nova Act and completes the task. It ALWAYS requires caregiver approval first — never claim the task is done until the caregiver approves and the automation completes. Tell Eleanor you've sent the request to Sarah for approval. Prefer provider_search for a reliable public-site demonstration: include ZIP 43215 and the requested specialty. Exact drug-plan coverage requires Eleanor's actual Part D plan details; never guess it. For bill payments, the agent uses VERIFIED bookmarks only — Eleanor never touches the open web for financial transactions.`;
 
 export const getMedSchedule = tool({
   name: "get_med_schedule",
@@ -329,10 +329,10 @@ export const assessRisk = tool({
 
 export const requestBrowserTask = tool({
   name: "request_browser_task",
-  description: "Request a real browser automation task via Nova Act. ALWAYS creates a pending_approval task. For insurance_check include medications; Eleanor's known ZIP is 43215.",
+  description: "Request a real browser automation task via Nova Act. ALWAYS creates a pending_approval task. Use provider_search to find real Medicare doctors on Care Compare; Eleanor's known ZIP is 43215.",
   inputSchema: z.object({
     userId: z.string(),
-    taskType: z.enum(["pharmacy_refill", "insurance_check", "bill_payment", "appointment_booking", "grocery_order", "benefits_recert"]),
+    taskType: z.enum(["pharmacy_refill", "insurance_check", "provider_search", "bill_payment", "appointment_booking", "grocery_order", "benefits_recert"]),
     params: z.record(z.string(), z.unknown()).describe("Task-specific params: medication, pharmacy_location, doctor, preferred_date, reason, items, address, etc."),
     reason: z.string().describe("Why this task is needed — shown to caregiver for approval"),
   }),

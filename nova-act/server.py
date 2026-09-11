@@ -40,6 +40,7 @@ def verify_secret(authorization: Optional[str] = Header(None)):
 class TaskType(str, Enum):
     pharmacy_refill = "pharmacy_refill"
     insurance_check = "insurance_check"
+    provider_search = "provider_search"
     bill_payment = "bill_payment"
     appointment_booking = "appointment_booking"
     grocery_order = "grocery_order"
@@ -88,6 +89,16 @@ def next_id() -> str:
 
 def normalize_task_params(task_type: TaskType, raw_params: dict) -> dict:
     params = dict(raw_params or {})
+    if task_type == TaskType.provider_search:
+        zip_code = str(params.get("zip_code") or params.get("zip") or "43215").strip()
+        if not re.fullmatch(r"\d{5}", zip_code):
+            raise ValueError("Provider searches require a valid 5-digit ZIP code.")
+        params.update({
+            "zip_code": zip_code,
+            "specialty": str(params.get("specialty") or "Internal Medicine"),
+            "max_results": min(5, max(1, int(params.get("max_results") or 3))),
+        })
+        return params
     if task_type != TaskType.insurance_check:
         return params
 
@@ -170,6 +181,56 @@ WORKFLOW_CONFIGS = {
                 "prompt": "Return a JSON summary of what is visibly shown: medications_checked, matching_plan_count, lowest_displayed_drug_cost, restrictions, and next_step. If exact coverage is unavailable without Eleanor's current plan details, say so explicitly instead of guessing.",
                 "label": "Coverage summary",
                 "extract": True,
+            },
+        ],
+    },
+
+    # ── Practical Demo: Find Medicare Doctors ──────────────────────────
+    TaskType.provider_search: {
+        "name": "Find Medicare Doctors",
+        "description": "Find real nearby clinicians using Medicare's public Care Compare directory.",
+        "starting_page": "https://www.medicare.gov/care-compare/",
+        "safe_sandbox": True,
+        "steps": [
+            {
+                "prompt": "Choose 'Doctors & clinicians' as the provider type. Stay on the official Medicare.gov Care Compare site.",
+                "label": "Open Medicare doctor directory",
+            },
+            {
+                "prompt": "Enter exactly ZIP code '{zip_code}' as the location and submit it once. Never guess or try a different ZIP.",
+                "label": "Search near Eleanor ({zip_code})",
+            },
+            {
+                "prompt": "Search for the exact specialty '{specialty}'. Use the site's specialty filter when available. Verify that returned clinicians visibly list '{specialty}'; do not substitute unrelated specialties.",
+                "label": "Find {specialty} clinicians",
+            },
+            {
+                "prompt": "Extract up to {max_results} real visible '{specialty}' clinicians from the current results. Use an empty string for a field that is not shown; never invent data.",
+                "label": "Summarize real providers",
+                "extract": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "providers": {
+                            "type": "array",
+                            "maxItems": 5,
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "specialty": {"type": "string"},
+                                    "address": {"type": "string"},
+                                    "phone": {"type": "string"},
+                                    "distance": {"type": "string"},
+                                },
+                                "required": ["name", "specialty", "address", "phone", "distance"],
+                            },
+                        },
+                        "source_url": {"type": "string"},
+                        "searched_zip": {"type": "string"},
+                    },
+                    "required": ["providers", "source_url", "searched_zip"],
+                },
             },
         ],
     },
@@ -258,6 +319,12 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
         from nova_act import NovaAct, workflow as nova_workflow
         from bedrock_agentcore.tools.browser_client import BrowserClient
     except ImportError as e:
+        if task.task_type == TaskType.provider_search:
+            task.status = TaskStatus.failed
+            task.error = "Real browser automation is unavailable; no provider results were fabricated."
+            task.completed_at = datetime.now(timezone.utc).isoformat()
+            log.error(f"Provider search requires Nova Act and AgentCore Browser ({e})")
+            return task
         log.warning(f"Required package not installed ({e}), running in demo mode")
         return await execute_demo_workflow(task, config, params)
 
@@ -327,12 +394,13 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
 
                         try:
                             if step_config.get("extract"):
-                                result = nova.act_get(prompt)
+                                result = nova.act_get(prompt, schema=step_config.get("schema", {"type": "string"}))
                                 step_record["status"] = "completed"
-                                step_record["response"] = result.response if hasattr(result, 'response') else str(result)
+                                response = result.parsed_response if hasattr(result, "parsed_response") else result.response if hasattr(result, "response") else str(result)
+                                step_record["response"] = response
                                 if task.result is None:
                                     task.result = {}
-                                task.result[step_label] = step_record["response"]
+                                task.result[step_label] = response
                             else:
                                 nova.act(prompt)
                                 step_record["status"] = "completed"

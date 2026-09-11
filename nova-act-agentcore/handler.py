@@ -52,6 +52,38 @@ TASK_CONFIGS = {
         ],
         "extract": "Return a JSON object: medications_checked, matching_plan_count, lowest_displayed_drug_cost, restrictions, next_step.",
     },
+    "provider_search": {
+        "default_url": "https://www.medicare.gov/care-compare/",
+        "steps": [
+            "Choose 'Doctors & clinicians' as the provider type on the official Medicare.gov Care Compare site.",
+            "Enter exactly ZIP code '{zip_code}' once. Never guess or try a different ZIP.",
+            "Search for the exact specialty '{specialty}'. Verify visible results list that specialty; do not substitute unrelated specialties.",
+        ],
+        "extract": "Extract up to {max_results} real visible '{specialty}' clinicians. Use empty strings for fields not shown; never invent data.",
+        "extract_schema": {
+            "type": "object",
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "maxItems": 5,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "specialty": {"type": "string"},
+                            "address": {"type": "string"},
+                            "phone": {"type": "string"},
+                            "distance": {"type": "string"},
+                        },
+                        "required": ["name", "specialty", "address", "phone", "distance"],
+                    },
+                },
+                "source_url": {"type": "string"},
+                "searched_zip": {"type": "string"},
+            },
+            "required": ["providers", "source_url", "searched_zip"],
+        },
+    },
     "bill_payment": {
         "default_url": "{portal_url}",
         "steps": [
@@ -87,6 +119,16 @@ def ping() -> dict[str, str]:
 
 def normalize_params(task_type: str, raw_params: dict) -> dict:
     params = dict(raw_params or {})
+    if task_type == "provider_search":
+        zip_code = str(params.get("zip_code") or params.get("zip") or "43215").strip()
+        if not re.fullmatch(r"\d{5}", zip_code):
+            raise ValueError("Provider searches require a valid 5-digit ZIP code.")
+        params.update({
+            "zip_code": zip_code,
+            "specialty": str(params.get("specialty") or "Internal Medicine"),
+            "max_results": min(5, max(1, int(params.get("max_results") or 3))),
+        })
+        return params
     if task_type != "insurance_check":
         return params
     source = params.get("medications") or params.get("medication") or []
@@ -184,6 +226,7 @@ def handler(payload):
                         except Exception as step_err:
                             steps_completed.append({"step": i + 1, "status": "failed", "error": str(step_err)[:300]})
                             log.error(f"Step {i+1} failed: {step_err}")
+                            raise
 
                     # Extract final data
                     try:
@@ -192,8 +235,15 @@ def handler(payload):
                         extract_prompt = config["extract"]
 
                     log.info(f"Extracting: {extract_prompt[:100]}...")
-                    extract_result = nova.act_get(extract_prompt)
-                    result_data = extract_result.response if hasattr(extract_result, "response") else str(extract_result)
+                    extract_result = nova.act_get(extract_prompt, schema=config.get("extract_schema", {"type": "string"}))
+                    raw_result = extract_result.parsed_response if hasattr(extract_result, "parsed_response") else extract_result.response if hasattr(extract_result, "response") else str(extract_result)
+                    if isinstance(raw_result, str):
+                        try:
+                            result_data = json.loads(raw_result)
+                        except json.JSONDecodeError:
+                            result_data = {"summary": raw_result}
+                    else:
+                        result_data = raw_result
                     steps_completed.append({"step": "extract", "status": "completed"})
 
         return {

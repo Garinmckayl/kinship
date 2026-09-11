@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BorderBeam } from "border-beam";
@@ -16,6 +16,10 @@ const BrowserLiveView = dynamic(
   { ssr: false },
 );
 
+const StableBrowserLiveView = memo(function StableBrowserLiveView({ signedUrl }: { signedUrl: string }) {
+  return <BrowserLiveView signedUrl={signedUrl} remoteWidth={1600} remoteHeight={900} />;
+});
+
 type Status = {
   elder: string;
   adherence_today: string;
@@ -30,6 +34,16 @@ type Med = { id: string; name: string; dosage: string; time: string; label: stri
 type BgTask = { id: string; instruction: string; runAt: string; status: string; result?: string };
 type Report = { date: string; channel: string; summary: string };
 type AppointmentPreview = { status: string };
+type BrowserTaskPreview = {
+  task_id: string;
+  task_type: string;
+  status: string;
+  params: Record<string, unknown>;
+  steps: { label: string; status: string }[];
+  result: Record<string, unknown> | null;
+  error: string | null;
+  recording_url?: string | null;
+};
 type RiskSignal = { label: string; severity: string; detail: string };
 type CompoundRisk = {
   riskLevel: "green" | "yellow" | "orange" | "red";
@@ -57,6 +71,19 @@ function adherencePct(s: string) {
   return Math.round((parseInt(m[1]) / Math.max(1, parseInt(m[2]))) * 100);
 }
 
+function mergeBrowserTaskUpdates(current: BrowserTaskPreview[], incoming: BrowserTaskPreview[]) {
+  const previousById = new Map(current.map((task) => [task.task_id, task]));
+  return incoming.map((task) => {
+    const previous = previousById.get(task.task_id);
+    if (!previous?.recording_url || task.status !== "running") return task;
+    return { ...task, recording_url: previous.recording_url };
+  });
+}
+
+function formatBrowserResult(value: unknown) {
+  return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+}
+
 export default function FamilyPage() {
   const [me, setMe] = useState<{ name: string; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -67,7 +94,8 @@ export default function FamilyPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState(0);
   const [risk, setRisk] = useState<CompoundRisk | null>(null);
-  const [browserTasks, setBrowserTasks] = useState<{ task_id: string; task_type: string; status: string; params: Record<string, unknown>; steps: { label: string; status: string }[]; result: Record<string, string> | null; error: string | null; recording_url?: string | null }[]>([]);
+  const [browserTasks, setBrowserTasks] = useState<BrowserTaskPreview[]>([]);
+  const [demoTaskBusy, setDemoTaskBusy] = useState(false);
   const hasRunningBrowserTask = browserTasks.some((task) => task.status === "running" || task.status === "approved");
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
@@ -123,7 +151,7 @@ export default function FamilyPage() {
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
       fetch(API + "/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => setPendingApprovals((d?.appointments ?? []).filter((a: AppointmentPreview) => a.status === "proposed").length)).catch(() => {});
       fetch(`${API}/welfare/compound`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setRisk(d)).catch(() => {});
-      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks(d.tasks)).catch(() => {});
+      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks((current) => mergeBrowserTaskUpdates(current, d.tasks))).catch(() => {});
     };
     load();
     // Poll: fast for status (10s), browser tasks check every 3s when one is running
@@ -138,7 +166,7 @@ export default function FamilyPage() {
     const poll = () => {
       fetch(`${API}/browser-agent`)
         .then((r) => (r.ok ? r.json() : null))
-        .then((d) => d?.tasks && setBrowserTasks(d.tasks))
+        .then((d) => d?.tasks && setBrowserTasks((current) => mergeBrowserTaskUpdates(current, d.tasks)))
         .catch(() => {});
     };
 
@@ -146,6 +174,25 @@ export default function FamilyPage() {
     const t = setInterval(poll, 1000);
     return () => clearInterval(t);
   }, [hasRunningBrowserTask]);
+
+  async function createProviderSearchDemo() {
+    setDemoTaskBusy(true);
+    try {
+      const response = await fetch(`${API}/browser-agent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task_type: "provider_search",
+          params: { specialty: "Internal Medicine", zip_code: "43215", max_results: 3 },
+        }),
+      });
+      if (!response.ok) throw new Error("Could not create provider search");
+      const task = await response.json();
+      setBrowserTasks((current) => [task, ...current.filter((item) => item.task_id !== task.task_id)]);
+    } finally {
+      setDemoTaskBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!authChecked || !me) return;
@@ -518,14 +565,22 @@ export default function FamilyPage() {
         </section>
 
         {/* Browser automation tasks (Nova Act) -- shown from sidecar OR from escalation fallbacks */}
-        {(browserTasks.length > 0 || s.escalations.some((e) => e.message.includes("Browser task requested"))) && (
-          <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
+        <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h2 className="font-bold text-xl flex items-center gap-2">Browser Automation</h2>
                 <p className="text-slate-400 text-sm">Real browser tasks powered by Amazon Nova Act. Approve to execute.</p>
               </div>
               <div className="flex items-center gap-2">
+                {!browserTasks.some((task) => task.status === "running" || task.status === "approved" || task.status === "pending_approval") && (
+                  <button
+                    onClick={createProviderSearchDemo}
+                    disabled={demoTaskBusy}
+                    className="rounded-xl bg-cyan-300 px-3 py-1.5 text-xs font-black text-slate-950 hover:bg-cyan-200 disabled:opacity-60"
+                  >
+                    {demoTaskBusy ? "Creating…" : "Find Medicare doctors near Eleanor"}
+                  </button>
+                )}
                 {browserTasks.some((t) => t.status !== "running" && t.status !== "approved") && (
                   <button
                     onClick={() => {
@@ -614,7 +669,7 @@ export default function FamilyPage() {
                     {bt.result && (
                       <div className="mt-2 rounded-xl bg-emerald-400/10 p-3 text-sm">
                         {Object.entries(bt.result).map(([k, v]) => (
-                          <div key={k}><span className="text-emerald-200 font-semibold">{k}:</span> <span className="text-white">{v}</span></div>
+                          <div key={k}><span className="text-emerald-200 font-semibold">{k}:</span> <span className="whitespace-pre-wrap text-white">{formatBrowserResult(v)}</span></div>
                         ))}
                       </div>
                     )}
@@ -629,7 +684,7 @@ export default function FamilyPage() {
                           </div>
                         </div>
                         <div className="w-full bg-slate-950" style={{ aspectRatio: "16 / 9" }}>
-                          <BrowserLiveView signedUrl={bt.recording_url} remoteWidth={1600} remoteHeight={900} />
+                          <StableBrowserLiveView signedUrl={bt.recording_url} />
                         </div>
                       </div>
                     )}
@@ -668,8 +723,7 @@ export default function FamilyPage() {
                 </div>
               );
             })}
-          </section>
-        )}
+        </section>
 
         {/* Background tasks */}
         <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">

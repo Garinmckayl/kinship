@@ -10,7 +10,7 @@ const NOVA_SIDECAR_URL = process.env.NOVA_SIDECAR_URL ?? "http://localhost:8100"
 const NOVA_SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
 const NOVA_AGENTCORE_RUNTIME = process.env.NOVA_AGENTCORE_RUNTIME; // ARN of the Nova Act AgentCore runtime
 
-export type BrowserTaskType = "pharmacy_refill" | "insurance_check" | "bill_payment" | "appointment_booking" | "grocery_order" | "benefits_recert" | "custom";
+export type BrowserTaskType = "pharmacy_refill" | "insurance_check" | "provider_search" | "bill_payment" | "appointment_booking" | "grocery_order" | "benefits_recert" | "custom";
 export type BrowserTaskStatus = "pending_approval" | "approved" | "running" | "completed" | "failed" | "cancelled";
 
 export type BrowserTaskStep = {

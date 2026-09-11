@@ -162,10 +162,18 @@ export const processBrowserTask = inngest.createFunction(
     await step.run("store-result", async () => {
       const { updateBrowserTask, addEscalation } = await import("./store");
       const ok = result.status === "success";
+      let storedResult = result.result ?? null;
+      if (typeof storedResult === "string") {
+        try {
+          storedResult = JSON.parse(storedResult);
+        } catch {
+          storedResult = { summary: storedResult };
+        }
+      }
       await updateBrowserTask(taskId, {
         status: ok ? "completed" : "failed",
         steps: result.steps ?? [],
-        result: result.result ?? null,
+        result: storedResult,
         error: ok ? null : (result.response ?? "unknown error"),
       });
       await addEscalation("eleanor-79",
