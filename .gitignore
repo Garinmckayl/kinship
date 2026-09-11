@@ -10,3 +10,4 @@ agentcore/node_modules/
 *.webm
 act_*.html
 frontend/public/nice-dcv-web-client-sdk/
+frontend/public/family/nice-dcv-web-client-sdk/

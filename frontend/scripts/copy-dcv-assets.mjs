@@ -8,9 +8,13 @@ const source = resolve(
   "node_modules/bedrock-agentcore/dist/src/tools/browser/live-view/nice-dcv-web-client-sdk",
 );
 const destination = resolve(root, "public/nice-dcv-web-client-sdk");
+const familyDestination = resolve(root, "public/family/nice-dcv-web-client-sdk");
 
 await mkdir(destination, { recursive: true });
+await mkdir(familyDestination, { recursive: true });
 await Promise.all([
   cp(resolve(source, "dcvjs-esm"), resolve(destination, "dcvjs-esm"), { recursive: true, force: true }),
   cp(resolve(source, "dcv-ui"), resolve(destination, "dcv-ui"), { recursive: true, force: true }),
+  cp(resolve(source, "dcvjs-esm"), resolve(familyDestination, "dcvjs-esm"), { recursive: true, force: true }),
+  cp(resolve(source, "dcv-ui"), resolve(familyDestination, "dcv-ui"), { recursive: true, force: true }),
 ]);

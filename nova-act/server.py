@@ -237,7 +237,7 @@ async def execute_nova_workflow(task: TaskResult, config: dict, params: dict) ->
             # Start AgentCore Browser Tool (cloud-hosted Chromium)
             log.info(f"Starting ACBT cloud browser in {aws_region}...")
             acbt_client = BrowserClient(region=aws_region)
-            acbt_client.start()
+            acbt_client.start(viewport={"width": 1600, "height": 900})
             live_view_url = acbt_client.generate_live_view_url(expires=300)
             cdp_ws_url, cdp_headers = acbt_client.generate_ws_headers()
             log.info(f"ACBT browser started. Live view: {live_view_url[:80]}...")

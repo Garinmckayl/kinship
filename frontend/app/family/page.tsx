@@ -475,8 +475,8 @@ export default function FamilyPage() {
             {s.escalations.length > 0 && (
               <button
                 onClick={async () => {
-                  await fetch(`${API}/escalations/clear`, { method: "POST" });
-                  setS((prev) => ({ ...prev, escalations: prev.escalations.map((e) => ({ ...e, acked: true })) }));
+                  const response = await fetch(`${API}/escalations/clear`, { method: "POST" });
+                  if (response.ok) setS((prev) => ({ ...prev, escalations: [] }));
                 }}
                 className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
               >
@@ -526,20 +526,20 @@ export default function FamilyPage() {
                 <p className="text-slate-400 text-sm">Real browser tasks powered by Amazon Nova Act. Approve to execute.</p>
               </div>
               <div className="flex items-center gap-2">
-                {browserTasks.some((t) => t.status === "completed" || t.status === "failed") && (
+                {browserTasks.some((t) => t.status !== "running" && t.status !== "approved") && (
                   <button
                     onClick={() => {
-                      const toDelete = browserTasks.filter((t) => t.status === "completed" || t.status === "failed");
+                      const toDelete = browserTasks.filter((t) => t.status !== "running" && t.status !== "approved");
                       Promise.all(toDelete.map(async (task) => {
                         const response = await fetch(`${API}/browser-agent/${task.task_id}`, { method: "DELETE" });
                         if (!response.ok) throw new Error(`Failed to dismiss ${task.task_id}`);
                       }))
-                        .then(() => setBrowserTasks((ts) => ts.filter((t) => t.status !== "completed" && t.status !== "failed")))
+                        .then(() => setBrowserTasks((tasks) => tasks.filter((task) => task.status === "running" || task.status === "approved")))
                         .catch((error) => console.error("[family] Failed to clear browser tasks:", error));
                     }}
                     className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
                   >
-                    Clear completed
+                    Clear inactive
                   </button>
                 )}
                 <span className="px-2.5 py-1 rounded-full bg-fuchsia-400/10 text-fuchsia-200 text-xs font-bold ring-1 ring-fuchsia-300/20">Nova Act</span>
@@ -576,7 +576,7 @@ export default function FamilyPage() {
                             Approve & Execute
                           </button>
                         )}
-                        {(isDone || isFailed) && (
+                        {!isRunning && (
                           <button
                             onClick={() => {
                               fetch(`${API}/browser-agent/${bt.task_id}`, { method: "DELETE" })
@@ -629,7 +629,7 @@ export default function FamilyPage() {
                           </div>
                         </div>
                         <div className="w-full bg-slate-950" style={{ aspectRatio: "16 / 9" }}>
-                          <BrowserLiveView signedUrl={bt.recording_url} remoteWidth={1920} remoteHeight={1080} />
+                          <BrowserLiveView signedUrl={bt.recording_url} remoteWidth={1600} remoteHeight={900} />
                         </div>
                       </div>
                     )}

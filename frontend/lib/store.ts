@@ -461,6 +461,8 @@ export async function deleteBrowserTask(id: string): Promise<void> {
   if (!dbOn()) {
     const idx = MEM_BROWSER_TASKS.findIndex((t) => t.id === id);
     if (idx !== -1) MEM_BROWSER_TASKS.splice(idx, 1);
+    const state = getState("eleanor-79");
+    state.escalations = state.escalations.filter((alert) => !alert.message.includes(id));
     return;
   }
   await ready();
@@ -470,6 +472,7 @@ export async function deleteBrowserTask(id: string): Promise<void> {
     await q("insert into dismissed_browser_tasks(id,task_id) values($1,$2) on conflict(id) do nothing", [`dismissed-${taskId}`, taskId]);
   }
   await q("delete from browser_tasks where id=$1", [id]);
+  await q("delete from escalations where elder_id='eleanor-79' and message like $1", [`%${id}%`]);
 }
 
 export async function getDismissedBrowserTasks(): Promise<string[]> {
