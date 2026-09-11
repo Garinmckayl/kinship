@@ -49,10 +49,13 @@ export const confirmIntake = tool({
   callback: async (input) => {
     const taken = await takenMedIds(input.userId);
     const meds = await listMeds(input.userId);
-    const medicationKey = input.medId.trim().toLowerCase();
+    const normalizeMedicationKey = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
+    const medicationKey = normalizeMedicationKey(input.medId);
     const med = meds.find((m) =>
       m.active &&
-      [m.id, m.name, m.label].some((value) => value?.trim().toLowerCase() === medicationKey)
+      [m.id, m.name, m.label, `${m.name} ${m.dosage}`]
+        .filter(Boolean)
+        .some((value) => normalizeMedicationKey(value) === medicationKey)
     );
     if (!med) return JSON.stringify({ ok: false, error: "Medication was not found on the active schedule." });
     if (taken.includes(med.id)) {
