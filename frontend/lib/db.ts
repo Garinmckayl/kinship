@@ -217,7 +217,7 @@ async function seedDemo() {
     await q("insert into escalations(elder_id,level,message) values('eleanor-79','info','Morning Lisinopril confirmed.')");
   }
 
-  const healthCount = await q<{ count: string }>("select count(*) from health_metrics where elder_id='eleanor-79'");
+  const healthCount = await q<{ count: string }>("select count(*) from health_metrics where elder_id='eleanor-79' and source='connected watch'");
   if (Number(healthCount[0]?.count ?? 0) === 0) {
     const days = [
       { sys: 132, dia: 78, heart: 72, steps: 4210, sleep: 7.2 },
