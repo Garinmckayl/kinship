@@ -13,6 +13,7 @@ function fmt(s: number) {
 export function CallScreen({
   phase,
   caption,
+  activity,
   seconds,
   onTalk,
   onEnd,
@@ -22,6 +23,7 @@ export function CallScreen({
 }: {
   phase: AgentPhase;
   caption: string;
+  activity?: string;
   seconds: number;
   onTalk: () => void;
   onEnd: () => void;
@@ -43,9 +45,10 @@ export function CallScreen({
         <div className="rounded-full bg-indigo-500/10 p-6 ring-1 ring-indigo-400/30 shadow-[0_0_120px_20px_rgba(99,102,241,0.35)]">
           <NovaFace phase={phase} size={260} />
         </div>
-        <p className="max-w-md text-center text-2xl leading-relaxed text-slate-100 min-h-[4rem]">
+        <p className="max-w-lg min-h-[2.75rem] text-center text-base font-medium leading-relaxed text-slate-200">
           “{caption}”
         </p>
+        {activity && <p className="rounded-full bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-200 ring-1 ring-emerald-300/20">{activity}</p>}
       </div>
 
       <div className="w-full max-w-xl space-y-4 pb-2">

@@ -1,0 +1,3116 @@
+[
+  {
+    "id": "w0",
+    "text": "While",
+    "start": 0.039,
+    "end": 0.226
+  },
+  {
+    "id": "w1",
+    "text": "Sarah",
+    "start": 0.265,
+    "end": 0.531
+  },
+  {
+    "id": "w2",
+    "text": "works,",
+    "start": 0.561,
+    "end": 1.043
+  },
+  {
+    "id": "w3",
+    "text": "Kinship",
+    "start": 1.171,
+    "end": 1.554
+  },
+  {
+    "id": "w4",
+    "text": "is",
+    "start": 1.594,
+    "end": 1.653
+  },
+  {
+    "id": "w5",
+    "text": "navigating",
+    "start": 1.712,
+    "end": 2.164
+  },
+  {
+    "id": "w6",
+    "text": "Medicare.gov",
+    "start": 2.214,
+    "end": 3.099
+  },
+  {
+    "id": "w7",
+    "text": "for",
+    "start": 3.158,
+    "end": 3.267
+  },
+  {
+    "id": "w8",
+    "text": "her",
+    "start": 3.316,
+    "end": 3.385
+  },
+  {
+    "id": "w9",
+    "text": "mother,",
+    "start": 3.443,
+    "end": 3.876
+  },
+  {
+    "id": "w10",
+    "text": "finding",
+    "start": 4.152,
+    "end": 4.457
+  },
+  {
+    "id": "w11",
+    "text": "nearby",
+    "start": 4.506,
+    "end": 4.781
+  },
+  {
+    "id": "w12",
+    "text": "doctors,",
+    "start": 4.841,
+    "end": 5.481
+  },
+  {
+    "id": "w13",
+    "text": "and",
+    "start": 5.608,
+    "end": 5.736
+  },
+  {
+    "id": "w14",
+    "text": "turning",
+    "start": 5.786,
+    "end": 6.07
+  },
+  {
+    "id": "w15",
+    "text": "official",
+    "start": 6.119,
+    "end": 6.454
+  },
+  {
+    "id": "w16",
+    "text": "results",
+    "start": 6.514,
+    "end": 6.947
+  },
+  {
+    "id": "w17",
+    "text": "into",
+    "start": 7.015,
+    "end": 7.192
+  },
+  {
+    "id": "w18",
+    "text": "a",
+    "start": 7.261,
+    "end": 7.281
+  },
+  {
+    "id": "w19",
+    "text": "decision",
+    "start": 7.33,
+    "end": 7.675
+  },
+  {
+    "id": "w20",
+    "text": "she",
+    "start": 7.724,
+    "end": 7.812
+  },
+  {
+    "id": "w21",
+    "text": "can",
+    "start": 7.852,
+    "end": 7.959
+  },
+  {
+    "id": "w22",
+    "text": "use.",
+    "start": 8.029,
+    "end": 8.55
+  },
+  {
+    "id": "w23",
+    "text": "For",
+    "start": 9.141,
+    "end": 9.278
+  },
+  {
+    "id": "w24",
+    "text": "Eleanor,",
+    "start": 9.327,
+    "end": 9.927
+  },
+  {
+    "id": "w25",
+    "text": "this",
+    "start": 10.203,
+    "end": 10.381
+  },
+  {
+    "id": "w26",
+    "text": "may",
+    "start": 10.449,
+    "end": 10.567
+  },
+  {
+    "id": "w27",
+    "text": "be",
+    "start": 10.626,
+    "end": 10.714
+  },
+  {
+    "id": "w28",
+    "text": "the",
+    "start": 10.764,
+    "end": 10.823
+  },
+  {
+    "id": "w29",
+    "text": "difference",
+    "start": 10.862,
+    "end": 11.197
+  },
+  {
+    "id": "w30",
+    "text": "between",
+    "start": 11.226,
+    "end": 11.492
+  },
+  {
+    "id": "w31",
+    "text": "waiting",
+    "start": 11.541,
+    "end": 11.856
+  },
+  {
+    "id": "w32",
+    "text": "and",
+    "start": 12.131,
+    "end": 12.308
+  },
+  {
+    "id": "w33",
+    "text": "getting",
+    "start": 12.368,
+    "end": 12.584
+  },
+  {
+    "id": "w34",
+    "text": "help.",
+    "start": 12.653,
+    "end": 13.047
+  },
+  {
+    "id": "w35",
+    "text": "Family",
+    "start": 13.853,
+    "end": 14.178
+  },
+  {
+    "id": "w36",
+    "text": "caregiving",
+    "start": 14.237,
+    "end": 14.739
+  },
+  {
+    "id": "w37",
+    "text": "is",
+    "start": 14.808,
+    "end": 14.916
+  },
+  {
+    "id": "w38",
+    "text": "a",
+    "start": 14.965,
+    "end": 14.985
+  },
+  {
+    "id": "w39",
+    "text": "second",
+    "start": 15.064,
+    "end": 15.369
+  },
+  {
+    "id": "w40",
+    "text": "shift",
+    "start": 15.418,
+    "end": 15.772
+  },
+  {
+    "id": "w41",
+    "text": "of",
+    "start": 15.831,
+    "end": 15.919
+  },
+  {
+    "id": "w42",
+    "text": "relentless",
+    "start": 15.979,
+    "end": 16.392
+  },
+  {
+    "id": "w43",
+    "text": "tasks.",
+    "start": 16.431,
+    "end": 17.11
+  },
+  {
+    "id": "w44",
+    "text": "Did",
+    "start": 17.484,
+    "end": 17.631
+  },
+  {
+    "id": "w45",
+    "text": "Mom",
+    "start": 17.681,
+    "end": 17.907
+  },
+  {
+    "id": "w46",
+    "text": "take",
+    "start": 17.947,
+    "end": 18.104
+  },
+  {
+    "id": "w47",
+    "text": "her",
+    "start": 18.134,
+    "end": 18.222
+  },
+  {
+    "id": "w48",
+    "text": "pills?",
+    "start": 18.281,
+    "end": 18.901
+  },
+  {
+    "id": "w49",
+    "text": "Has",
+    "start": 19.176,
+    "end": 19.304
+  },
+  {
+    "id": "w50",
+    "text": "she",
+    "start": 19.334,
+    "end": 19.442
+  },
+  {
+    "id": "w51",
+    "text": "moved?",
+    "start": 19.511,
+    "end": 20.072
+  },
+  {
+    "id": "w52",
+    "text": "Was",
+    "start": 20.446,
+    "end": 20.574
+  },
+  {
+    "id": "w53",
+    "text": "the",
+    "start": 20.623,
+    "end": 20.681
+  },
+  {
+    "id": "w54",
+    "text": "appointment",
+    "start": 20.731,
+    "end": 21.114
+  },
+  {
+    "id": "w55",
+    "text": "confirmed?",
+    "start": 21.164,
+    "end": 21.863
+  },
+  {
+    "id": "w56",
+    "text": "Which",
+    "start": 22.236,
+    "end": 22.443
+  },
+  {
+    "id": "w57",
+    "text": "doctor",
+    "start": 22.502,
+    "end": 22.826
+  },
+  {
+    "id": "w58",
+    "text": "accepts",
+    "start": 22.876,
+    "end": 23.22
+  },
+  {
+    "id": "w59",
+    "text": "Medicare?",
+    "start": 23.28,
+    "end": 23.869
+  },
+  {
+    "id": "w60",
+    "text": "Each",
+    "start": 24.371,
+    "end": 24.548
+  },
+  {
+    "id": "w61",
+    "text": "is",
+    "start": 24.588,
+    "end": 24.647
+  },
+  {
+    "id": "w62",
+    "text": "small.",
+    "start": 24.686,
+    "end": 25.247
+  },
+  {
+    "id": "w63",
+    "text": "Together,",
+    "start": 25.621,
+    "end": 26.221
+  },
+  {
+    "id": "w64",
+    "text": "they",
+    "start": 26.319,
+    "end": 26.516
+  },
+  {
+    "id": "w65",
+    "text": "consume",
+    "start": 26.595,
+    "end": 26.919
+  },
+  {
+    "id": "w66",
+    "text": "attention",
+    "start": 26.949,
+    "end": 27.363
+  },
+  {
+    "id": "w67",
+    "text": "and",
+    "start": 27.442,
+    "end": 27.569
+  },
+  {
+    "id": "w68",
+    "text": "still",
+    "start": 27.628,
+    "end": 27.864
+  },
+  {
+    "id": "w69",
+    "text": "leave",
+    "start": 27.923,
+    "end": 28.169
+  },
+  {
+    "id": "w70",
+    "text": "dangerous",
+    "start": 28.208,
+    "end": 28.582
+  },
+  {
+    "id": "w71",
+    "text": "gaps.",
+    "start": 28.642,
+    "end": 29.231
+  },
+  {
+    "id": "w72",
+    "text": "Kinship",
+    "start": 30.038,
+    "end": 30.511
+  },
+  {
+    "id": "w73",
+    "text": "is",
+    "start": 30.569,
+    "end": 30.668
+  },
+  {
+    "id": "w74",
+    "text": "an",
+    "start": 30.708,
+    "end": 30.757
+  },
+  {
+    "id": "w75",
+    "text": "AI",
+    "start": 30.816,
+    "end": 31.062
+  },
+  {
+    "id": "w76",
+    "text": "companion",
+    "start": 31.131,
+    "end": 31.632
+  },
+  {
+    "id": "w77",
+    "text": "for",
+    "start": 31.701,
+    "end": 31.809
+  },
+  {
+    "id": "w78",
+    "text": "older",
+    "start": 31.878,
+    "end": 32.153
+  },
+  {
+    "id": "w79",
+    "text": "adults",
+    "start": 32.203,
+    "end": 32.528
+  },
+  {
+    "id": "w80",
+    "text": "living",
+    "start": 32.597,
+    "end": 32.833
+  },
+  {
+    "id": "w81",
+    "text": "independently.",
+    "start": 32.902,
+    "end": 33.758
+  },
+  {
+    "id": "w82",
+    "text": "It",
+    "start": 34.191,
+    "end": 34.308
+  },
+  {
+    "id": "w83",
+    "text": "handles",
+    "start": 34.348,
+    "end": 34.643
+  },
+  {
+    "id": "w84",
+    "text": "repetitive",
+    "start": 34.702,
+    "end": 35.145
+  },
+  {
+    "id": "w85",
+    "text": "work",
+    "start": 35.184,
+    "end": 35.42
+  },
+  {
+    "id": "w86",
+    "text": "quietly",
+    "start": 35.489,
+    "end": 35.962
+  },
+  {
+    "id": "w87",
+    "text": "in",
+    "start": 36.001,
+    "end": 36.05
+  },
+  {
+    "id": "w88",
+    "text": "the",
+    "start": 36.089,
+    "end": 36.148
+  },
+  {
+    "id": "w89",
+    "text": "background,",
+    "start": 36.188,
+    "end": 36.827
+  },
+  {
+    "id": "w90",
+    "text": "and",
+    "start": 36.925,
+    "end": 37.053
+  },
+  {
+    "id": "w91",
+    "text": "surfaces",
+    "start": 37.123,
+    "end": 37.614
+  },
+  {
+    "id": "w92",
+    "text": "when",
+    "start": 37.664,
+    "end": 37.781
+  },
+  {
+    "id": "w93",
+    "text": "there",
+    "start": 37.802,
+    "end": 37.919
+  },
+  {
+    "id": "w94",
+    "text": "is",
+    "start": 37.949,
+    "end": 38.008
+  },
+  {
+    "id": "w95",
+    "text": "a",
+    "start": 38.037,
+    "end": 38.067
+  },
+  {
+    "id": "w96",
+    "text": "real",
+    "start": 38.165,
+    "end": 38.402
+  },
+  {
+    "id": "w97",
+    "text": "decision",
+    "start": 38.47,
+    "end": 38.835
+  },
+  {
+    "id": "w98",
+    "text": "to",
+    "start": 38.884,
+    "end": 38.933
+  },
+  {
+    "id": "w99",
+    "text": "make.",
+    "start": 39.002,
+    "end": 39.444
+  },
+  {
+    "id": "w100",
+    "text": "Every",
+    "start": 40.389,
+    "end": 40.625
+  },
+  {
+    "id": "w101",
+    "text": "morning,",
+    "start": 40.694,
+    "end": 41.029
+  },
+  {
+    "id": "w102",
+    "text": "Eleanor",
+    "start": 41.058,
+    "end": 41.412
+  },
+  {
+    "id": "w103",
+    "text": "sees",
+    "start": 41.462,
+    "end": 41.678
+  },
+  {
+    "id": "w104",
+    "text": "what",
+    "start": 41.708,
+    "end": 41.825
+  },
+  {
+    "id": "w105",
+    "text": "matters",
+    "start": 41.875,
+    "end": 42.159
+  },
+  {
+    "id": "w106",
+    "text": "today.",
+    "start": 42.199,
+    "end": 42.691
+  },
+  {
+    "id": "w107",
+    "text": "Kinship",
+    "start": 43.203,
+    "end": 43.646
+  },
+  {
+    "id": "w108",
+    "text": "reminds",
+    "start": 43.695,
+    "end": 44.098
+  },
+  {
+    "id": "w109",
+    "text": "her",
+    "start": 44.137,
+    "end": 44.216
+  },
+  {
+    "id": "w110",
+    "text": "about",
+    "start": 44.265,
+    "end": 44.492
+  },
+  {
+    "id": "w111",
+    "text": "four",
+    "start": 44.57,
+    "end": 44.836
+  },
+  {
+    "id": "w112",
+    "text": "medications.",
+    "start": 44.895,
+    "end": 45.81
+  },
+  {
+    "id": "w113",
+    "text": "She",
+    "start": 46.086,
+    "end": 46.214
+  },
+  {
+    "id": "w114",
+    "text": "answers",
+    "start": 46.282,
+    "end": 46.538
+  },
+  {
+    "id": "w115",
+    "text": "by",
+    "start": 46.577,
+    "end": 46.686
+  },
+  {
+    "id": "w116",
+    "text": "voice",
+    "start": 46.764,
+    "end": 47.217
+  },
+  {
+    "id": "w117",
+    "text": "or",
+    "start": 47.256,
+    "end": 47.414
+  },
+  {
+    "id": "w118",
+    "text": "one",
+    "start": 47.492,
+    "end": 47.68
+  },
+  {
+    "id": "w119",
+    "text": "tap.",
+    "start": 47.719,
+    "end": 48.191
+  },
+  {
+    "id": "w120",
+    "text": "Each",
+    "start": 48.703,
+    "end": 48.89
+  },
+  {
+    "id": "w121",
+    "text": "confirmation",
+    "start": 48.939,
+    "end": 49.558
+  },
+  {
+    "id": "w122",
+    "text": "becomes",
+    "start": 49.608,
+    "end": 49.923
+  },
+  {
+    "id": "w123",
+    "text": "shared",
+    "start": 49.962,
+    "end": 50.257
+  },
+  {
+    "id": "w124",
+    "text": "context,",
+    "start": 50.316,
+    "end": 51.074
+  },
+  {
+    "id": "w125",
+    "text": "so",
+    "start": 51.221,
+    "end": 51.349
+  },
+  {
+    "id": "w126",
+    "text": "Sarah",
+    "start": 51.418,
+    "end": 51.723
+  },
+  {
+    "id": "w127",
+    "text": "does",
+    "start": 51.743,
+    "end": 51.861
+  },
+  {
+    "id": "w128",
+    "text": "not",
+    "start": 51.9,
+    "end": 52.019
+  },
+  {
+    "id": "w129",
+    "text": "have",
+    "start": 52.058,
+    "end": 52.166
+  },
+  {
+    "id": "w130",
+    "text": "to",
+    "start": 52.186,
+    "end": 52.225
+  },
+  {
+    "id": "w131",
+    "text": "call",
+    "start": 52.284,
+    "end": 52.589
+  },
+  {
+    "id": "w132",
+    "text": "and",
+    "start": 52.658,
+    "end": 52.747
+  },
+  {
+    "id": "w133",
+    "text": "ask",
+    "start": 52.805,
+    "end": 53.012
+  },
+  {
+    "id": "w134",
+    "text": "again.",
+    "start": 53.061,
+    "end": 53.632
+  },
+  {
+    "id": "w135",
+    "text": "Kinship",
+    "start": 54.143,
+    "end": 54.606
+  },
+  {
+    "id": "w136",
+    "text": "connects",
+    "start": 54.655,
+    "end": 55.009
+  },
+  {
+    "id": "w137",
+    "text": "medication,",
+    "start": 55.078,
+    "end": 55.737
+  },
+  {
+    "id": "w138",
+    "text": "activity,",
+    "start": 55.797,
+    "end": 56.475
+  },
+  {
+    "id": "w139",
+    "text": "mood,",
+    "start": 56.544,
+    "end": 57.006
+  },
+  {
+    "id": "w140",
+    "text": "conversation,",
+    "start": 57.085,
+    "end": 57.902
+  },
+  {
+    "id": "w141",
+    "text": "and",
+    "start": 57.921,
+    "end": 58.069
+  },
+  {
+    "id": "w142",
+    "text": "upcoming",
+    "start": 58.128,
+    "end": 58.531
+  },
+  {
+    "id": "w143",
+    "text": "care.",
+    "start": 58.591,
+    "end": 59.082
+  },
+  {
+    "id": "w144",
+    "text": "If",
+    "start": 59.515,
+    "end": 59.633
+  },
+  {
+    "id": "w145",
+    "text": "Eleanor",
+    "start": 59.692,
+    "end": 60.007
+  },
+  {
+    "id": "w146",
+    "text": "goes",
+    "start": 60.057,
+    "end": 60.224
+  },
+  {
+    "id": "w147",
+    "text": "quiet",
+    "start": 60.273,
+    "end": 60.745
+  },
+  {
+    "id": "w148",
+    "text": "and",
+    "start": 60.824,
+    "end": 60.932
+  },
+  {
+    "id": "w149",
+    "text": "activity",
+    "start": 60.981,
+    "end": 61.424
+  },
+  {
+    "id": "w150",
+    "text": "falls",
+    "start": 61.503,
+    "end": 61.778
+  },
+  {
+    "id": "w151",
+    "text": "below",
+    "start": 61.827,
+    "end": 62.083
+  },
+  {
+    "id": "w152",
+    "text": "her",
+    "start": 62.152,
+    "end": 62.241
+  },
+  {
+    "id": "w153",
+    "text": "pattern,",
+    "start": 62.3,
+    "end": 62.851
+  },
+  {
+    "id": "w154",
+    "text": "Kinship",
+    "start": 63.086,
+    "end": 63.519
+  },
+  {
+    "id": "w155",
+    "text": "does",
+    "start": 63.569,
+    "end": 63.707
+  },
+  {
+    "id": "w156",
+    "text": "not",
+    "start": 63.835,
+    "end": 64.13
+  },
+  {
+    "id": "w157",
+    "text": "diagnose.",
+    "start": 64.198,
+    "end": 64.976
+  },
+  {
+    "id": "w158",
+    "text": "It",
+    "start": 65.566,
+    "end": 65.675
+  },
+  {
+    "id": "w159",
+    "text": "explains",
+    "start": 65.714,
+    "end": 66.147
+  },
+  {
+    "id": "w160",
+    "text": "the",
+    "start": 66.196,
+    "end": 66.255
+  },
+  {
+    "id": "w161",
+    "text": "change",
+    "start": 66.304,
+    "end": 66.727
+  },
+  {
+    "id": "w162",
+    "text": "and",
+    "start": 66.757,
+    "end": 66.845
+  },
+  {
+    "id": "w163",
+    "text": "asks",
+    "start": 66.904,
+    "end": 67.16
+  },
+  {
+    "id": "w164",
+    "text": "family",
+    "start": 67.199,
+    "end": 67.495
+  },
+  {
+    "id": "w165",
+    "text": "to",
+    "start": 67.544,
+    "end": 67.593
+  },
+  {
+    "id": "w166",
+    "text": "review.",
+    "start": 67.672,
+    "end": 68.253
+  },
+  {
+    "id": "w167",
+    "text": "Sarah",
+    "start": 68.941,
+    "end": 69.265
+  },
+  {
+    "id": "w168",
+    "text": "sees",
+    "start": 69.305,
+    "end": 69.531
+  },
+  {
+    "id": "w169",
+    "text": "one",
+    "start": 69.6,
+    "end": 69.875
+  },
+  {
+    "id": "w170",
+    "text": "proposed",
+    "start": 69.935,
+    "end": 70.456
+  },
+  {
+    "id": "w171",
+    "text": "action:",
+    "start": 70.515,
+    "end": 71.066
+  },
+  {
+    "id": "w172",
+    "text": "find",
+    "start": 71.44,
+    "end": 71.736
+  },
+  {
+    "id": "w173",
+    "text": "nearby",
+    "start": 71.804,
+    "end": 72.217
+  },
+  {
+    "id": "w174",
+    "text": "Internal",
+    "start": 72.276,
+    "end": 72.641
+  },
+  {
+    "id": "w175",
+    "text": "Medicine",
+    "start": 72.699,
+    "end": 73.034
+  },
+  {
+    "id": "w176",
+    "text": "clinicians",
+    "start": 73.064,
+    "end": 73.614
+  },
+  {
+    "id": "w177",
+    "text": "who",
+    "start": 73.654,
+    "end": 73.762
+  },
+  {
+    "id": "w178",
+    "text": "accept",
+    "start": 73.821,
+    "end": 74.214
+  },
+  {
+    "id": "w179",
+    "text": "Medicare.",
+    "start": 74.284,
+    "end": 74.894
+  },
+  {
+    "id": "w180",
+    "text": "Nothing",
+    "start": 75.386,
+    "end": 75.661
+  },
+  {
+    "id": "w181",
+    "text": "consequential",
+    "start": 75.72,
+    "end": 76.301
+  },
+  {
+    "id": "w182",
+    "text": "happens",
+    "start": 76.359,
+    "end": 76.645
+  },
+  {
+    "id": "w183",
+    "text": "silently.",
+    "start": 76.685,
+    "end": 77.324
+  },
+  {
+    "id": "w184",
+    "text": "She",
+    "start": 77.629,
+    "end": 77.747
+  },
+  {
+    "id": "w185",
+    "text": "can",
+    "start": 77.786,
+    "end": 77.885
+  },
+  {
+    "id": "w186",
+    "text": "inspect,",
+    "start": 77.914,
+    "end": 78.514
+  },
+  {
+    "id": "w187",
+    "text": "approve,",
+    "start": 78.574,
+    "end": 79.242
+  },
+  {
+    "id": "w188",
+    "text": "or",
+    "start": 79.37,
+    "end": 79.488
+  },
+  {
+    "id": "w189",
+    "text": "dismiss",
+    "start": 79.537,
+    "end": 79.882
+  },
+  {
+    "id": "w190",
+    "text": "it.",
+    "start": 79.931,
+    "end": 80.177
+  },
+  {
+    "id": "w191",
+    "text": "One",
+    "start": 80.836,
+    "end": 81.043
+  },
+  {
+    "id": "w192",
+    "text": "human",
+    "start": 81.082,
+    "end": 81.338
+  },
+  {
+    "id": "w193",
+    "text": "decision",
+    "start": 81.377,
+    "end": 81.752
+  },
+  {
+    "id": "w194",
+    "text": "starts",
+    "start": 81.81,
+    "end": 82.076
+  },
+  {
+    "id": "w195",
+    "text": "the",
+    "start": 82.115,
+    "end": 82.164
+  },
+  {
+    "id": "w196",
+    "text": "work.",
+    "start": 82.214,
+    "end": 82.597
+  },
+  {
+    "id": "w197",
+    "text": "A",
+    "start": 82.952,
+    "end": 83.02
+  },
+  {
+    "id": "w198",
+    "text": "Strands",
+    "start": 83.08,
+    "end": 83.424
+  },
+  {
+    "id": "w199",
+    "text": "agent",
+    "start": 83.464,
+    "end": 83.709
+  },
+  {
+    "id": "w200",
+    "text": "creates",
+    "start": 83.758,
+    "end": 84.074
+  },
+  {
+    "id": "w201",
+    "text": "a",
+    "start": 84.103,
+    "end": 84.123
+  },
+  {
+    "id": "w202",
+    "text": "durable",
+    "start": 84.172,
+    "end": 84.575
+  },
+  {
+    "id": "w203",
+    "text": "task.",
+    "start": 84.614,
+    "end": 85.205
+  },
+  {
+    "id": "w204",
+    "text": "Amazon",
+    "start": 85.618,
+    "end": 86.061
+  },
+  {
+    "id": "w205",
+    "text": "Nova",
+    "start": 86.119,
+    "end": 86.386
+  },
+  {
+    "id": "w206",
+    "text": "Act",
+    "start": 86.474,
+    "end": 86.779
+  },
+  {
+    "id": "w207",
+    "text": "opens",
+    "start": 86.907,
+    "end": 87.212
+  },
+  {
+    "id": "w208",
+    "text": "Medicare",
+    "start": 87.271,
+    "end": 87.645
+  },
+  {
+    "id": "w209",
+    "text": "Care",
+    "start": 87.684,
+    "end": 87.891
+  },
+  {
+    "id": "w210",
+    "text": "Compare",
+    "start": 87.92,
+    "end": 88.501
+  },
+  {
+    "id": "w211",
+    "text": "inside",
+    "start": 88.619,
+    "end": 89.042
+  },
+  {
+    "id": "w212",
+    "text": "an",
+    "start": 89.071,
+    "end": 89.111
+  },
+  {
+    "id": "w213",
+    "text": "AgentCore",
+    "start": 89.17,
+    "end": 89.77
+  },
+  {
+    "id": "w214",
+    "text": "Browser.",
+    "start": 89.809,
+    "end": 90.37
+  },
+  {
+    "id": "w215",
+    "text": "Sarah",
+    "start": 91.128,
+    "end": 91.403
+  },
+  {
+    "id": "w216",
+    "text": "watches",
+    "start": 91.433,
+    "end": 91.719
+  },
+  {
+    "id": "w217",
+    "text": "every",
+    "start": 91.797,
+    "end": 92.043
+  },
+  {
+    "id": "w218",
+    "text": "step",
+    "start": 92.092,
+    "end": 92.308
+  },
+  {
+    "id": "w219",
+    "text": "live:",
+    "start": 92.377,
+    "end": 92.859
+  },
+  {
+    "id": "w220",
+    "text": "select",
+    "start": 93.214,
+    "end": 93.519
+  },
+  {
+    "id": "w221",
+    "text": "clinicians,",
+    "start": 93.568,
+    "end": 94.296
+  },
+  {
+    "id": "w222",
+    "text": "enter",
+    "start": 94.394,
+    "end": 94.62
+  },
+  {
+    "id": "w223",
+    "text": "Eleanor's",
+    "start": 94.68,
+    "end": 95.093
+  },
+  {
+    "id": "w224",
+    "text": "Columbus",
+    "start": 95.132,
+    "end": 95.506
+  },
+  {
+    "id": "w225",
+    "text": "ZIP,",
+    "start": 95.526,
+    "end": 96.077
+  },
+  {
+    "id": "w226",
+    "text": "filter",
+    "start": 96.421,
+    "end": 96.795
+  },
+  {
+    "id": "w227",
+    "text": "Internal",
+    "start": 96.864,
+    "end": 97.247
+  },
+  {
+    "id": "w228",
+    "text": "Medicine,",
+    "start": 97.297,
+    "end": 97.819
+  },
+  {
+    "id": "w229",
+    "text": "and",
+    "start": 98.045,
+    "end": 98.173
+  },
+  {
+    "id": "w230",
+    "text": "read",
+    "start": 98.231,
+    "end": 98.389
+  },
+  {
+    "id": "w231",
+    "text": "the",
+    "start": 98.419,
+    "end": 98.478
+  },
+  {
+    "id": "w232",
+    "text": "results.",
+    "start": 98.517,
+    "end": 99.147
+  },
+  {
+    "id": "w233",
+    "text": "The",
+    "start": 99.786,
+    "end": 99.885
+  },
+  {
+    "id": "w234",
+    "text": "task",
+    "start": 99.934,
+    "end": 100.288
+  },
+  {
+    "id": "w235",
+    "text": "stays",
+    "start": 100.357,
+    "end": 100.583
+  },
+  {
+    "id": "w236",
+    "text": "running",
+    "start": 100.662,
+    "end": 100.937
+  },
+  {
+    "id": "w237",
+    "text": "until",
+    "start": 101.006,
+    "end": 101.213
+  },
+  {
+    "id": "w238",
+    "text": "the",
+    "start": 101.253,
+    "end": 101.302
+  },
+  {
+    "id": "w239",
+    "text": "work",
+    "start": 101.341,
+    "end": 101.518
+  },
+  {
+    "id": "w240",
+    "text": "is",
+    "start": 101.567,
+    "end": 101.646
+  },
+  {
+    "id": "w241",
+    "text": "finished.",
+    "start": 101.695,
+    "end": 102.236
+  },
+  {
+    "id": "w242",
+    "text": "Kinship",
+    "start": 102.994,
+    "end": 103.417
+  },
+  {
+    "id": "w243",
+    "text": "returns",
+    "start": 103.476,
+    "end": 103.831
+  },
+  {
+    "id": "w244",
+    "text": "a",
+    "start": 103.869,
+    "end": 103.899
+  },
+  {
+    "id": "w245",
+    "text": "receipt,",
+    "start": 103.948,
+    "end": 104.539
+  },
+  {
+    "id": "w246",
+    "text": "not",
+    "start": 104.736,
+    "end": 104.942
+  },
+  {
+    "id": "w247",
+    "text": "JSON:",
+    "start": 105.001,
+    "end": 105.532
+  },
+  {
+    "id": "w248",
+    "text": "Christopher",
+    "start": 105.837,
+    "end": 106.202
+  },
+  {
+    "id": "w249",
+    "text": "Barlow",
+    "start": 106.26,
+    "end": 106.625
+  },
+  {
+    "id": "w250",
+    "text": "and",
+    "start": 106.693,
+    "end": 106.811
+  },
+  {
+    "id": "w251",
+    "text": "Shannon",
+    "start": 106.87,
+    "end": 107.136
+  },
+  {
+    "id": "w252",
+    "text": "Codispoti,",
+    "start": 107.195,
+    "end": 107.953
+  },
+  {
+    "id": "w253",
+    "text": "both",
+    "start": 108.198,
+    "end": 108.396
+  },
+  {
+    "id": "w254",
+    "text": "zero",
+    "start": 108.454,
+    "end": 108.701
+  },
+  {
+    "id": "w255",
+    "text": "point",
+    "start": 108.769,
+    "end": 108.956
+  },
+  {
+    "id": "w256",
+    "text": "one",
+    "start": 109.025,
+    "end": 109.182
+  },
+  {
+    "id": "w257",
+    "text": "miles",
+    "start": 109.222,
+    "end": 109.497
+  },
+  {
+    "id": "w258",
+    "text": "away,",
+    "start": 109.536,
+    "end": 109.931
+  },
+  {
+    "id": "w259",
+    "text": "with",
+    "start": 109.969,
+    "end": 110.117
+  },
+  {
+    "id": "w260",
+    "text": "address,",
+    "start": 110.166,
+    "end": 110.825
+  },
+  {
+    "id": "w261",
+    "text": "phone,",
+    "start": 110.934,
+    "end": 111.485
+  },
+  {
+    "id": "w262",
+    "text": "search",
+    "start": 111.702,
+    "end": 111.967
+  },
+  {
+    "id": "w263",
+    "text": "ZIP,",
+    "start": 112.056,
+    "end": 112.518
+  },
+  {
+    "id": "w264",
+    "text": "and",
+    "start": 112.636,
+    "end": 112.764
+  },
+  {
+    "id": "w265",
+    "text": "Medicare",
+    "start": 112.823,
+    "end": 113.217
+  },
+  {
+    "id": "w266",
+    "text": "source",
+    "start": 113.246,
+    "end": 113.502
+  },
+  {
+    "id": "w267",
+    "text": "attached.",
+    "start": 113.521,
+    "end": 114.161
+  },
+  {
+    "id": "w268",
+    "text": "The",
+    "start": 114.899,
+    "end": 114.987
+  },
+  {
+    "id": "w269",
+    "text": "result",
+    "start": 115.036,
+    "end": 115.391
+  },
+  {
+    "id": "w270",
+    "text": "is",
+    "start": 115.48,
+    "end": 115.588
+  },
+  {
+    "id": "w271",
+    "text": "specific",
+    "start": 115.617,
+    "end": 116.08
+  },
+  {
+    "id": "w272",
+    "text": "and",
+    "start": 116.267,
+    "end": 116.395
+  },
+  {
+    "id": "w273",
+    "text": "auditable.",
+    "start": 116.453,
+    "end": 116.975
+  },
+  {
+    "id": "w274",
+    "text": "The",
+    "start": 117.979,
+    "end": 118.067
+  },
+  {
+    "id": "w275",
+    "text": "same",
+    "start": 118.136,
+    "end": 118.363
+  },
+  {
+    "id": "w276",
+    "text": "pattern",
+    "start": 118.412,
+    "end": 118.785
+  },
+  {
+    "id": "w277",
+    "text": "coordinates",
+    "start": 118.874,
+    "end": 119.435
+  },
+  {
+    "id": "w278",
+    "text": "refills,",
+    "start": 119.503,
+    "end": 120.231
+  },
+  {
+    "id": "w279",
+    "text": "appointments,",
+    "start": 120.389,
+    "end": 121.136
+  },
+  {
+    "id": "w280",
+    "text": "verified",
+    "start": 121.225,
+    "end": 121.668
+  },
+  {
+    "id": "w281",
+    "text": "bills,",
+    "start": 121.717,
+    "end": 122.229
+  },
+  {
+    "id": "w282",
+    "text": "benefits,",
+    "start": 122.425,
+    "end": 123.193
+  },
+  {
+    "id": "w283",
+    "text": "groceries,",
+    "start": 123.331,
+    "end": 124.098
+  },
+  {
+    "id": "w284",
+    "text": "and",
+    "start": 124.118,
+    "end": 124.265
+  },
+  {
+    "id": "w285",
+    "text": "follow-up.",
+    "start": 124.325,
+    "end": 124.954
+  },
+  {
+    "id": "w286",
+    "text": "Kinship",
+    "start": 125.614,
+    "end": 126.017
+  },
+  {
+    "id": "w287",
+    "text": "gathers",
+    "start": 126.056,
+    "end": 126.352
+  },
+  {
+    "id": "w288",
+    "text": "context,",
+    "start": 126.41,
+    "end": 127.158
+  },
+  {
+    "id": "w289",
+    "text": "prepares",
+    "start": 127.286,
+    "end": 127.669
+  },
+  {
+    "id": "w290",
+    "text": "the",
+    "start": 127.709,
+    "end": 127.768
+  },
+  {
+    "id": "w291",
+    "text": "task,",
+    "start": 127.817,
+    "end": 128.497
+  },
+  {
+    "id": "w292",
+    "text": "pauses",
+    "start": 128.723,
+    "end": 129.086
+  },
+  {
+    "id": "w293",
+    "text": "at",
+    "start": 129.126,
+    "end": 129.195
+  },
+  {
+    "id": "w294",
+    "text": "the",
+    "start": 129.225,
+    "end": 129.283
+  },
+  {
+    "id": "w295",
+    "text": "decision,",
+    "start": 129.323,
+    "end": 129.893
+  },
+  {
+    "id": "w296",
+    "text": "and",
+    "start": 130.041,
+    "end": 130.159
+  },
+  {
+    "id": "w297",
+    "text": "records",
+    "start": 130.218,
+    "end": 130.661
+  },
+  {
+    "id": "w298",
+    "text": "the",
+    "start": 130.7,
+    "end": 130.769
+  },
+  {
+    "id": "w299",
+    "text": "outcome.",
+    "start": 130.828,
+    "end": 131.419
+  },
+  {
+    "id": "w300",
+    "text": "Here,",
+    "start": 131.979,
+    "end": 132.363
+  },
+  {
+    "id": "w301",
+    "text": "Medicare",
+    "start": 132.481,
+    "end": 132.864
+  },
+  {
+    "id": "w302",
+    "text": "provider",
+    "start": 132.885,
+    "end": 133.219
+  },
+  {
+    "id": "w303",
+    "text": "search",
+    "start": 133.268,
+    "end": 133.543
+  },
+  {
+    "id": "w304",
+    "text": "is",
+    "start": 133.603,
+    "end": 133.72
+  },
+  {
+    "id": "w305",
+    "text": "the",
+    "start": 133.769,
+    "end": 133.829
+  },
+  {
+    "id": "w306",
+    "text": "live",
+    "start": 133.888,
+    "end": 134.192
+  },
+  {
+    "id": "w307",
+    "text": "browser",
+    "start": 134.232,
+    "end": 134.576
+  },
+  {
+    "id": "w308",
+    "text": "proof.",
+    "start": 134.645,
+    "end": 135.186
+  },
+  {
+    "id": "w309",
+    "text": "Other",
+    "start": 136.092,
+    "end": 136.308
+  },
+  {
+    "id": "w310",
+    "text": "playbooks",
+    "start": 136.347,
+    "end": 136.731
+  },
+  {
+    "id": "w311",
+    "text": "remain",
+    "start": 136.781,
+    "end": 137.007
+  },
+  {
+    "id": "w312",
+    "text": "approval-gated",
+    "start": 137.046,
+    "end": 137.745
+  },
+  {
+    "id": "w313",
+    "text": "until",
+    "start": 137.853,
+    "end": 138.099
+  },
+  {
+    "id": "w314",
+    "text": "chosen.",
+    "start": 138.158,
+    "end": 138.708
+  },
+  {
+    "id": "w315",
+    "text": "Kinship",
+    "start": 139.299,
+    "end": 139.752
+  },
+  {
+    "id": "w316",
+    "text": "also",
+    "start": 139.801,
+    "end": 140.067
+  },
+  {
+    "id": "w317",
+    "text": "stays",
+    "start": 140.136,
+    "end": 140.372
+  },
+  {
+    "id": "w318",
+    "text": "present",
+    "start": 140.431,
+    "end": 140.804
+  },
+  {
+    "id": "w319",
+    "text": "in",
+    "start": 140.903,
+    "end": 141.021
+  },
+  {
+    "id": "w320",
+    "text": "the",
+    "start": 141.051,
+    "end": 141.109
+  },
+  {
+    "id": "w321",
+    "text": "moment.",
+    "start": 141.158,
+    "end": 141.67
+  },
+  {
+    "id": "w322",
+    "text": "Eleanor",
+    "start": 142.261,
+    "end": 142.605
+  },
+  {
+    "id": "w323",
+    "text": "can",
+    "start": 142.644,
+    "end": 142.743
+  },
+  {
+    "id": "w324",
+    "text": "speak",
+    "start": 142.782,
+    "end": 143.008
+  },
+  {
+    "id": "w325",
+    "text": "naturally",
+    "start": 143.077,
+    "end": 143.599
+  },
+  {
+    "id": "w326",
+    "text": "while",
+    "start": 143.658,
+    "end": 143.825
+  },
+  {
+    "id": "w327",
+    "text": "the",
+    "start": 143.845,
+    "end": 143.903
+  },
+  {
+    "id": "w328",
+    "text": "companion",
+    "start": 143.943,
+    "end": 144.386
+  },
+  {
+    "id": "w329",
+    "text": "quietly",
+    "start": 144.445,
+    "end": 144.809
+  },
+  {
+    "id": "w330",
+    "text": "checks",
+    "start": 144.858,
+    "end": 145.085
+  },
+  {
+    "id": "w331",
+    "text": "her",
+    "start": 145.114,
+    "end": 145.183
+  },
+  {
+    "id": "w332",
+    "text": "schedule,",
+    "start": 145.242,
+    "end": 145.931
+  },
+  {
+    "id": "w333",
+    "text": "logs",
+    "start": 146.206,
+    "end": 146.531
+  },
+  {
+    "id": "w334",
+    "text": "a",
+    "start": 146.56,
+    "end": 146.58
+  },
+  {
+    "id": "w335",
+    "text": "medication,",
+    "start": 146.629,
+    "end": 147.386
+  },
+  {
+    "id": "w336",
+    "text": "or",
+    "start": 147.593,
+    "end": 147.731
+  },
+  {
+    "id": "w337",
+    "text": "updates",
+    "start": 147.83,
+    "end": 148.282
+  },
+  {
+    "id": "w338",
+    "text": "Sarah.",
+    "start": 148.361,
+    "end": 148.882
+  },
+  {
+    "id": "w339",
+    "text": "The",
+    "start": 149.984,
+    "end": 150.092
+  },
+  {
+    "id": "w340",
+    "text": "live",
+    "start": 150.151,
+    "end": 150.377
+  },
+  {
+    "id": "w341",
+    "text": "call",
+    "start": 150.417,
+    "end": 150.692
+  },
+  {
+    "id": "w342",
+    "text": "keeps",
+    "start": 150.761,
+    "end": 150.997
+  },
+  {
+    "id": "w343",
+    "text": "that",
+    "start": 151.036,
+    "end": 151.164
+  },
+  {
+    "id": "w344",
+    "text": "work",
+    "start": 151.214,
+    "end": 151.41
+  },
+  {
+    "id": "w345",
+    "text": "visible",
+    "start": 151.469,
+    "end": 151.962
+  },
+  {
+    "id": "w346",
+    "text": "without",
+    "start": 152.031,
+    "end": 152.355
+  },
+  {
+    "id": "w347",
+    "text": "turning",
+    "start": 152.394,
+    "end": 152.66
+  },
+  {
+    "id": "w348",
+    "text": "care",
+    "start": 152.719,
+    "end": 152.985
+  },
+  {
+    "id": "w349",
+    "text": "into",
+    "start": 153.024,
+    "end": 153.172
+  },
+  {
+    "id": "w350",
+    "text": "another",
+    "start": 153.25,
+    "end": 153.497
+  },
+  {
+    "id": "w351",
+    "text": "dashboard.",
+    "start": 153.555,
+    "end": 154.264
+  },
+  {
+    "id": "w352",
+    "text": "Care",
+    "start": 154.854,
+    "end": 155.091
+  },
+  {
+    "id": "w353",
+    "text": "continues",
+    "start": 155.13,
+    "end": 155.71
+  },
+  {
+    "id": "w354",
+    "text": "after",
+    "start": 155.759,
+    "end": 155.986
+  },
+  {
+    "id": "w355",
+    "text": "the",
+    "start": 156.025,
+    "end": 156.084
+  },
+  {
+    "id": "w356",
+    "text": "browser",
+    "start": 156.124,
+    "end": 156.478
+  },
+  {
+    "id": "w357",
+    "text": "closes.",
+    "start": 156.547,
+    "end": 157.196
+  },
+  {
+    "id": "w358",
+    "text": "Appointments",
+    "start": 157.786,
+    "end": 158.318
+  },
+  {
+    "id": "w359",
+    "text": "remain",
+    "start": 158.376,
+    "end": 158.632
+  },
+  {
+    "id": "w360",
+    "text": "visible.",
+    "start": 158.692,
+    "end": 159.232
+  },
+  {
+    "id": "w361",
+    "text": "Health",
+    "start": 159.744,
+    "end": 159.99
+  },
+  {
+    "id": "w362",
+    "text": "trends",
+    "start": 160.03,
+    "end": 160.354
+  },
+  {
+    "id": "w363",
+    "text": "stay",
+    "start": 160.384,
+    "end": 160.581
+  },
+  {
+    "id": "w364",
+    "text": "connected",
+    "start": 160.64,
+    "end": 161.033
+  },
+  {
+    "id": "w365",
+    "text": "to",
+    "start": 161.063,
+    "end": 161.112
+  },
+  {
+    "id": "w366",
+    "text": "conversation.",
+    "start": 161.17,
+    "end": 162.086
+  },
+  {
+    "id": "w367",
+    "text": "Completed",
+    "start": 162.519,
+    "end": 162.952
+  },
+  {
+    "id": "w368",
+    "text": "tasks",
+    "start": 162.991,
+    "end": 163.503
+  },
+  {
+    "id": "w369",
+    "text": "leave",
+    "start": 163.601,
+    "end": 163.818
+  },
+  {
+    "id": "w370",
+    "text": "receipts.",
+    "start": 163.857,
+    "end": 164.565
+  },
+  {
+    "id": "w371",
+    "text": "Eleanor",
+    "start": 165.076,
+    "end": 165.509
+  },
+  {
+    "id": "w372",
+    "text": "keeps",
+    "start": 165.569,
+    "end": 165.785
+  },
+  {
+    "id": "w373",
+    "text": "her",
+    "start": 165.825,
+    "end": 165.903
+  },
+  {
+    "id": "w374",
+    "text": "independence;",
+    "start": 165.962,
+    "end": 166.759
+  },
+  {
+    "id": "w375",
+    "text": "Sarah",
+    "start": 167.192,
+    "end": 167.517
+  },
+  {
+    "id": "w376",
+    "text": "gets",
+    "start": 167.546,
+    "end": 167.694
+  },
+  {
+    "id": "w377",
+    "text": "fewer",
+    "start": 167.753,
+    "end": 168.019
+  },
+  {
+    "id": "w378",
+    "text": "interruptions",
+    "start": 168.077,
+    "end": 168.747
+  },
+  {
+    "id": "w379",
+    "text": "and",
+    "start": 168.796,
+    "end": 168.924
+  },
+  {
+    "id": "w380",
+    "text": "better",
+    "start": 168.983,
+    "end": 169.18
+  },
+  {
+    "id": "w381",
+    "text": "decisions.",
+    "start": 169.229,
+    "end": 169.976
+  },
+  {
+    "id": "w382",
+    "text": "Inngest",
+    "start": 170.567,
+    "end": 171.029
+  },
+  {
+    "id": "w383",
+    "text": "keeps",
+    "start": 171.088,
+    "end": 171.304
+  },
+  {
+    "id": "w384",
+    "text": "care",
+    "start": 171.364,
+    "end": 171.639
+  },
+  {
+    "id": "w385",
+    "text": "moving",
+    "start": 171.688,
+    "end": 172.023
+  },
+  {
+    "id": "w386",
+    "text": "when",
+    "start": 172.131,
+    "end": 172.288
+  },
+  {
+    "id": "w387",
+    "text": "nobody",
+    "start": 172.347,
+    "end": 172.663
+  },
+  {
+    "id": "w388",
+    "text": "has",
+    "start": 172.712,
+    "end": 172.879
+  },
+  {
+    "id": "w389",
+    "text": "the",
+    "start": 172.928,
+    "end": 173.007
+  },
+  {
+    "id": "w390",
+    "text": "app",
+    "start": 173.105,
+    "end": 173.292
+  },
+  {
+    "id": "w391",
+    "text": "open:",
+    "start": 173.351,
+    "end": 173.784
+  },
+  {
+    "id": "w392",
+    "text": "a",
+    "start": 174.158,
+    "end": 174.207
+  },
+  {
+    "id": "w393",
+    "text": "morning",
+    "start": 174.306,
+    "end": 174.571
+  },
+  {
+    "id": "w394",
+    "text": "check-in,",
+    "start": 174.62,
+    "end": 175.191
+  },
+  {
+    "id": "w395",
+    "text": "welfare",
+    "start": 175.299,
+    "end": 175.762
+  },
+  {
+    "id": "w396",
+    "text": "sweeps",
+    "start": 175.801,
+    "end": 176.136
+  },
+  {
+    "id": "w397",
+    "text": "every",
+    "start": 176.185,
+    "end": 176.392
+  },
+  {
+    "id": "w398",
+    "text": "thirty",
+    "start": 176.45,
+    "end": 176.697
+  },
+  {
+    "id": "w399",
+    "text": "minutes,",
+    "start": 176.765,
+    "end": 177.228
+  },
+  {
+    "id": "w400",
+    "text": "scheduled",
+    "start": 177.297,
+    "end": 177.719
+  },
+  {
+    "id": "w401",
+    "text": "tasks,",
+    "start": 177.759,
+    "end": 178.447
+  },
+  {
+    "id": "w402",
+    "text": "and",
+    "start": 178.723,
+    "end": 178.851
+  },
+  {
+    "id": "w403",
+    "text": "an",
+    "start": 178.891,
+    "end": 178.949
+  },
+  {
+    "id": "w404",
+    "text": "evening",
+    "start": 179.008,
+    "end": 179.303
+  },
+  {
+    "id": "w405",
+    "text": "caregiver",
+    "start": 179.363,
+    "end": 179.845
+  },
+  {
+    "id": "w406",
+    "text": "digest.",
+    "start": 179.903,
+    "end": 180.652
+  },
+  {
+    "id": "w407",
+    "text": "Kinship",
+    "start": 181.163,
+    "end": 181.606
+  },
+  {
+    "id": "w408",
+    "text": "runs",
+    "start": 181.664,
+    "end": 181.871
+  },
+  {
+    "id": "w409",
+    "text": "quietly,",
+    "start": 181.931,
+    "end": 182.599
+  },
+  {
+    "id": "w410",
+    "text": "and",
+    "start": 182.669,
+    "end": 182.797
+  },
+  {
+    "id": "w411",
+    "text": "pings",
+    "start": 182.855,
+    "end": 183.121
+  },
+  {
+    "id": "w412",
+    "text": "Sarah",
+    "start": 183.15,
+    "end": 183.525
+  },
+  {
+    "id": "w413",
+    "text": "only",
+    "start": 183.574,
+    "end": 183.79
+  },
+  {
+    "id": "w414",
+    "text": "when",
+    "start": 183.819,
+    "end": 183.937
+  },
+  {
+    "id": "w415",
+    "text": "attention",
+    "start": 183.967,
+    "end": 184.4
+  },
+  {
+    "id": "w416",
+    "text": "or",
+    "start": 184.479,
+    "end": 184.597
+  },
+  {
+    "id": "w417",
+    "text": "a",
+    "start": 184.646,
+    "end": 184.665
+  },
+  {
+    "id": "w418",
+    "text": "real",
+    "start": 184.744,
+    "end": 184.961
+  },
+  {
+    "id": "w419",
+    "text": "decision",
+    "start": 185.01,
+    "end": 185.374
+  },
+  {
+    "id": "w420",
+    "text": "is",
+    "start": 185.423,
+    "end": 185.482
+  },
+  {
+    "id": "w421",
+    "text": "needed.",
+    "start": 185.542,
+    "end": 186.014
+  },
+  {
+    "id": "w422",
+    "text": "Under",
+    "start": 186.604,
+    "end": 186.801
+  },
+  {
+    "id": "w423",
+    "text": "the",
+    "start": 186.84,
+    "end": 186.899
+  },
+  {
+    "id": "w424",
+    "text": "hood,",
+    "start": 186.958,
+    "end": 187.381
+  },
+  {
+    "id": "w425",
+    "text": "Strands",
+    "start": 187.48,
+    "end": 187.864
+  },
+  {
+    "id": "w426",
+    "text": "coordinates",
+    "start": 187.913,
+    "end": 188.434
+  },
+  {
+    "id": "w427",
+    "text": "care,",
+    "start": 188.483,
+    "end": 189.025
+  },
+  {
+    "id": "w428",
+    "text": "safety,",
+    "start": 189.172,
+    "end": 189.713
+  },
+  {
+    "id": "w429",
+    "text": "and",
+    "start": 189.742,
+    "end": 189.881
+  },
+  {
+    "id": "w430",
+    "text": "browser",
+    "start": 189.939,
+    "end": 190.293
+  },
+  {
+    "id": "w431",
+    "text": "tools.",
+    "start": 190.353,
+    "end": 190.933
+  },
+  {
+    "id": "w432",
+    "text": "Amazon",
+    "start": 191.524,
+    "end": 191.986
+  },
+  {
+    "id": "w433",
+    "text": "Bedrock",
+    "start": 192.045,
+    "end": 192.419
+  },
+  {
+    "id": "w434",
+    "text": "provides",
+    "start": 192.478,
+    "end": 192.861
+  },
+  {
+    "id": "w435",
+    "text": "reasoning.",
+    "start": 192.92,
+    "end": 193.492
+  },
+  {
+    "id": "w436",
+    "text": "Kinship",
+    "start": 194.081,
+    "end": 194.514
+  },
+  {
+    "id": "w437",
+    "text": "memory",
+    "start": 194.564,
+    "end": 194.869
+  },
+  {
+    "id": "w438",
+    "text": "holds",
+    "start": 194.928,
+    "end": 195.164
+  },
+  {
+    "id": "w439",
+    "text": "consented",
+    "start": 195.213,
+    "end": 195.626
+  },
+  {
+    "id": "w440",
+    "text": "context.",
+    "start": 195.686,
+    "end": 196.433
+  },
+  {
+    "id": "w441",
+    "text": "Events",
+    "start": 196.807,
+    "end": 197.201
+  },
+  {
+    "id": "w442",
+    "text": "stream",
+    "start": 197.269,
+    "end": 197.594
+  },
+  {
+    "id": "w443",
+    "text": "to",
+    "start": 197.653,
+    "end": 197.703
+  },
+  {
+    "id": "w444",
+    "text": "the",
+    "start": 197.752,
+    "end": 197.81
+  },
+  {
+    "id": "w445",
+    "text": "family",
+    "start": 197.859,
+    "end": 198.125
+  },
+  {
+    "id": "w446",
+    "text": "dashboard.",
+    "start": 198.185,
+    "end": 198.883
+  },
+  {
+    "id": "w447",
+    "text": "AgentCore",
+    "start": 199.572,
+    "end": 200.241
+  },
+  {
+    "id": "w448",
+    "text": "gives",
+    "start": 200.29,
+    "end": 200.477
+  },
+  {
+    "id": "w449",
+    "text": "Nova",
+    "start": 200.526,
+    "end": 200.762
+  },
+  {
+    "id": "w450",
+    "text": "Act",
+    "start": 200.831,
+    "end": 201.097
+  },
+  {
+    "id": "w451",
+    "text": "a",
+    "start": 201.156,
+    "end": 201.195
+  },
+  {
+    "id": "w452",
+    "text": "durable,",
+    "start": 201.293,
+    "end": 201.884
+  },
+  {
+    "id": "w453",
+    "text": "observable",
+    "start": 201.992,
+    "end": 202.573
+  },
+  {
+    "id": "w454",
+    "text": "browser.",
+    "start": 202.612,
+    "end": 203.252
+  },
+  {
+    "id": "w455",
+    "text": "Structured",
+    "start": 203.94,
+    "end": 204.403
+  },
+  {
+    "id": "w456",
+    "text": "extraction",
+    "start": 204.442,
+    "end": 204.953
+  },
+  {
+    "id": "w457",
+    "text": "turns",
+    "start": 205.003,
+    "end": 205.229
+  },
+  {
+    "id": "w458",
+    "text": "official",
+    "start": 205.269,
+    "end": 205.593
+  },
+  {
+    "id": "w459",
+    "text": "pages",
+    "start": 205.653,
+    "end": 206.046
+  },
+  {
+    "id": "w460",
+    "text": "into",
+    "start": 206.105,
+    "end": 206.262
+  },
+  {
+    "id": "w461",
+    "text": "typed",
+    "start": 206.321,
+    "end": 206.607
+  },
+  {
+    "id": "w462",
+    "text": "results.",
+    "start": 206.665,
+    "end": 207.364
+  },
+  {
+    "id": "w463",
+    "text": "Approvals,",
+    "start": 207.875,
+    "end": 208.584
+  },
+  {
+    "id": "w464",
+    "text": "audit",
+    "start": 208.614,
+    "end": 208.899
+  },
+  {
+    "id": "w465",
+    "text": "logs,",
+    "start": 208.948,
+    "end": 209.381
+  },
+  {
+    "id": "w466",
+    "text": "and",
+    "start": 209.411,
+    "end": 209.538
+  },
+  {
+    "id": "w467",
+    "text": "source",
+    "start": 209.608,
+    "end": 209.912
+  },
+  {
+    "id": "w468",
+    "text": "links",
+    "start": 209.961,
+    "end": 210.217
+  },
+  {
+    "id": "w469",
+    "text": "preserve",
+    "start": 210.315,
+    "end": 210.797
+  },
+  {
+    "id": "w470",
+    "text": "human",
+    "start": 210.827,
+    "end": 211.064
+  },
+  {
+    "id": "w471",
+    "text": "control.",
+    "start": 211.122,
+    "end": 211.781
+  },
+  {
+    "id": "w472",
+    "text": "More",
+    "start": 212.372,
+    "end": 212.519
+  },
+  {
+    "id": "w473",
+    "text": "than",
+    "start": 212.549,
+    "end": 212.658
+  },
+  {
+    "id": "w474",
+    "text": "fifty",
+    "start": 212.736,
+    "end": 213.041
+  },
+  {
+    "id": "w475",
+    "text": "million",
+    "start": 213.119,
+    "end": 213.435
+  },
+  {
+    "id": "w476",
+    "text": "Americans",
+    "start": 213.474,
+    "end": 213.975
+  },
+  {
+    "id": "w477",
+    "text": "provide",
+    "start": 214.035,
+    "end": 214.408
+  },
+  {
+    "id": "w478",
+    "text": "unpaid",
+    "start": 214.468,
+    "end": 214.999
+  },
+  {
+    "id": "w479",
+    "text": "family",
+    "start": 215.048,
+    "end": 215.334
+  },
+  {
+    "id": "w480",
+    "text": "care.",
+    "start": 215.403,
+    "end": 215.894
+  },
+  {
+    "id": "w481",
+    "text": "Returning",
+    "start": 216.583,
+    "end": 216.937
+  },
+  {
+    "id": "w482",
+    "text": "one",
+    "start": 217.016,
+    "end": 217.183
+  },
+  {
+    "id": "w483",
+    "text": "hour",
+    "start": 217.213,
+    "end": 217.439
+  },
+  {
+    "id": "w484",
+    "text": "each",
+    "start": 217.518,
+    "end": 217.695
+  },
+  {
+    "id": "w485",
+    "text": "week",
+    "start": 217.764,
+    "end": 218.019
+  },
+  {
+    "id": "w486",
+    "text": "restores",
+    "start": 218.197,
+    "end": 218.561
+  },
+  {
+    "id": "w487",
+    "text": "billions",
+    "start": 218.689,
+    "end": 219.121
+  },
+  {
+    "id": "w488",
+    "text": "of",
+    "start": 219.161,
+    "end": 219.21
+  },
+  {
+    "id": "w489",
+    "text": "hours",
+    "start": 219.259,
+    "end": 219.574
+  },
+  {
+    "id": "w490",
+    "text": "to",
+    "start": 219.623,
+    "end": 219.682
+  },
+  {
+    "id": "w491",
+    "text": "families.",
+    "start": 219.751,
+    "end": 220.381
+  },
+  {
+    "id": "w492",
+    "text": "Kinship",
+    "start": 221.069,
+    "end": 221.571
+  },
+  {
+    "id": "w493",
+    "text": "is",
+    "start": 221.669,
+    "end": 221.808
+  },
+  {
+    "id": "w494",
+    "text": "not",
+    "start": 221.876,
+    "end": 222.073
+  },
+  {
+    "id": "w495",
+    "text": "another",
+    "start": 222.103,
+    "end": 222.348
+  },
+  {
+    "id": "w496",
+    "text": "dashboard",
+    "start": 222.397,
+    "end": 222.929
+  },
+  {
+    "id": "w497",
+    "text": "asking",
+    "start": 222.978,
+    "end": 223.244
+  },
+  {
+    "id": "w498",
+    "text": "caregivers",
+    "start": 223.293,
+    "end": 223.825
+  },
+  {
+    "id": "w499",
+    "text": "to",
+    "start": 223.874,
+    "end": 223.933
+  },
+  {
+    "id": "w500",
+    "text": "do",
+    "start": 224.031,
+    "end": 224.159
+  },
+  {
+    "id": "w501",
+    "text": "more.",
+    "start": 224.258,
+    "end": 224.769
+  },
+  {
+    "id": "w502",
+    "text": "It",
+    "start": 225.458,
+    "end": 225.565
+  },
+  {
+    "id": "w503",
+    "text": "handles",
+    "start": 225.605,
+    "end": 225.87
+  },
+  {
+    "id": "w504",
+    "text": "the",
+    "start": 225.91,
+    "end": 225.969
+  },
+  {
+    "id": "w505",
+    "text": "repetition,",
+    "start": 226.018,
+    "end": 226.766
+  },
+  {
+    "id": "w506",
+    "text": "protects",
+    "start": 227.042,
+    "end": 227.415
+  },
+  {
+    "id": "w507",
+    "text": "the",
+    "start": 227.464,
+    "end": 227.524
+  },
+  {
+    "id": "w508",
+    "text": "decision,",
+    "start": 227.563,
+    "end": 228.064
+  },
+  {
+    "id": "w509",
+    "text": "and",
+    "start": 228.124,
+    "end": 228.252
+  },
+  {
+    "id": "w510",
+    "text": "closes",
+    "start": 228.311,
+    "end": 228.655
+  },
+  {
+    "id": "w511",
+    "text": "the",
+    "start": 228.704,
+    "end": 228.764
+  },
+  {
+    "id": "w512",
+    "text": "loop--from",
+    "start": 228.822,
+    "end": 229.934
+  },
+  {
+    "id": "w513",
+    "text": "silence,",
+    "start": 230.003,
+    "end": 230.623
+  },
+  {
+    "id": "w514",
+    "text": "to",
+    "start": 230.721,
+    "end": 230.819
+  },
+  {
+    "id": "w515",
+    "text": "understanding,",
+    "start": 230.888,
+    "end": 231.735
+  },
+  {
+    "id": "w516",
+    "text": "to",
+    "start": 232.108,
+    "end": 232.217
+  },
+  {
+    "id": "w517",
+    "text": "real",
+    "start": 232.325,
+    "end": 232.571
+  },
+  {
+    "id": "w518",
+    "text": "help.",
+    "start": 232.64,
+    "end": 233.024
+  }
+]

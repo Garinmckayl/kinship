@@ -393,7 +393,9 @@ html[data-theme="dark"] .elder-dock { background: linear-gradient(to top, #07121
 .live-phase-speaking .live-face-wrap { filter: drop-shadow(0 24px 38px rgba(45,212,191,.18)); }
 .live-phase-speaking .live-ripple { border-color: rgba(251,191,36,.28); animation: liveSpeakRing .85s ease-in-out infinite; }
 .live-status { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-top: -.5rem; color: #99f6e4; font-size: .85rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.live-caption { max-width: 48ch; min-height: 2.8em; margin: .65rem auto 0; color: #f7fffc; font-size: clamp(1rem, 2.2vw, 1.45rem); line-height: 1.38; font-weight: 680; text-wrap: balance; }
+.live-tool-status { display: inline-flex; align-items: center; gap: .55rem; margin-top: .75rem; border: 1px solid rgba(110,231,183,.2); border-radius: 999px; padding: .5rem .85rem; color: #a7f3d0; background: rgba(16,185,129,.09); font-size: .78rem; font-weight: 850; letter-spacing: .025em; }
+.live-tool-dot { width: .48rem; height: .48rem; border-radius: 999px; background: #6ee7b7; box-shadow: 0 0 0 .25rem rgba(110,231,183,.12); }
+.live-caption { max-width: 42ch; min-height: 2.5em; margin: .55rem auto 0; color: rgba(247,255,252,.84); font-size: clamp(.82rem, 1.3vw, 1rem); line-height: 1.4; font-weight: 620; text-wrap: balance; }
 .live-immersive-controls { width: min(100%, 42rem); margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: .7rem; }
 .live-type-row { width: 100%; display: flex; gap: .55rem; }
 html[data-theme="light"] .live-type-row input, .live-type-row input { min-width: 0; flex: 1; min-height: 3rem; border: 1px solid rgba(255,255,255,.17); border-radius: .9rem; padding: .65rem .9rem; color: white !important; background: rgba(0,0,0,.18) !important; outline: none; }
@@ -423,7 +425,7 @@ html[data-theme="light"] .live-type-row input, .live-type-row input { min-width:
   .elder-dock .grid button svg { width: 1.25rem; height: 1.25rem; flex: 0 0 auto; }
   .live-immersive { padding: max(.8rem, env(safe-area-inset-top)) .8rem max(.8rem, env(safe-area-inset-bottom)); }
   .live-minimize span { display: none; }
-  .live-caption { min-height: 3.6em; }
+  .live-caption { min-height: 3.4em; font-size: .86rem; }
 }
 @media (max-height: 680px) and (orientation: landscape) {
   .live-immersive { grid-template-columns: minmax(0, 1fr) minmax(16rem, .8fr); grid-template-rows: auto 1fr; }
@@ -431,7 +433,7 @@ html[data-theme="light"] .live-type-row input, .live-type-row input { min-width:
   .live-immersive-stage { grid-column: 1; grid-row: 2; }
   .live-immersive-controls { grid-column: 2; grid-row: 2; align-self: center; padding-inline: 1rem; }
   .live-face-wrap { width: min(62vh, 24rem); }
-  .live-caption { font-size: clamp(1.05rem, 2.2vw, 1.5rem); }
+  .live-caption { font-size: .86rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .live-ripple, .live-face-wrap { animation: none !important; }

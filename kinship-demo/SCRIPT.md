@@ -1,7 +1,7 @@
 # SCRIPT — Kinship competition film
 
-**Narration asset:** `assets/voice/voiceover-v3.mp3`
-**Word timing:** `assets/voice/voiceover-v3.words.json`
+**Narration asset:** `assets/voice/voiceover-v4.mp3`
+**Word timing:** `assets/voice/voiceover-v4.words.json`
 **Direction:** Intimate and immediate at the open; warm, intelligent, quietly
 urgent through the human story; precise during technical proof; expansive but
 credible at the close. Never sound like an advertisement.
@@ -44,14 +44,22 @@ credible at the close. Never sound like an advertisement.
 
     The same pattern coordinates refills, appointments, verified bills, benefits, groceries, and follow-up. Kinship gathers context, prepares the task, pauses at the decision, and records the outcome. Here, Medicare provider search is the live browser proof. Other playbooks remain approval-gated until chosen.
 
-## 10 — Follow-through
+## 10 — Live companion
+
+    Kinship also stays present in the moment. Eleanor can speak naturally while the companion quietly checks her schedule, logs a medication, or updates Sarah. The live call keeps that work visible without turning care into another dashboard.
+
+## 11 — Follow-through
 
     Care continues after the browser closes. Appointments remain visible. Health trends stay connected to conversation. Completed tasks leave receipts. Eleanor keeps her independence; Sarah gets fewer interruptions and better decisions.
 
-## 11 — Architecture
+## 12 — Durable autonomy
+
+    Inngest keeps care moving when nobody has the app open: a morning check-in, welfare sweeps every thirty minutes, scheduled tasks, and an evening caregiver digest. Kinship runs quietly, and pings Sarah only when attention or a real decision is needed.
+
+## 13 — Architecture
 
     Under the hood, Strands coordinates care, safety, and browser tools. Amazon Bedrock provides reasoning. Kinship memory holds consented context. Events stream to the family dashboard. AgentCore gives Nova Act a durable, observable browser. Structured extraction turns official pages into typed results. Approvals, audit logs, and source links preserve human control.
 
-## 12 — Impact and vision
+## 14 — Impact and vision
 
     More than fifty million Americans provide unpaid family care. Returning one hour each week restores billions of hours to families. Kinship is not another dashboard asking caregivers to do more. It handles the repetition, protects the decision, and closes the loop—from silence, to understanding, to real help.

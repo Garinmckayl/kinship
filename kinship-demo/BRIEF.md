@@ -7,7 +7,7 @@ destination: devpost
 aspect: 1920x1080
 language: en
 audience: AWS Agents for Humans judges
-length: 196.5s
+length: 234.5s
 angle: emotionally urgent care story proven by visible production behavior and a real Nova Act workflow
 ---
 
@@ -17,8 +17,9 @@ A competition film that makes the hidden labor of family caregiving tangible, th
 shows Kinship quietly completing repetitive care work end to end. The film opens
 with the strongest real outcome: Nova Act working on Medicare.gov and returning
 verified nearby clinicians. It then reveals why that work matters to Eleanor and
-Sarah, demonstrates medication, health-context, approval, browser, and appointment
-loops, and closes with the AWS architecture and credible human impact.
+Sarah, demonstrates medication, health-context, approval, browser, immersive voice,
+durable Inngest autonomy, and appointment loops, then closes with the AWS architecture
+and credible human impact.
 
 ## Competition thesis
 
@@ -34,7 +35,9 @@ control over consequential actions.
 - `assets/captures/provider-completed.png` — source evidence for the verified result.
 - Authentic production captures of Eleanor's medication view, health trends,
   calendar, family dashboard, and caregiver approval flow.
-- `assets/voice/voiceover-v3.mp3` narration, starting at 1s, with `assets/voice/voiceover-v3.words.json` used for caption timing.
+- Authentic Nova face assets from the production immersive-call experience.
+- `assets/voice/voiceover-v4.mp3` narration, starting at 1s, with
+  `assets/voice/voiceover-v4.words.json` used for caption timing.
 
 ## Visual direction
 
@@ -54,9 +57,11 @@ control over consequential actions.
 3. Demonstrate who Kinship serves and why the problem matters.
 4. Show several truthful care loops, with one clearly marked live Nova proof.
 5. Show human approval before consequential external action.
-6. Build a technically rich Strands, Bedrock, AgentCore, Nova Act, and application
+6. Show the immersive call turning natural conversation into visible tool work.
+7. Show Inngest running scheduled care in the background and escalating only real decisions.
+8. Build a technically rich Strands, Bedrock, AgentCore, Nova Act, and application
    architecture that remains understandable.
-7. End with measurable potential impact and a memorable vision.
+9. End with measurable potential impact and a memorable vision.
 
 ## Truth boundary
 

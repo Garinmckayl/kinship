@@ -1,8 +1,8 @@
 ---
 format: 1920x1080
-duration: 196.5s
+duration: 234.5s
 message: "Kinship handles the repetitive work of care, then surfaces the decisions only family can make"
-arc: Proof → Human cost → Quiet automation → Decision → Live work → Receipt → Scale → Architecture → Impact
+arc: Proof → Human cost → Quiet automation → Decision → Live work → Receipt → Voice → Autonomy → Architecture → Impact
 audience: AWS Agents for Humans judges
 mode: autonomous
 ---
@@ -10,8 +10,8 @@ mode: autonomous
 ## Frame 1 — Real work, right now
 - status: animated
 - src: compositions/01-proof.html
-- duration: 15s
-- timing: 0–15s
+- duration: 14.85s
+- timing: 0–14.85s
 - motion: camera-journey + dynamic-content-sequencing
 - scene: Open inside the authentic Medicare browser, then reveal verified help and Eleanor's stakes inside ten seconds.
 - narrativeRole: Earn belief and emotion before introducing the product.
@@ -19,8 +19,8 @@ mode: autonomous
 ## Frame 2 — Sarah's invisible second shift
 - status: animated
 - src: compositions/02-burden.html
-- duration: 16.5s
-- timing: 15–31.5s
+- duration: 16.19s
+- timing: 14.85–31.04s
 - motion: overwhelm-surround + waterfall-entry
 - scene: Repetitive care tasks avalanche into an overwhelming queue around Sarah's attention.
 - narrativeRole: Make repetitive care labor emotionally undeniable.
@@ -28,8 +28,8 @@ mode: autonomous
 ## Frame 3 — Quietly handle the repetition
 - status: animated
 - src: compositions/03-thesis.html
-- duration: 9s
-- timing: 31.5–40.5s
+- duration: 10.35s
+- timing: 31.04–41.39s
 - motion: kinetic-type-beats + nudge-curve
 - scene: The task queue collapses into one calm current; one coral human decision remains.
 - narrativeRole: State the exact Everyday Agent thesis.
@@ -37,8 +37,8 @@ mode: autonomous
 ## Frame 4 — The medication loop
 - status: animated
 - src: compositions/04-medication.html
-- duration: 13s
-- timing: 40.5–53.5s
+- duration: 13.75s
+- timing: 41.39–55.14s
 - motion: fixed-anchor-cycle + dynamic-content-sequencing
 - scene: Eleanor's real Today surface supports a designed four-medication loop, voice/tap confirmations, and shared context.
 - narrativeRole: Show repetitive work completed without another caregiver call.
@@ -46,8 +46,8 @@ mode: autonomous
 ## Frame 5 — Context without diagnosis
 - status: animated
 - src: compositions/05-context.html
-- duration: 14s
-- timing: 53.5–67.5s
+- duration: 14.8s
+- timing: 55.14–69.94s
 - motion: panel-edit-live-sync + stat-bars-and-fills
 - scene: Real health surfaces connect medication, activity, mood, conversation, and upcoming care into an explainable review request.
 - narrativeRole: Demonstrate useful context while preserving the diagnosis boundary.
@@ -55,8 +55,8 @@ mode: autonomous
 ## Frame 6 — The human decision
 - status: animated
 - src: compositions/06-approval.html
-- duration: 14s
-- timing: 67.5–81.5s
+- duration: 14.01s
+- timing: 69.94–83.95s
 - motion: cursor-ui-demo + physics-press-reaction
 - scene: Sarah inspects and explicitly approves one provider-search proposal.
 - narrativeRole: Make human authority concrete before external action.
@@ -64,8 +64,8 @@ mode: autonomous
 ## Frame 7 — Nova Act works live
 - status: animated
 - src: compositions/07-live-work.html
-- duration: 19.5s
-- timing: 81.5–101s
+- duration: 20.04s
+- timing: 83.95–103.99s
 - motion: camera-journey + agent-progress-theater
 - scene: Readable full-frame crop of the authentic Nova Act browser recording with a dark-teal progress rail.
 - narrativeRole: Prove durable production browser work.
@@ -73,8 +73,8 @@ mode: autonomous
 ## Frame 8 — Verified help
 - status: animated
 - src: compositions/08-receipt.html
-- duration: 15.5s
-- timing: 101–116.5s
+- duration: 14.99s
+- timing: 103.99–118.98s
 - motion: grid-card-assemble + fixed-anchor-cycle
 - scene: A designed receipt presents verified provider data; the source screenshot remains secondary evidence.
 - narrativeRole: Turn browser work into a specific, useful, auditable result.
@@ -82,35 +82,53 @@ mode: autonomous
 ## Frame 9 — One pattern, many repetitive tasks
 - status: animated
 - src: compositions/09-library.html
-- duration: 21.5s
-- timing: 116.5–138s
+- duration: 21.32s
+- timing: 118.98–140.3s
 - motion: grid-card-assemble + dynamic-content-sequencing
 - scene: Provider search is marked LIVE PROOF; refill, appointments, verified bills, benefits, groceries, and follow-up remain PLAYBOOK / APPROVAL-GATED.
 - narrativeRole: Show breadth without claiming uncaptured completion.
 
-## Frame 10 — Follow-through
+## Frame 10 — Present in the moment
+- status: animated
+- src: compositions/10-live-companion.html
+- duration: 15.55s
+- timing: 140.3–155.85s
+- motion: fixed-anchor-cycle + dynamic-content-sequencing
+- scene: Eleanor speaks naturally with the expressive companion while compact green tool states progress from checking her schedule to logging medication and updating Sarah only if needed.
+- narrativeRole: Prove that the humane voice experience performs useful, visible work.
+
+## Frame 11 — Follow-through
 - status: animated
 - src: compositions/10-followthrough.html
-- duration: 13.5s
-- timing: 138–151.5s
+- duration: 15.72s
+- timing: 155.85–171.57s
 - motion: spatial-pan-stations + card-morph-anchor
 - scene: The receipt flows through calendar, health, and family surfaces so care continues after the browser closes.
 - narrativeRole: Show that Kinship closes loops.
 
-## Frame 11 — Built for consequential care
+## Frame 12 — Quietly autonomous
+- status: animated
+- src: compositions/12-autonomy.html
+- duration: 16.03s
+- timing: 171.57–187.6s
+- motion: grid-card-assemble + dynamic-content-sequencing
+- scene: Inngest connects the 9 AM check-in, 30-minute welfare sweep, durable requested work, and 8 PM caregiver digest to a single decision-only escalation.
+- narrativeRole: Match the Everyday Agents thesis with factual scheduled background care.
+
+## Frame 13 — Built for consequential care
 - status: animated
 - src: compositions/11-architecture.html
-- duration: 24s
-- timing: 151.5–175.5s
+- duration: 25.77s
+- timing: 187.6–213.37s
 - motion: constellation-hub + svg-path-draw
 - scene: Three readable planes show human context, Strands orchestration with Bedrock and consented memory, then durable AgentCore/Nova action and typed audited receipts.
 - narrativeRole: Establish implementation credibility for AWS judges.
 
-## Frame 12 — Return time to families
+## Frame 14 — Return time to families
 - status: animated
 - src: compositions/12-impact.html
-- duration: 21s
-- timing: 175.5–196.5s
+- duration: 21.13s
+- timing: 213.37–234.5s
 - motion: dataviz-countup + logo-assemble-lockup
 - scene: 50M+ unpaid U.S. family caregivers and the potential 2.6B+ hours/year framing resolve into the Kinship close.
 - narrativeRole: Land credible potential impact and the differentiated promise.

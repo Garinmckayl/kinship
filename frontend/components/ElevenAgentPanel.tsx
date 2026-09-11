@@ -15,6 +15,7 @@ type Props = {
   onPhase?: (phase: "idle" | "connecting" | "listening" | "speaking") => void;
   onTool?: (name: string) => void;
   caption?: string;
+  activity?: string;
   expression?: NovaFaceName;
 };
 
@@ -23,7 +24,7 @@ function fmt(seconds: number) {
   return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}`;
 }
 
-function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, caption, expression }: Props) {
+function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, caption, activity, expression }: Props) {
   const conversation = useConversation();
   const [notice, setNotice] = useState("");
   const [text, setText] = useState("");
@@ -122,6 +123,7 @@ function AgentControls({ elderName, dynamicContext, onMessage, onPhase, onTool, 
           <main className="live-immersive-stage">
             <div className="live-face-wrap"><div className="live-ripple live-ripple-one" /><div className="live-ripple live-ripple-two" /><NovaFace phase={livePhase} expression={expression} size={480} /></div>
             <div className="live-status"><span>{PHASE_LABEL[livePhase]}</span><span aria-hidden="true">·</span><span>{fmt(seconds)}</span></div>
+            {activity && <div className="live-tool-status" aria-live="polite"><span className="live-tool-dot" />{activity}</div>}
             <p className="live-caption" aria-live="polite">{caption ? `“${caption}”` : conversation.status === "connecting" ? "Just a moment, I’m joining you." : "I’m right here. Take your time."}</p>
           </main>
           <footer className="live-immersive-controls">

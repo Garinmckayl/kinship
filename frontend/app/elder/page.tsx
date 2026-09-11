@@ -447,6 +447,7 @@ export default function ElderPage() {
         <CallScreen
           phase={phase}
           caption={lastAgent}
+          activity={toolNote}
           seconds={seconds}
           onTalk={voiceInput}
           onEnd={endCall}
@@ -500,12 +501,13 @@ export default function ElderPage() {
           }}
           onMessage={handleElevenMessage}
           caption={lastAgent}
+          activity={toolNote}
           expression={avatarExpression}
           onPhase={(next) => setPhase(next)}
           onTool={(name) => {
             if (name.startsWith("connected:")) setToolNote("Live ElevenAgents session connected");
             else if (name.startsWith("error:")) setToolNote(name.slice(6));
-            else setToolNote(name);
+            else setToolNote(TOOL_LABELS[name] ?? name);
           }}
         />
         </section>
@@ -581,7 +583,7 @@ export default function ElderPage() {
               </div>
             )
           )}
-          {toolNote && <p className="text-indigo-300 text-lg animate-pulse">{toolNote}</p>}
+          {toolNote && <p className="text-emerald-300 text-sm font-bold tracking-wide">{toolNote}</p>}
         </div>
         {chatExpanded && (
           <div className="mx-auto w-full max-w-4xl shrink-0 border-t border-white/10 pt-4">

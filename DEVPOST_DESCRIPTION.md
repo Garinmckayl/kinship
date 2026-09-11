@@ -23,6 +23,8 @@ Our demo follows Eleanor, 79, living independently in Columbus:
 5. A Strands agent starts a durable task and Amazon Nova Act operates Medicare.gov in a real AgentCore browser.
 6. Sarah watches every step live and receives a readable, source-backed receipt.
 7. The outcome remains connected to appointments, health context, and family follow-through.
+8. In an immersive call, Eleanor can speak naturally while visible tool states confirm that Kinship is checking, logging, and updating—not merely replying.
+9. Inngest runs the quiet care rhythm even when nobody has the app open: a 9 AM check-in, 30-minute welfare sweeps, scheduled work, and an 8 PM caregiver digest.
 
 In our production verification, Kinship returned two real providers 0.1 miles from Eleanor: Christopher Barlow and Shannon C. Codispoti, MD, with the practice address and phone number.
 
@@ -74,6 +76,8 @@ Provider discovery is useful; silently booking care is not. Browser work, appoin
 - Real Medicare.gov navigation through Nova Act—not a mocked browser or fabricated answer.
 - A caregiver can watch the AgentCore browser work in real time.
 - Medication reminders, care context, approval, execution, receipt, and follow-through form one coherent product experience.
+- The immersive call turns natural conversation into visible medication, schedule, and family-update tool work.
+- Inngest provides durable autonomous care and pings family only when risk, attention, or a real decision requires it.
 - Human approval remains visible and enforceable.
 - Health trends are presented as care context, never diagnosis.
 - Alerts and completed browser tasks can be durably acknowledged or cleared.
