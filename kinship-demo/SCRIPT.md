@@ -54,7 +54,7 @@ credible at the close. Never sound like an advertisement.
 
 ## 12 — Durable autonomy
 
-    Inngest keeps care moving when nobody has the app open: a morning check-in, welfare sweeps every thirty minutes, scheduled tasks, and an evening caregiver digest. Kinship runs quietly, and pings Sarah only when attention or a real decision is needed.
+    [Music-only proof beat. On-screen copy shows that the exact reminder remains scheduled after Eleanor closes the app, and Sarah is interrupted only if Eleanor misses the follow-up.]
 
 ## 13 — Architecture
 

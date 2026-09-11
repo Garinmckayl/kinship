@@ -1,4 +1,4 @@
-# Kinship — The AI Care Companion That Closes the Loop
+# Kinship — An AI Care Agent for Older Adults Living Alone
 
 > Agents for Humans Hackathon — **Everyday Agents** track.
 > Proactive Strands agent that listens, acts with human approval, verifies completion, and only asks family to step in when it matters.

@@ -1,102 +1,150 @@
-# Kinship — The AI Care Companion That Closes the Loop
+# Kinship — An AI Care Agent for Older Adults Living Alone
 
-> **Everyday Agents:** quiet background care that surfaces only when a real human decision is needed.
+**Track:** Everyday Agents
+
+**Elevator pitch:** Kinship talks with older adults, logs medications, schedules and monitors follow-ups, and uses Amazon Nova Act to complete caregiver-approved tasks such as finding Medicare doctors—alerting family only when a risk or real decision needs them.
 
 ## Inspiration
 
-Family caregiving is a second shift made of tiny, repetitive tasks: check the pills, confirm the appointment, search insurance directories, follow up, and remember what happened.
+Family caregiving is a second shift made of small, relentless questions:
 
-Most care tools turn that work into more notifications. They detect a missed medication or low activity, then leave a daughter with more alarms and the same question: **What should I do now?**
+- Did Mom take her medication?
+- Is today’s silence normal?
+- Was the appointment confirmed?
+- Which nearby doctor accepts Medicare?
+- Did anybody follow up?
 
-Kinship closes that gap. It runs quietly in the background, handles the repetitive work, and surfaces only when there is a real human decision to make.
+Most care products turn those questions into more alerts. They detect something, notify a daughter, and leave her with the same work and the same uncertainty.
+
+We built Kinship around a different idea: **the agent should handle repetition quietly and involve family only when human judgment or approval is required.**
 
 ## What it does
 
-Kinship is a voice-first care companion for an older adult and a decision dashboard for family.
+Kinship is a voice-first AI care companion for older adults living independently and a decision surface for their families.
 
-Our demo follows Eleanor, 79, living independently in Columbus:
+Our demo follows Eleanor, 79, and her daughter Sarah.
 
-1. Kinship reminds Eleanor about four medications and shares her confirmations without another repetitive caregiver call.
-2. It connects medication, activity, mood, conversation, and upcoming care without claiming a diagnosis.
-3. It proposes one bounded action: find nearby Internal Medicine doctors who accept Medicare.
-4. Sarah explicitly approves the request.
-5. A Strands agent starts a durable task and Amazon Nova Act operates Medicare.gov in a real AgentCore browser.
-6. Sarah watches every step live and receives a readable, source-backed receipt.
-7. The outcome remains connected to appointments, health context, and family follow-through.
-8. In an immersive call, Eleanor can speak naturally while visible tool states confirm that Kinship is checking, logging, and updating—not merely replying.
-9. Inngest runs the quiet care rhythm even when nobody has the app open: a 9 AM check-in, 30-minute welfare sweeps, scheduled work, and an 8 PM caregiver digest.
+Eleanor can speak naturally to Kinship or use a simple senior-friendly interface. In one real production interaction, she says that she took her Metformin and asks for a blood-pressure reminder. Kinship:
 
-In our production verification, Kinship returned two real providers 0.1 miles from Eleanor: Christopher Barlow and Shannon C. Codispoti, MD, with the practice address and phone number.
+1. Streams its response in real time.
+2. Calls the medication tool and safely records the dose.
+3. Creates a durable follow-up task.
+4. Keeps that task running after the conversation ends.
+5. Shows the exact task on Sarah’s caregiver dashboard.
+6. Alerts Sarah only if Eleanor misses the follow-up or a decision is required.
 
-That is the difference between an AI that talks and an agent that closes the loop.
+Kinship also connects medication adherence, symptoms, mood, activity, health signals, appointments, and conversation history into one care context. It does not diagnose or change dosages.
+
+For consequential external work, Kinship pauses for approval. In the demo, it proposes finding nearby Internal Medicine clinicians who accept Medicare. Sarah reviews the request and selects **Approve & Execute**. Amazon Nova Act then operates Medicare Care Compare inside an Amazon Bedrock AgentCore Browser while Sarah watches the live browser session.
+
+Kinship returns a readable receipt—not a vague “done” message. Our production run found two real providers 0.1 miles from Eleanor’s Columbus ZIP, including address, phone number, search criteria, and source.
+
+That is the complete loop:
+
+**notice → understand → ask → act → verify → remember**
 
 ## Why it matters
 
-Elder care is not one dramatic emergency. It is a thousand recurring uncertainties: Was the pill taken? Is today’s silence normal? Was the appointment confirmed? Who accepts Medicare? Did anyone follow up?
+Care rarely fails because nobody cares. It fails in the gap between noticing and following through.
 
-More than 50 million Americans provide unpaid family care. Returning even one hour per week would represent more than 2.6 billion hours restored to families each year. Kinship is designed to make that credible by automating bounded tasks while protecting human decisions.
+Kinship reduces that gap without taking control away from Eleanor or Sarah:
 
-Kinship is designed around four principles:
+- **Quiet by default:** repetitive checks and reminders run in the background.
+- **Decision-aware:** appointments, browser actions, and other consequential steps require explicit approval.
+- **Observable:** the caregiver can watch Nova Act work and see durable task status.
+- **Auditable:** completed work preserves steps, results, errors, and source links.
+- **Accessible:** Eleanor gets large controls, natural voice interaction, an immersive call, and a full-screen conversation.
+- **Safety-bounded:** health signals are context, not diagnosis; medication confirmation includes double-dose protection.
 
-- **Silence is a signal.** Durable welfare checks notice when expected activity does not happen.
-- **Context beats alarm volume.** Medication, mood, symptoms, activity, and conversation become one explainable picture.
-- **Sent is not saved.** Urgent alerts remain open until a caregiver acknowledges ownership.
-- **Humans authorize consequential action.** The agent proposes; the family decides.
-- **Repetition belongs to the agent.** Checking, remembering, searching, following up, and verifying run as durable background work.
+More than 50 million Americans provide unpaid family care. Returning even one hour per week would restore more than 2.6 billion hours to families each year.
 
 ## How we built it
 
-- **Strands Agents SDK:** specialized care, safety, and browser agents coordinate typed tools for medication status, mood, memory, symptoms, notifications, appointments, health trends, and browser tasks.
-- **Amazon Bedrock:** provides the companion’s reasoning and tool selection.
-- **Amazon Bedrock AgentCore Browser:** hosts the real browser session used by Nova Act.
-- **Amazon Nova Act:** navigates public websites and extracts structured, source-linked results.
-- **Inngest:** runs durable reminders, welfare sweeps, reports, and browser workflows that survive disconnects.
-- **Next.js + PostgreSQL:** powers the elder experience, family dashboard, approval queue, task history, and care record.
-- **ElevenAgents, Twilio, WhatsApp, and Resend:** provide natural conversation and escalation across the channels families already use.
+### Agent orchestration
 
-The browser workflow correlates each frontend request with its authoritative sidecar task ID, streams step progress and AgentCore live view to the caregiver, extracts typed results, and fails explicitly instead of fabricating a provider.
+Kinship uses the **Strands Agents SDK for TypeScript** to coordinate typed tools for:
+
+- Medication schedules and intake confirmation
+- Mood, memory, symptoms, and health trends
+- Durable reminders and welfare follow-up
+- Caregiver notifications and doctor summaries
+- Appointment proposals and approvals
+- Browser task requests and result handling
+
+Amazon Bedrock provides reasoning and tool selection. Zod schemas keep tool inputs explicit and validated.
+
+### Real browser action
+
+Amazon Nova Act runs approved tasks in an **Amazon Bedrock AgentCore Browser**. A sidecar service creates and tracks the browser session. The frontend correlates every request with its authoritative sidecar task ID, streams progress, and embeds the AgentCore DCV live view.
+
+For the competition demo, Nova Act:
+
+1. Opens Medicare Care Compare.
+2. Selects clinicians.
+3. Enters ZIP `43215`.
+4. Filters for Internal Medicine.
+5. Reads the official results.
+6. Returns structured provider details with the source attached.
+
+### Durable care
+
+Kinship persists medication intake, chat history, alerts, tasks, appointments, reports, and health metrics in PostgreSQL.
+
+Scheduled reminders and welfare checks continue after Eleanor closes the app. The family dashboard shows the resulting work, while notification channels are reserved for attention and real decisions.
+
+### Voice and communication
+
+The elder experience includes ElevenLabs conversational voice with natural turn-taking, interruption, dynamic context, and tool events. Kinship can also use Twilio, WhatsApp, Resend, and browser speech fallbacks depending on available channels.
+
+### Product surfaces
+
+- **Eleanor:** voice companion, immersive call, medication board, and full-screen chat
+- **Sarah:** caregiver status, decisions, alerts, reports, background tasks, and live browser work
+- **Calendar:** appointment proposals remain pending until caregiver approval
+- **Health:** trends and context without diagnostic claims
 
 ## Challenges
 
-### Making “nothing happened” observable
+### Making agent work truthful
 
-Silence has no event payload. We built heartbeat records and scheduled welfare sweeps so Kinship can reason about missing expected activity while respecting nighttime and configurable quiet windows.
+The browser workflow originally risked showing a completed state before the matching sidecar task had actually finished. We replaced task-type guessing with exact `sidecar_task_id` correlation and explicit running, completed, and failed states.
 
-### Showing real agent work without false completion
+### Showing a real remote browser
 
-The frontend originally could confuse tasks of the same type and display completion before the sidecar had finished. We added end-to-end task correlation, durable progress states, explicit failures, and a real DCV/WebSocket live browser view.
+AgentCore’s live view is a DCV/WebSocket stream rather than a normal video URL. We integrated the official live-view client, matched the remote viewport, and kept the signed stream stable while task updates continued.
 
-### Keeping automation safe
+### Detecting when nothing happened
 
-Provider discovery is useful; silently booking care is not. Browser work, appointment requests, and other consequential actions stop at a clear approval boundary. The completed task preserves its steps, source URL, structured result, and errors.
+Silence has no event payload. Kinship records heartbeats and runs scheduled welfare checks with quiet-hour awareness. Missing expected activity can become a gentle nudge, then an escalation if multiple signals compound.
+
+### Keeping medication interaction safe
+
+Medication confirmation resolves the caregiver-managed schedule, accepts natural spoken labels such as “Metformin 500mg,” refuses duplicate same-day intake, and records prevented double-dose attempts.
 
 ## Accomplishments we are proud of
 
-- A complete, production-verified care loop from compound risk to real nearby help.
-- Real Medicare.gov navigation through Nova Act—not a mocked browser or fabricated answer.
-- A caregiver can watch the AgentCore browser work in real time.
-- Medication reminders, care context, approval, execution, receipt, and follow-through form one coherent product experience.
-- The immersive call turns natural conversation into visible medication, schedule, and family-update tool work.
-- Inngest provides durable autonomous care and pings family only when risk, attention, or a real decision requires it.
-- Human approval remains visible and enforceable.
-- Health trends are presented as care context, never diagnosis.
-- Alerts and completed browser tasks can be durably acknowledged or cleared.
-- The elder experience remains simple, conversational, and full-screen accessible.
+- A real end-to-end care loop from Eleanor’s conversation to durable follow-up on Sarah’s dashboard
+- Production Nova Act navigation on Medicare.gov—not a mocked browser
+- A live AgentCore browser stream visible to the caregiver
+- Explicit human approval before consequential action
+- Specific, source-backed provider results rather than fabricated completion
+- Durable reminders that survive the conversation
+- A voice experience that visibly shows tool work
+- Health context that supports care without pretending to diagnose
+- Clearable alerts and completed browser tasks
 
 ## What we learned
 
-The most valuable healthcare agent is not the one with the longest feature list. It is the one that can keep a promise across time:
+The best agent is not the one with the longest capability list. It is the one that can keep a promise across time.
 
-**notice → understand → ask → act → verify → close the loop**
-
-Reliable execution, explicit approval, truthful failure, and visible receipts matter more than a clever response.
+Reliable execution, explicit approval, truthful failure, durable state, and visible receipts matter more than a clever response.
 
 ## What’s next
 
-- Confirm provider acceptance and availability with authenticated payer/provider data.
-- Turn an approved provider result into a caregiver-reviewed appointment request.
-- Add production wearable integrations for passive health signals.
-- Expand from one elder to family and community care networks.
+- Connect authenticated payer and provider data for plan-specific coverage
+- Turn approved provider results into caregiver-reviewed appointment requests
+- Add production wearable integrations
+- Expand from one elder to coordinated family and community care networks
 
 ## Try it
 
@@ -104,17 +152,20 @@ Reliable execution, explicit approval, truthful failure, and visible receipts ma
 - **Caregiver dashboard:** https://elderai-omega.vercel.app/family
 - **Demo login:** `caregiver@demo.local` / `demo1234`
 - **Source:** https://github.com/Garinmckayl/elderai
+- **Demo video:** add final video URL
 
-### Judge path
+### Recommended judge path
 
 1. Sign in and open **Family**.
 2. Scroll to **Browser Automation**.
-3. Click **Find Medicare doctors near Eleanor**.
+3. Select **Find Medicare doctors near Eleanor**.
 4. Review ZIP `43215` and specialty `Internal Medicine`.
-5. Click **Approve & Execute**.
-6. Watch Nova Act work in the live browser window.
-7. Read the completed provider receipt and source URL.
+5. Select **Approve & Execute**.
+6. Watch Nova Act work in the live browser.
+7. Read the provider receipt and source.
+8. Open **Eleanor**, select **Simulate morning call**, and send: “I took my Metformin 500mg. Remind me in 30 minutes to check my blood pressure.”
+9. Return to **Family** and inspect the durable background task.
 
 ## Built with
 
-Strands Agents SDK, Amazon Bedrock, Amazon Bedrock AgentCore Browser, Amazon Nova Act, Next.js, TypeScript, Inngest, PostgreSQL, ElevenAgents, Twilio, WhatsApp Cloud API, Resend, and Zod.
+Strands Agents SDK, Amazon Bedrock, Amazon Bedrock AgentCore Browser, Amazon Nova Act, Next.js, TypeScript, PostgreSQL, Inngest, ElevenLabs, Twilio, WhatsApp Cloud API, Resend, and Zod.

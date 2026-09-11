@@ -1,28 +1,21 @@
 <template>
 <style>
-  #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;color:#f7fffc;font-family:"Montserrat",Arial,sans-serif}
-  #root *{box-sizing:border-box}.ground{position:absolute;inset:0;background:radial-gradient(circle at 50% 43%,rgba(22,163,138,.34),transparent 500px),radial-gradient(circle at 10% 8%,rgba(56,189,248,.14),transparent 420px),linear-gradient(145deg,#061519,#0a2529 58%,#071418)}
-  .header{position:absolute;left:72px;right:72px;top:48px;display:flex;align-items:flex-start;justify-content:space-between}.kicker{display:flex;align-items:center;gap:12px;font:900 15px/1 "JetBrains Mono",monospace;letter-spacing:.17em;color:#99f6e4}.kicker i{width:11px;height:11px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 0 6px rgba(110,231,183,.12)}.header h1{margin:13px 0 0;font:400 58px/1 "EB Garamond",Georgia,serif;letter-spacing:-.04em}.time{padding:12px 16px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.06);font:700 14px/1 "JetBrains Mono",monospace;color:#d5fffa}
-  .stage{position:absolute;left:0;right:0;top:146px;bottom:132px;display:grid;place-items:center}.orbit{position:absolute;width:600px;height:600px;border:1px solid rgba(94,234,212,.18);border-radius:50%}.orbit.two{width:740px;height:740px;opacity:.45}.face{position:absolute;width:520px;height:520px;object-fit:contain;filter:drop-shadow(0 28px 52px rgba(0,0,0,.24))}.face-talk,.face-focus{opacity:0}
-  .status{position:absolute;left:50%;bottom:83px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:11px 17px;border:1px solid rgba(110,231,183,.2);border-radius:999px;background:rgba(16,185,129,.1);color:#a7f3d0;font-weight:850;font-size:16px;white-space:nowrap}.status i{width:9px;height:9px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 0 5px rgba(110,231,183,.12)}.caption{position:absolute;left:50%;bottom:32px;transform:translateX(-50%);max-width:620px;margin:0;color:rgba(247,255,252,.76);font-size:16px;line-height:1.4;text-align:center}
-  .tools{position:absolute;left:72px;top:280px;width:360px;display:flex;flex-direction:column;gap:14px}.tool{padding:19px 21px;border:1px solid rgba(255,255,255,.11);border-radius:18px;background:rgba(255,255,255,.055);color:rgba(247,255,252,.42)}.tool small{display:block;margin-bottom:8px;font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.12em;color:inherit}.tool strong{font-size:19px}.proof{position:absolute;right:72px;top:280px;width:350px;padding:25px;border:1px solid rgba(153,246,228,.18);border-radius:22px;background:rgba(6,21,25,.58)}.proof small{font:700 11px/1 "JetBrains Mono",monospace;letter-spacing:.12em;color:#99f6e4}.proof h2{margin:14px 0 12px;font-size:28px;line-height:1.12}.proof p{margin:0;color:#b8d9d4;font-size:16px;line-height:1.5}
+  #root{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:#07051c;color:#fff;font-family:"Montserrat",Arial,sans-serif}
+  #root *{box-sizing:border-box}.proof-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 54%;will-change:transform}.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,4,24,.16),transparent 20%,transparent 76%,rgba(5,4,24,.24));pointer-events:none}
+  .proof{position:absolute;left:54px;top:42px;display:flex;align-items:center;gap:12px;padding:12px 17px;border:1px solid rgba(153,246,228,.34);border-radius:999px;background:rgba(6,58,56,.9);box-shadow:0 14px 36px rgba(0,0,0,.24);font:900 14px/1 "Montserrat";letter-spacing:.09em}.proof i{width:10px;height:10px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 0 5px rgba(110,231,183,.15)}
+  .flow{position:absolute;right:54px;top:42px;padding:12px 17px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(7,5,28,.86);font:700 13px/1 "JetBrains Mono",monospace;letter-spacing:.06em}
 </style>
 <div id="root" data-composition-id="10-live-companion" data-width="1920" data-height="1080" data-duration="15.55">
-  <div id="live-companion-ground" class="ground clip" data-start="0" data-duration="15.55" data-track-index="0"></div>
-  <header class="header"><div><div class="kicker"><i></i>KINSHIP LIVE · ELEVENLABS CONVERSATIONAL AI</div><h1>Present with Eleanor. Working quietly.</h1></div><div class="time">LIVE · 02:18</div></header>
-  <main class="stage"><div class="orbit one"></div><div class="orbit two"></div><img class="face face-listen" src="assets/nova/listening-plain.png" alt="Kinship listening to Eleanor"><img class="face face-talk" src="assets/nova/mouth-half-plain.png" alt=""><img class="face face-focus" src="assets/nova/focused-plain.png" alt=""><div class="status"><i></i><span id="status-copy">Listening to Eleanor…</span></div><p class="caption">“Yes, I took my Lisinopril this morning.”</p></main>
-  <aside class="tools"><div class="tool" id="tool-1"><small>TOOL ACTIVITY</small><strong>Checking your schedule…</strong></div><div class="tool" id="tool-2"><small>TOOL ACTIVITY</small><strong>Logging your pill…</strong></div><div class="tool" id="tool-3"><small>ONLY IF NEEDED</small><strong>Updating Sarah…</strong></div></aside>
-  <aside class="proof"><small>VOICE → ACTION → SHARED CONTEXT</small><h2>The work is visible, not distracting.</h2><p>Natural turn-taking stays central. Compact status text confirms what Kinship is doing in the background.</p></aside>
+  <video id="elder-care-proof" class="proof-video" src="assets/captures/elder-care-loop.mp4" data-start="0" data-duration="15.55" data-media-start="20.5" muted playsinline></video>
+  <div class="shade"></div>
+  <div class="proof"><i></i><span>REAL PRODUCTION SESSION</span></div>
+  <div class="flow">ELEANOR → KINSHIP → DURABLE ACTION</div>
 </div>
 <script>
   const tl=gsap.timeline({paused:true});
-  tl.fromTo(".face-listen",{scale:.9,autoAlpha:0},{scale:1,autoAlpha:1,duration:.7,ease:"power4.out"},0).fromTo(".tools",{x:-70,autoAlpha:0},{x:0,autoAlpha:1,duration:.62,ease:"power4.out"},.45).fromTo(".proof",{x:70,autoAlpha:0},{x:0,autoAlpha:1,duration:.62,ease:"power4.out"},.6)
-    .to(".face-listen",{autoAlpha:0,duration:.2,ease:"none"},2.4).to(".face-talk",{autoAlpha:1,duration:.2,ease:"none"},2.4)
-    .to("#tool-1",{color:"#d5fffa",borderColor:"rgba(110,231,183,.36)",backgroundColor:"rgba(16,185,129,.12)",duration:.3,ease:"none"},4).set("#status-copy",{textContent:"Checking your schedule…"},4)
-    .to(".face-talk",{autoAlpha:0,duration:.2,ease:"none"},5.2).to(".face-focus",{autoAlpha:1,duration:.2,ease:"none"},5.2)
-    .to("#tool-2",{color:"#d5fffa",borderColor:"rgba(110,231,183,.36)",backgroundColor:"rgba(16,185,129,.12)",duration:.3,ease:"none"},7).set("#status-copy",{textContent:"Logging your pill…"},7).to("#tool-1",{color:"rgba(247,255,252,.42)",borderColor:"rgba(255,255,255,.11)",backgroundColor:"rgba(255,255,255,.055)",duration:.25,ease:"none"},7)
-    .to("#tool-3",{color:"#d5fffa",borderColor:"rgba(110,231,183,.36)",backgroundColor:"rgba(16,185,129,.12)",duration:.3,ease:"none"},10.2).set("#status-copy",{textContent:"Updating Sarah only if needed…"},10.2).to("#tool-2",{color:"rgba(247,255,252,.42)",borderColor:"rgba(255,255,255,.11)",backgroundColor:"rgba(255,255,255,.055)",duration:.25,ease:"none"},10.2)
-    .to(".face-focus",{autoAlpha:0,duration:.2,ease:"none"},12.6).to(".face-talk",{autoAlpha:1,duration:.2,ease:"none"},12.6).set("#status-copy",{textContent:"Kinship is speaking"},12.6);
+  tl.fromTo(".proof-video",{scale:1.02},{scale:1.07,duration:15.55,ease:"power1.inOut"},0)
+    .fromTo(".proof",{y:-24,autoAlpha:0},{y:0,autoAlpha:1,duration:.52,ease:"power4.out"},.2)
+    .fromTo(".flow",{x:28,autoAlpha:0},{x:0,autoAlpha:1,duration:.52,ease:"power4.out"},.38);
   window.__timelines["10-live-companion"]=tl;
 </script>
 </template>

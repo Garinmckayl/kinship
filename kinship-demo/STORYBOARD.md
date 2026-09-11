@@ -94,7 +94,7 @@ mode: autonomous
 - duration: 15.55s
 - timing: 140.3–155.85s
 - motion: fixed-anchor-cycle + dynamic-content-sequencing
-- scene: Eleanor speaks naturally with the expressive companion while compact green tool states progress from checking her schedule to logging medication and updating Sarah only if needed.
+- scene: A real production recording shows Eleanor's request, Kinship's streamed response, the expressive companion, and genuine green tool activity while Metformin is logged and a blood-pressure reminder is scheduled.
 - narrativeRole: Prove that the humane voice experience performs useful, visible work.
 
 ## Frame 11 — Follow-through
@@ -103,7 +103,7 @@ mode: autonomous
 - duration: 15.72s
 - timing: 155.85–171.57s
 - motion: spatial-pan-stations + card-morph-anchor
-- scene: The receipt flows through calendar, health, and family surfaces so care continues after the browser closes.
+- scene: A real production recording moves from the exact background task on Sarah's dashboard into the calendar and health surfaces.
 - narrativeRole: Show that Kinship closes loops.
 
 ## Frame 12 — Quietly autonomous
@@ -112,7 +112,7 @@ mode: autonomous
 - duration: 16.03s
 - timing: 171.57–187.6s
 - motion: grid-card-assemble + dynamic-content-sequencing
-- scene: Inngest connects the 9 AM check-in, 30-minute welfare sweep, durable requested work, and 8 PM caregiver digest to a single decision-only escalation.
+- scene: Sarah's real dashboard preserves Eleanor's scheduled reminder after the call ends and makes the decision-only escalation boundary explicit.
 - narrativeRole: Match the Everyday Agents thesis with factual scheduled background care.
 
 ## Frame 13 — Built for consequential care
