@@ -417,7 +417,22 @@ export type BrowserTaskRow = {
   created_at: string; completed_at: string | null;
 };
 
+type BrowserTaskDbRow = Omit<BrowserTaskRow, "params" | "steps" | "result"> & {
+  params: Record<string, unknown> | string | null;
+  steps: Record<string, unknown>[] | string | null;
+  result: Record<string, unknown> | string | null;
+};
+
 const MEM_BROWSER_TASKS: BrowserTaskRow[] = [];
+
+function parseBrowserTaskRow(row: BrowserTaskDbRow): BrowserTaskRow {
+  return {
+    ...row,
+    params: typeof row.params === "string" ? JSON.parse(row.params) : (row.params ?? {}),
+    steps: typeof row.steps === "string" ? JSON.parse(row.steps) : (row.steps ?? []),
+    result: row.result && typeof row.result === "string" ? JSON.parse(row.result) : row.result,
+  };
+}
 
 export async function saveBrowserTask(id: string, taskType: string, params: Record<string, unknown>, status = "pending_approval"): Promise<BrowserTaskRow> {
   const row: BrowserTaskRow = { id, task_type: taskType, status, sidecar_task_id: null, params, steps: [], result: null, error: null, created_at: new Date().toISOString(), completed_at: null };
@@ -429,6 +444,56 @@ export async function saveBrowserTask(id: string, taskType: string, params: Reco
     [id, taskType, status, JSON.stringify(params)],
   );
   return row;
+}
+
+export async function claimBrowserTaskApproval(
+  id: string,
+  taskType: string,
+  params: Record<string, unknown>,
+): Promise<{ task: BrowserTaskRow; claimed: boolean }> {
+  if (!dbOn()) {
+    const existing = MEM_BROWSER_TASKS.find((task) => task.id === id);
+    const retryableApproval = existing?.status === "approved" && !existing.sidecar_task_id;
+    if (existing && !["pending_approval", "failed"].includes(existing.status) && !retryableApproval) {
+      return { task: existing, claimed: false };
+    }
+    if (existing) {
+      Object.assign(existing, {
+        task_type: taskType,
+        params,
+        status: "approved",
+        sidecar_task_id: null,
+        steps: [],
+        result: null,
+        error: null,
+        completed_at: null,
+      });
+      return { task: existing, claimed: true };
+    }
+    const task = await saveBrowserTask(id, taskType, params, "approved");
+    return { task, claimed: true };
+  }
+
+  await ready();
+  const claimed = await q<BrowserTaskDbRow>(
+    `insert into browser_tasks(id,task_type,status,params)
+     values($1,$2,'approved',$3)
+     on conflict(id) do update
+       set task_type=excluded.task_type,status='approved',sidecar_task_id=null,params=excluded.params,
+           steps='[]',result=null,error=null,completed_at=null
+       where browser_tasks.status in ('pending_approval','failed')
+          or (browser_tasks.status='approved' and browser_tasks.sidecar_task_id is null)
+     returning id,task_type,status,sidecar_task_id,params,steps,result,error,created_at,completed_at`,
+    [id, taskType, JSON.stringify(params)],
+  );
+  if (claimed[0]) return { task: parseBrowserTaskRow(claimed[0]), claimed: true };
+
+  const existing = await q<BrowserTaskDbRow>(
+    "select id,task_type,status,sidecar_task_id,params,steps,result,error,created_at,completed_at from browser_tasks where id=$1",
+    [id],
+  );
+  if (!existing[0]) throw new Error("browser task not found");
+  return { task: parseBrowserTaskRow(existing[0]), claimed: false };
 }
 
 export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserTaskRow, "status" | "sidecar_task_id" | "steps" | "result" | "error">>): Promise<void> {
@@ -449,16 +514,10 @@ export async function updateBrowserTask(id: string, patch: Partial<Pick<BrowserT
 export async function listBrowserTasks(elder = "eleanor-79"): Promise<BrowserTaskRow[]> {
   if (!dbOn()) return MEM_BROWSER_TASKS.slice(0, 20);
   await ready();
-  const rows = await q<{ id: string; task_type: string; status: string; sidecar_task_id: string | null; params: string; steps: string; result: string; error: string; created_at: string; completed_at: string }>(
+  const rows = await q<BrowserTaskDbRow>(
     "select id,task_type,status,sidecar_task_id,params,steps,result,error,created_at,completed_at from browser_tasks where elder_id=$1 order by created_at desc limit 20", [elder]
   );
-  return rows.map((r) => ({
-    id: r.id, task_type: r.task_type, status: r.status, sidecar_task_id: r.sidecar_task_id,
-    params: typeof r.params === "string" ? JSON.parse(r.params) : (r.params ?? {}),
-    steps: typeof r.steps === "string" ? JSON.parse(r.steps) : (r.steps ?? []),
-    result: r.result ? (typeof r.result === "string" ? JSON.parse(r.result) : r.result) : null,
-    error: r.error, created_at: r.created_at, completed_at: r.completed_at,
-  }));
+  return rows.map(parseBrowserTaskRow);
 }
 
 export async function deleteBrowserTask(id: string): Promise<void> {

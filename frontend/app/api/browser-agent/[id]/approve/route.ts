@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addEscalation, saveBrowserTask, updateBrowserTask } from "@/lib/store";
+import { addEscalation, claimBrowserTaskApproval, updateBrowserTask } from "@/lib/store";
 import { normalizeBrowserTaskParams } from "@/lib/browser-task";
 
 // Approve and execute a browser task.
@@ -16,7 +16,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const taskId = params.id;
-    await saveBrowserTask(taskId, taskType, taskParams, "approved");
+    const approval = await claimBrowserTaskApproval(taskId, taskType, taskParams);
+    if (!approval.claimed) {
+      return NextResponse.json({
+        task_id: approval.task.id,
+        task_type: approval.task.task_type,
+        status: approval.task.status,
+        params: approval.task.params,
+        steps: approval.task.steps,
+        result: approval.task.result,
+        error: approval.task.error,
+        sidecar_task_id: approval.task.sidecar_task_id,
+        mode: approval.task.sidecar_task_id ? "sidecar" : "existing",
+      });
+    }
 
     // --- Path 1: Sidecar (via Cloudflare tunnel or local) ---
     const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
@@ -24,37 +37,64 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     if (SIDECAR_URL) {
       try {
-        // Create task on sidecar
         const createRes = await fetch(`${SIDECAR_URL}/tasks`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${SIDECAR_SECRET}` },
-          body: JSON.stringify({ task_type: taskType, params: taskParams, approved: true }),
+          body: JSON.stringify({ task_id: taskId, task_type: taskType, elder_id: "eleanor-79", params: taskParams, approved: true }),
           signal: AbortSignal.timeout(8000),
         });
 
-        if (createRes.ok) {
-          const sidecarTask = await createRes.json();
-          const sidecarTaskId = String(sidecarTask.task_id ?? "");
-          if (!sidecarTaskId) {
-            throw new Error("Sidecar created a task without a task_id");
-          }
-          await addEscalation("eleanor-79", "info", `Browser task approved and executing via Nova Act sidecar: ${taskType}`);
-          await updateBrowserTask(taskId, { status: "running", sidecar_task_id: sidecarTaskId });
-
-          return NextResponse.json({
-            task_id: taskId,
-            task_type: taskType,
-            status: "running",
-            params: taskParams,
-            steps: [],
-            result: null,
-            error: null,
-            sidecar_task_id: sidecarTaskId,
-            mode: "sidecar",
-          });
+        if (!createRes.ok) {
+          const detail = (await createRes.text()).slice(0, 200);
+          throw new Error(`Sidecar rejected task (${createRes.status}): ${detail}`);
         }
+        const sidecarTask = await createRes.json();
+        const sidecarTaskId = String(sidecarTask.task_id ?? "");
+        if (!sidecarTaskId) throw new Error("Sidecar created a task without a task_id");
+
+        const sidecarStatus = String(sidecarTask.status ?? "running");
+        const taskPatch = {
+          status: sidecarStatus,
+          sidecar_task_id: sidecarTaskId,
+          steps: (sidecarTask.steps as Record<string, unknown>[]) ?? [],
+          result: (sidecarTask.result as Record<string, unknown>) ?? undefined,
+          error: sidecarTask.error != null ? String(sidecarTask.error) : undefined,
+        };
+        await updateBrowserTask(taskId, taskPatch).catch((error) => {
+          console.error("[approve] Nova Act launched but task sync failed:", String(error).slice(0, 300));
+        });
+        await addEscalation("eleanor-79", "info", `Browser task approved and executing via Nova Act sidecar: ${taskType}`).catch((error) => {
+          console.error("[approve] Nova Act launched but escalation sync failed:", String(error).slice(0, 300));
+        });
+
+        return NextResponse.json({
+          task_id: taskId,
+          task_type: taskType,
+          status: sidecarStatus,
+          params: taskParams,
+          steps: taskPatch.steps,
+          result: taskPatch.result ?? null,
+          error: taskPatch.error ?? null,
+          sidecar_task_id: sidecarTaskId,
+          recording_url: sidecarTask.recording_url ?? null,
+          mode: "sidecar",
+        });
       } catch (sidecarErr) {
-        console.warn("[approve] Sidecar unavailable:", String(sidecarErr).slice(0, 200));
+        const message = `Nova Act could not start: ${String(sidecarErr).slice(0, 300)}`;
+        console.error("[approve]", message);
+        await updateBrowserTask(taskId, { status: "failed", error: message }).catch((error) => {
+          console.error("[approve] Failed to persist launch error:", String(error).slice(0, 200));
+        });
+        return NextResponse.json({
+          task_id: taskId,
+          task_type: taskType,
+          status: "failed",
+          params: taskParams,
+          steps: [],
+          result: null,
+          error: message,
+          mode: "sidecar",
+        }, { status: 502 });
       }
     }
 
@@ -86,9 +126,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   } catch (e) {
     const msg = String(e).slice(0, 500);
     console.error("[browser-agent/approve] Error:", msg);
+    await updateBrowserTask(params.id, { status: "failed", error: msg }).catch((updateError) => {
+      console.error("[browser-agent/approve] Failed to persist error:", String(updateError).slice(0, 200));
+    });
     return NextResponse.json({
       task_id: params.id, task_type: body?.task_type ?? "unknown",
       status: "failed", error: msg,
-    });
+    }, { status: 500 });
   }
 }

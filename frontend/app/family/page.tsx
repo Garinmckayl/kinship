@@ -96,6 +96,9 @@ export default function FamilyPage() {
   const [risk, setRisk] = useState<CompoundRisk | null>(null);
   const [browserTasks, setBrowserTasks] = useState<BrowserTaskPreview[]>([]);
   const [demoTaskBusy, setDemoTaskBusy] = useState(false);
+  const [approvingTaskId, setApprovingTaskId] = useState<string | null>(null);
+  const [clearingBrowserTasks, setClearingBrowserTasks] = useState(false);
+  const [browserActionError, setBrowserActionError] = useState<string | null>(null);
   const hasRunningBrowserTask = browserTasks.some((task) => task.status === "running" || task.status === "approved");
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
   const [reportMsg, setReportMsg] = useState("");
@@ -151,7 +154,14 @@ export default function FamilyPage() {
       fetch(`${API}/reports`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setReports(d.reports ?? [])).catch(() => {});
       fetch(API + "/appointments").then((r) => (r.ok ? r.json() : null)).then((d) => setPendingApprovals((d?.appointments ?? []).filter((a: AppointmentPreview) => a.status === "proposed").length)).catch(() => {});
       fetch(`${API}/welfare/compound`).then((r) => (r.ok ? r.json() : null)).then((d) => d && setRisk(d)).catch(() => {});
-      fetch(`${API}/browser-agent`).then((r) => (r.ok ? r.json() : null)).then((d) => d?.tasks && setBrowserTasks((current) => mergeBrowserTaskUpdates(current, d.tasks))).catch(() => {});
+      fetch(`${API}/browser-agent`)
+        .then(async (r) => {
+          const data = await r.json();
+          if (!r.ok) throw new Error(data.error ?? "Browser tasks are temporarily unavailable");
+          return data;
+        })
+        .then((d) => d?.tasks && setBrowserTasks((current) => mergeBrowserTaskUpdates(current, d.tasks)))
+        .catch((error) => setBrowserActionError(error instanceof Error ? error.message : "Browser tasks are temporarily unavailable"));
     };
     load();
     // Poll: fast for status (10s), browser tasks check every 3s when one is running
@@ -165,9 +175,13 @@ export default function FamilyPage() {
 
     const poll = () => {
       fetch(`${API}/browser-agent`)
-        .then((r) => (r.ok ? r.json() : null))
+        .then(async (r) => {
+          const data = await r.json();
+          if (!r.ok) throw new Error(data.error ?? "Nova Act progress is temporarily unavailable");
+          return data;
+        })
         .then((d) => d?.tasks && setBrowserTasks((current) => mergeBrowserTaskUpdates(current, d.tasks)))
-        .catch(() => {});
+        .catch((error) => setBrowserActionError(error instanceof Error ? error.message : "Nova Act progress is temporarily unavailable"));
     };
 
     poll();
@@ -177,6 +191,7 @@ export default function FamilyPage() {
 
   async function createProviderSearchDemo() {
     setDemoTaskBusy(true);
+    setBrowserActionError(null);
     try {
       const response = await fetch(`${API}/browser-agent`, {
         method: "POST",
@@ -189,6 +204,8 @@ export default function FamilyPage() {
       if (!response.ok) throw new Error("Could not create provider search");
       const task = await response.json();
       setBrowserTasks((current) => [task, ...current.filter((item) => item.task_id !== task.task_id)]);
+    } catch (error) {
+      setBrowserActionError(error instanceof Error ? error.message : "Could not create provider search");
     } finally {
       setDemoTaskBusy(false);
     }
@@ -585,21 +602,31 @@ export default function FamilyPage() {
                   <button
                     onClick={() => {
                       const toDelete = browserTasks.filter((t) => t.status !== "running" && t.status !== "approved");
+                      setClearingBrowserTasks(true);
+                      setBrowserActionError(null);
                       Promise.all(toDelete.map(async (task) => {
                         const response = await fetch(`${API}/browser-agent/${task.task_id}`, { method: "DELETE" });
                         if (!response.ok) throw new Error(`Failed to dismiss ${task.task_id}`);
                       }))
                         .then(() => setBrowserTasks((tasks) => tasks.filter((task) => task.status === "running" || task.status === "approved")))
-                        .catch((error) => console.error("[family] Failed to clear browser tasks:", error));
+                        .catch(() => setBrowserActionError("Could not clear inactive tasks. Please try again."))
+                        .finally(() => setClearingBrowserTasks(false));
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20"
+                    disabled={clearingBrowserTasks}
+                    className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20 disabled:cursor-wait disabled:opacity-60"
                   >
-                    Clear inactive
+                    {clearingBrowserTasks ? "Clearing…" : "Clear inactive"}
                   </button>
                 )}
                 <span className="px-2.5 py-1 rounded-full bg-fuchsia-400/10 text-fuchsia-200 text-xs font-bold ring-1 ring-fuchsia-300/20">Nova Act</span>
               </div>
             </div>
+            {browserActionError && (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-red-950/50 px-3 py-2 text-sm text-red-200 ring-1 ring-red-400/20">
+                <span>{browserActionError}</span>
+                <button onClick={() => setBrowserActionError(null)} className="font-bold text-red-100 hover:text-white">Dismiss</button>
+              </div>
+            )}
             <div className="space-y-3">
               {browserTasks.map((bt) => {
                 const isPending = bt.status === "pending_approval";
@@ -616,19 +643,29 @@ export default function FamilyPage() {
                         {isPending && (
                           <button
                             onClick={async () => {
-                              const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ task_type: bt.task_type, params: bt.params }),
-                              });
-                              if (res.ok) {
+                              setApprovingTaskId(bt.task_id);
+                              setBrowserActionError(null);
+                              try {
+                                const res = await fetch(`${API}/browser-agent/${bt.task_id}/approve`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ task_type: bt.task_type, params: bt.params }),
+                                });
                                 const result = await res.json();
                                 setBrowserTasks((ts) => ts.map((t) => t.task_id === bt.task_id ? { ...t, ...result } : t));
+                                if (!res.ok || result.status === "failed") {
+                                  throw new Error(result.error ?? "Nova Act could not start this task");
+                                }
+                              } catch (error) {
+                                setBrowserActionError(error instanceof Error ? error.message : "Nova Act could not start this task");
+                              } finally {
+                                setApprovingTaskId(null);
                               }
                             }}
-                            className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
+                            disabled={approvingTaskId === bt.task_id}
+                            className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400 disabled:cursor-wait disabled:opacity-60"
                           >
-                            Approve & Execute
+                            {approvingTaskId === bt.task_id ? "Starting Nova Act…" : "Approve & Execute"}
                           </button>
                         )}
                         {!isRunning && (
@@ -639,7 +676,7 @@ export default function FamilyPage() {
                                   if (!response.ok) throw new Error(`Failed to dismiss ${bt.task_id}`);
                                   setBrowserTasks((ts) => ts.filter((t) => t.task_id !== bt.task_id));
                                 })
-                                .catch((error) => console.error("[family] Failed to dismiss browser task:", error));
+                                .catch(() => setBrowserActionError("Could not dismiss this task. Please try again."));
                             }}
                             className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-red-950/50 hover:text-red-200"
                             title="Dismiss this task"
@@ -704,19 +741,30 @@ export default function FamilyPage() {
                     <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-300">[requested] {taskLabel}</span>
                     <button
                       onClick={async () => {
-                        const res = await fetch(`${API}/browser-agent/escalation-${i}/approve`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ task_type: taskType, params: {} }),
-                        });
-                        if (res.ok) {
+                        const fallbackTaskId = `escalation-${i}`;
+                        setApprovingTaskId(fallbackTaskId);
+                        setBrowserActionError(null);
+                        try {
+                          const res = await fetch(`${API}/browser-agent/${fallbackTaskId}/approve`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ task_type: taskType, params: {} }),
+                          });
                           const result = await res.json();
                           setBrowserTasks((ts) => [...ts, result]);
+                          if (!res.ok || result.status === "failed") {
+                            throw new Error(result.error ?? "Nova Act could not start this task");
+                          }
+                        } catch (error) {
+                          setBrowserActionError(error instanceof Error ? error.message : "Nova Act could not start this task");
+                        } finally {
+                          setApprovingTaskId(null);
                         }
                       }}
-                      className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400"
+                      disabled={approvingTaskId === `escalation-${i}`}
+                      className="px-4 py-1.5 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-400 disabled:cursor-wait disabled:opacity-60"
                     >
-                      Approve & Execute via AgentCore
+                      {approvingTaskId === `escalation-${i}` ? "Starting Nova Act…" : "Approve & Execute via AgentCore"}
                     </button>
                   </div>
                   <p className="text-sm text-white/80">{reason}</p>

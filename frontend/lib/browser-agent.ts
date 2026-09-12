@@ -264,11 +264,12 @@ export async function getLatestScreenshot(taskId: string): Promise<LatestScreens
   }
   // AgentCore doesn't stream screenshots (tasks are synchronous invocations)
   const task = AGENTCORE_TASKS.get(taskId);
+  const currentStep = task?.steps.at(-1);
   return {
     task_id: taskId,
     status: (task?.status ?? "unknown") as BrowserTaskStatus,
     step_count: task?.steps.length ?? 0,
-    current_step: task?.steps[task.steps.length - 1]?.label ?? null,
+    current_step: currentStep?.label ?? null,
     screenshot: null,
     screenshot_index: -1,
   };

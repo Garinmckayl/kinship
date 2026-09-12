@@ -84,8 +84,12 @@ export async function GET() {
     }
 
     return NextResponse.json({ tasks: merged, sidecar: sidecarTasks.length > 0 });
-  } catch {
-    return NextResponse.json({ tasks: [], sidecar: false });
+  } catch (error) {
+    console.error("[browser-agent] Failed to list tasks:", String(error).slice(0, 300));
+    return NextResponse.json(
+      { tasks: [], sidecar: false, error: "Browser tasks are temporarily unavailable" },
+      { status: 503 },
+    );
   }
 }
 

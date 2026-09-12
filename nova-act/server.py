@@ -56,6 +56,7 @@ class TaskStatus(str, Enum):
     cancelled = "cancelled"
 
 class TaskRequest(BaseModel):
+    task_id: Optional[str] = None
     task_type: TaskType
     elder_id: str = "eleanor-79"
     params: dict = {}
@@ -589,7 +590,12 @@ async def health():
 async def create_task(req: TaskRequest, authorization: Optional[str] = Header(None)):
     verify_secret(authorization)
 
-    task_id = next_id()
+    task_id = req.task_id or next_id()
+    existing = TASKS.get(task_id)
+    if existing:
+        if existing.task_type != req.task_type:
+            raise HTTPException(status_code=409, detail="task_id already belongs to a different task type")
+        return existing
     config = WORKFLOW_CONFIGS.get(req.task_type)
 
     if not config and req.task_type != TaskType.custom:
