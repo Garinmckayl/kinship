@@ -274,7 +274,7 @@ export async function claimDueTasks(userId?: string, limit = 5): Promise<BgTask[
   const rows = await q<{ id: string; elder_id: string; instruction: string; run_at: string; status: string; result: string; claim_token: string }>(
     `with due as (
        select id from tasks
-       where (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '30 minutes')))
+       where (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '1 minute')))
          and run_at <= now()
          and ($1::text is null or elder_id = $1)
        order by run_at
@@ -316,7 +316,7 @@ export async function claimTask(id: string): Promise<BgTask | undefined> {
     `update tasks
      set status = 'running', claimed_at = now(), claim_token = $2
      where id = $1
-       and (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '30 minutes')))
+       and (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '1 minute')))
      returning id,elder_id,instruction,run_at,status,result,claim_token`,
     [id, claimToken]
   );

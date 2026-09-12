@@ -6,7 +6,7 @@ export async function executeClaimedBackgroundTask(task: BgTask) {
 
   try {
     const { runBackgroundInstruction } = await import("./guardian");
-    const result = (await runBackgroundInstruction(task.instruction)).slice(0, 500);
+    const result = runBackgroundInstruction(task.instruction).slice(0, 500);
     return finishClaimedTaskWithDelivery(task, result);
   } catch (error) {
     console.error("Background task execution failed", { taskId: task.id, error });

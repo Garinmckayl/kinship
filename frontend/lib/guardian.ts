@@ -374,7 +374,6 @@ export const requestBrowserTask = tool({
 export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam, assessRisk, requestBrowserTask];
 
 let _agent: Agent | null = null;
-let _backgroundAgent: Agent | null = null;
 export function getAgent(): Agent {
   if (!_agent) {
     _agent = new Agent({
@@ -386,17 +385,6 @@ export function getAgent(): Agent {
     });
   }
   return _agent;
-}
-
-function getBackgroundAgent(): Agent {
-  if (!_backgroundAgent) {
-    _backgroundAgent = new Agent({
-      systemPrompt: "You are Kinship's reminder worker. Write one warm, concise reminder or check-in for Eleanor. Do not call tools, schedule more work, or claim an external action occurred.",
-      printer: false,
-      contextManager: "auto",
-    });
-  }
-  return _backgroundAgent;
 }
 
 // Rule-based fallback so the demo works with zero AWS creds (judges click + it just works).
@@ -436,16 +424,13 @@ export async function fallbackReply(userId: string, message: string): Promise<{ 
   return { reply: "Thank you for telling me. I'm keeping track so your family doesn't worry. How are you feeling right now?", speak: true };
 }
 
-export async function runBackgroundInstruction(instruction: string): Promise<string> {
-  let reply;
-  if (!process.env.AWS_REGION && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
-    reply = `Reminder: ${instruction}`;
-  } else {
-    const result = await getBackgroundAgent().invoke(instruction);
-    reply = messageToText((result as { lastMessage?: unknown }).lastMessage ?? result);
-    if (!reply.trim()) throw new Error("Background agent returned an empty response");
-  }
-  return reply;
+export function runBackgroundInstruction(instruction: string): string {
+  const cleanInstruction = instruction.trim().replace(/\s+/g, " ");
+  if (!cleanInstruction) throw new Error("Background task instruction is empty");
+  const reminder = cleanInstruction
+    .replace(/^remind eleanor to /i, "")
+    .replace(/\bher\b/gi, "your");
+  return `Eleanor, this is your Kinship reminder: ${reminder}`;
 }
 
 function messageToText(msg: unknown): string {
