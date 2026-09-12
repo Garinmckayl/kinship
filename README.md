@@ -13,6 +13,16 @@ Single codebase: Next.js PWA + Strands TS SDK in `frontend/` — no separate Pyt
 - **Why:** 65+ US 58M → 84M by 2050; non-adherence ~$300B/yr; loneliness mortality ≈ smoking 15 cigs/day. High spending power, underserved.
 
 ## Architecture
+
+Kinship uses specialized agents rather than one unrestricted assistant:
+
+- **Guardian Agent:** elder-facing care and safety orchestration.
+- **Caregiver Agent:** family-facing status and care-management orchestration.
+- **ScamGuard:** specialist Strands sub-agent invoked by the Guardian for suspicious caller and payment stories.
+- **Nova Act Browser Worker:** caregiver-approved external website execution.
+
+They coordinate through typed tools, approval states, and the shared PostgreSQL care record.
+
 ```
 [PWA /elder + /family] --fetch /api--> [Next.js API routes] --> [Strands TS guardian-agent]
         |                              /api/chat /status /tasks      | 8 tools (lib/guardian.ts):

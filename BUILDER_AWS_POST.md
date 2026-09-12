@@ -42,7 +42,30 @@ That pattern—conversation becoming durable, visible work—is the core of Kins
 
 ## Why Strands Agents SDK
 
-Kinship uses the Strands Agents SDK for TypeScript. The guardian agent coordinates tools for:
+Kinship is a multi-agent system, but not an unrestricted agent swarm. Each agent exists because it has a different user, tool set, or safety boundary:
+
+| Agent | Responsibility | Boundary |
+| --- | --- | --- |
+| Guardian Agent | Talks with Eleanor and coordinates 17 care and safety tools | Cannot silently perform consequential external actions |
+| Caregiver Agent | Answers Sarah from live care data and manages family-side requests | Appointment actions remain proposals until explicit approval |
+| ScamGuard Specialist | Analyzes suspicious caller and money stories delegated by the Guardian | Returns a structured verdict and protective script; caution beats certainty |
+| Nova Act Browser Worker | Operates approved external websites and extracts source-backed results | Starts only after caregiver approval |
+
+The Guardian and Caregiver agents use different prompts and different tools while sharing the same durable care record. The Guardian performs a true specialist handoff through the `check_scam` tool, which invokes the separate ScamGuard Strands agent. Approved browser work is handed to Nova Act and reconciled back into the same task record.
+
+This architecture keeps agent specialization understandable and auditable:
+
+```text
+Eleanor → Guardian Agent ── suspicious story ──→ ScamGuard
+                 │
+                 └── consequential task ──→ Sarah approval ──→ Nova Act
+
+Sarah ──→ Caregiver Agent
+              │
+              └──────── shared PostgreSQL care record ────────┘
+```
+
+The guardian agent coordinates tools for:
 
 - Medication schedules and intake confirmation
 - Mood, memories, symptoms, and health trends

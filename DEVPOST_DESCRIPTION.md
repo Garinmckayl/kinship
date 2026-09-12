@@ -62,7 +62,16 @@ More than 50 million Americans provide unpaid family care. Returning even one ho
 
 ### Agent orchestration
 
-Kinship uses the **Strands Agents SDK for TypeScript** to coordinate typed tools for:
+Kinship uses a multi-agent architecture organized around trust boundaries:
+
+- **Guardian Agent:** Eleanor’s elder-facing Strands agent. It coordinates 17 care and safety tools for medications, symptoms, mood, health trends, appointments, reminders, notifications, and browser-task requests.
+- **Caregiver Agent:** Sarah’s family-facing Strands agent. It reads the same durable care record but has a different prompt and narrower tools for status, medication management, reminders, summaries, and appointment proposals.
+- **ScamGuard Specialist:** a dedicated Strands sub-agent. The Guardian delegates suspicious caller or money stories through `check_scam`; ScamGuard returns a structured verdict, a kind script for Eleanor, and a family note.
+- **Nova Act Browser Worker:** an approval-gated execution agent for external websites. It begins only after Sarah approves a bounded request, then writes progress and results back to the shared task record.
+
+The agents do not pass around unstructured chat. They coordinate through typed tool contracts, explicit approval states, and shared PostgreSQL records. We chose specialized agents around safety boundaries—not a swarm of general-purpose chatbots.
+
+The Guardian’s typed tools cover:
 
 - Medication schedules and intake confirmation
 - Mood, memory, symptoms, and health trends
