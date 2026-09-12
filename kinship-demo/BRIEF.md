@@ -7,7 +7,7 @@ destination: devpost
 aspect: 1920x1080
 language: en
 audience: AWS Agents for Humans judges
-length: 234.5s
+length: 242.73s
 angle: emotionally urgent care story proven by visible production behavior and a real Nova Act workflow
 ---
 
@@ -59,8 +59,9 @@ control over consequential actions.
 5. Show human approval before consequential external action.
 6. Show the immersive call turning natural conversation into visible tool work.
 7. Show Inngest running scheduled care in the background and escalating only real decisions.
-8. Build a technically rich Strands, Bedrock, AgentCore, Nova Act, and application
-   architecture that remains understandable.
+8. Build a technically rich but understandable multi-agent architecture: Guardian,
+   Caregiver, ScamGuard, and Nova Act use distinct permissions, typed contracts, and
+   one shared durable care record across Strands, Bedrock, and AgentCore.
 9. End with measurable potential impact and a memorable vision.
 
 ## Truth boundary

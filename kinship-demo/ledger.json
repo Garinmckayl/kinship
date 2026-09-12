@@ -222,7 +222,7 @@
     },
     {
       "id": "architecture-to-impact",
-      "cut": 213.37,
+      "cut": 221.6,
       "technique": "cut-the-curve LEFT",
       "exit": {
         "selector": "#scene-13",

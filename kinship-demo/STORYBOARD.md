@@ -1,6 +1,6 @@
 ---
 format: 1920x1080
-duration: 234.5s
+duration: 242.73s
 message: "Kinship handles the repetitive work of care, then surfaces the decisions only family can make"
 arc: Proof → Human cost → Quiet automation → Decision → Live work → Receipt → Voice → Autonomy → Architecture → Impact
 audience: AWS Agents for Humans judges
@@ -118,17 +118,17 @@ mode: autonomous
 ## Frame 13 — Built for consequential care
 - status: animated
 - src: compositions/11-architecture.html
-- duration: 25.77s
-- timing: 187.6–213.37s
+- duration: 34s
+- timing: 187.6–221.6s
 - motion: constellation-hub + svg-path-draw
-- scene: Three readable planes show human context, Strands orchestration with Bedrock and consented memory, then durable AgentCore/Nova action and typed audited receipts.
+- scene: Three readable planes open with an eight-second reveal of four specialized agents—Guardian, Caregiver, ScamGuard, and Nova Act—coordinated through distinct permissions and one shared care record, then show Bedrock reasoning, consented memory, approval, durable action, and typed audited receipts.
 - narrativeRole: Establish implementation credibility for AWS judges.
 
 ## Frame 14 — Return time to families
 - status: animated
 - src: compositions/12-impact.html
 - duration: 21.13s
-- timing: 213.37–234.5s
+- timing: 221.6–242.73s
 - motion: dataviz-countup + logo-assemble-lockup
 - scene: 50M+ unpaid U.S. family caregivers and the potential 2.6B+ hours/year framing resolve into the Kinship close.
 - narrativeRole: Land credible potential impact and the differentiated promise.

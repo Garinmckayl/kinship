@@ -54,11 +54,11 @@ credible at the close. Never sound like an advertisement.
 
 ## 12 — Durable autonomy
 
-    [Music-only proof beat. On-screen copy shows that the exact reminder remains scheduled after Eleanor closes the app, and Sarah is interrupted only if Eleanor misses the follow-up.]
+    The conversation may end, but Kinship's background agent keeps working. It preserves Eleanor's blood-pressure reminder as a durable task, monitors whether it is completed, and alerts Sarah only if the follow-up is missed.
 
 ## 13 — Architecture
 
-    Under the hood, Strands coordinates care, safety, and browser tools. Amazon Bedrock provides reasoning. Kinship memory holds consented context. Events stream to the family dashboard. AgentCore gives Nova Act a durable, observable browser. Structured extraction turns official pages into typed results. Approvals, audit logs, and source links preserve human control.
+    Kinship is a multi-agent care system. Guardian supports Eleanor. Caregiver helps Sarah decide. ScamGuard investigates suspicious messages. Nova Act completes approved web work. Strands coordinates them; Bedrock provides reasoning; and shared durable state preserves every handoff. For browser tasks, AgentCore provides a secure, observable runtime. Typed progress reaches the family dashboard, while approvals, audit receipts, and source links keep people in control.
 
 ## 14 — Impact and vision
 
