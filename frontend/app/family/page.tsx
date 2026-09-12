@@ -98,6 +98,7 @@ export default function FamilyPage() {
   const [demoTaskBusy, setDemoTaskBusy] = useState(false);
   const [approvingTaskId, setApprovingTaskId] = useState<string | null>(null);
   const [clearingBrowserTasks, setClearingBrowserTasks] = useState(false);
+  const [clearingBackgroundTasks, setClearingBackgroundTasks] = useState(false);
   const [browserActionError, setBrowserActionError] = useState<string | null>(null);
   const hasRunningBrowserTask = browserTasks.some((task) => task.status === "running" || task.status === "approved");
   const [form, setForm] = useState({ name: "", dosage: "", time: "", label: "" });
@@ -775,7 +776,29 @@ export default function FamilyPage() {
 
         {/* Background tasks */}
         <section className="bg-white/5 ring-1 ring-white/10 rounded-3xl p-5">
-          <h2 className="font-bold text-xl mb-1">Background agent</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-bold text-xl">Background agent</h2>
+            {tasks.some((task) => task.status === "done" || task.status === "failed") && (
+              <button
+                onClick={async () => {
+                  setClearingBackgroundTasks(true);
+                  try {
+                    const response = await fetch(`${API}/tasks?user_id=eleanor-79`, { method: "DELETE" });
+                    if (!response.ok) throw new Error("clear failed");
+                    setTasks((current) => current.filter((task) => task.status !== "done" && task.status !== "failed"));
+                  } catch {
+                    setBrowserActionError("Could not clear background task history. Please try again.");
+                  } finally {
+                    setClearingBackgroundTasks(false);
+                  }
+                }}
+                disabled={clearingBackgroundTasks}
+                className="px-3 py-1.5 rounded-xl bg-white/10 text-slate-300 text-xs font-bold hover:bg-white/20 disabled:cursor-wait disabled:opacity-60"
+              >
+                {clearingBackgroundTasks ? "Clearing…" : "Clear history"}
+              </button>
+            )}
+          </div>
           <p className="text-slate-400 text-sm mb-3">Keeps working even if Eleanor closes the app.</p>
           {tasks.length === 0 ? (
             <p className="text-slate-400">No background tasks. Eleanor can say "remind me in 30 minutes".</p>

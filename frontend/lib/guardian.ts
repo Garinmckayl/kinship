@@ -4,7 +4,7 @@ import {
   listMeds, takenMedIds, confirmIntake as storeConfirmIntake,
   logMood as storeLogMood, listMoods, listMemories,
   addEscalation, listEscalations,
-  enqueueTask, updateTask, saveChatMessage, listChatMessages,
+  enqueueTask, saveChatMessage, listChatMessages,
 } from "./store";
 import { normalizeBrowserTaskParams } from "./browser-task";
 
@@ -155,10 +155,21 @@ export const scheduleTask = tool({
     } catch {
       // No Inngest dev server / keys: run in-process (works on single-instance dev/demo).
       setTimeout(async () => {
-        await updateTask(task.id, { status: "running" });
-        const out = await fallbackReply(input.userId, `[background reminder] ${input.instruction}`);
-        await addEscalation(input.userId, "attention", `Background reminder fired: ${out.reply.slice(0, 200)}`);
-        await updateTask(task.id, { status: "done", result: out.reply.slice(0, 300) });
+        const run = async (attempt: number): Promise<void> => {
+          const { claimTask } = await import("./store");
+          const claimed = await claimTask(task.id);
+          if (!claimed) return;
+          try {
+            const { executeClaimedBackgroundTask } = await import("./background-tasks");
+            await executeClaimedBackgroundTask(claimed);
+          } catch (error) {
+            console.error("Inline background task attempt failed", { taskId: task.id, attempt, error });
+            if (attempt < 2) {
+              setTimeout(() => { void run(attempt + 1); }, 1_000 * (attempt + 1));
+            }
+          }
+        };
+        await run(0);
       }, Math.max(0, input.delayMinutes) * 60_000);
       return JSON.stringify({ ok: true, taskId: task.id, mode: "inline-fallback" });
     }
@@ -363,6 +374,7 @@ export const requestBrowserTask = tool({
 export const ALL_TOOLS = [getMedSchedule, confirmIntake, logMood, retrieveMemory, notifyFamily, summarizeForDoctor, scheduleTask, callElder, manageAppointments, logHealthMetric, getHealthTrends, logSymptom, checkRefillStatus, checkScam, flagScam, assessRisk, requestBrowserTask];
 
 let _agent: Agent | null = null;
+let _backgroundAgent: Agent | null = null;
 export function getAgent(): Agent {
   if (!_agent) {
     _agent = new Agent({
@@ -374,6 +386,17 @@ export function getAgent(): Agent {
     });
   }
   return _agent;
+}
+
+function getBackgroundAgent(): Agent {
+  if (!_backgroundAgent) {
+    _backgroundAgent = new Agent({
+      systemPrompt: "You are Kinship's reminder worker. Write one warm, concise reminder or check-in for Eleanor. Do not call tools, schedule more work, or claim an external action occurred.",
+      printer: false,
+      contextManager: "auto",
+    });
+  }
+  return _backgroundAgent;
 }
 
 // Rule-based fallback so the demo works with zero AWS creds (judges click + it just works).
@@ -411,6 +434,18 @@ export async function fallbackReply(userId: string, message: string): Promise<{ 
   }
   await storeLogMood(userId, "ok", message);
   return { reply: "Thank you for telling me. I'm keeping track so your family doesn't worry. How are you feeling right now?", speak: true };
+}
+
+export async function runBackgroundInstruction(instruction: string): Promise<string> {
+  let reply;
+  if (!process.env.AWS_REGION && !process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_BEARER_TOKEN_BEDROCK) {
+    reply = `Reminder: ${instruction}`;
+  } else {
+    const result = await getBackgroundAgent().invoke(instruction);
+    reply = messageToText((result as { lastMessage?: unknown }).lastMessage ?? result);
+    if (!reply.trim()) throw new Error("Background agent returned an empty response");
+  }
+  return reply;
 }
 
 function messageToText(msg: unknown): string {

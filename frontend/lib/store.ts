@@ -7,7 +7,7 @@ import { randomId } from "./crypto";
 
 export type Med = { id: string; name: string; dosage: string; time: string; label: string; active: boolean; pills_left?: number };
 export type Escalation = { level: string; message: string; time: string };
-export type BgTask = { id: string; userId: string; instruction: string; runAt: string; status: string; result?: string };
+export type BgTask = { id: string; userId: string; instruction: string; runAt: string; status: string; result?: string; claimToken?: string };
 export type ChatMessage = {
   id: string | number;
   threadId: string;
@@ -257,6 +257,182 @@ export async function listTasks(userId?: string): Promise<BgTask[]> {
   return rows.map((r) => ({ id: r.id, userId: r.elder_id, instruction: r.instruction, runAt: new Date(r.run_at).toISOString(), status: r.status, result: r.result || undefined }));
 }
 
+export async function claimDueTasks(userId?: string, limit = 5): Promise<BgTask[]> {
+  if (!dbOn()) {
+    const now = Date.now();
+    const claimed = MEM_TASKS
+      .filter((task) => task.status === "pending" && new Date(task.runAt).getTime() <= now && (!userId || task.userId === userId))
+      .slice(0, limit);
+    claimed.forEach((task) => {
+      task.status = "running";
+      task.claimToken = randomId("claim");
+    });
+    return claimed;
+  }
+
+  await ready();
+  const rows = await q<{ id: string; elder_id: string; instruction: string; run_at: string; status: string; result: string; claim_token: string }>(
+    `with due as (
+       select id from tasks
+       where (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '30 minutes')))
+         and run_at <= now()
+         and ($1::text is null or elder_id = $1)
+       order by run_at
+       for update skip locked
+       limit $2
+     )
+     update tasks
+     set status = 'running',
+         claimed_at = now(),
+         claim_token = md5(random()::text || clock_timestamp()::text || tasks.id)
+     where id in (select id from due)
+     returning id,elder_id,instruction,run_at,status,result,claim_token`,
+    [userId ?? null, limit]
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    userId: row.elder_id,
+    instruction: row.instruction,
+    runAt: new Date(row.run_at).toISOString(),
+    status: row.status,
+    result: row.result || undefined,
+    claimToken: row.claim_token,
+  }));
+}
+
+export async function claimTask(id: string): Promise<BgTask | undefined> {
+  if (!dbOn()) {
+    const task = MEM_TASKS.find((candidate) => candidate.id === id && candidate.status === "pending");
+    if (task) {
+      task.status = "running";
+      task.claimToken = randomId("claim");
+    }
+    return task;
+  }
+
+  await ready();
+  const claimToken = randomId("claim");
+  const rows = await q<{ id: string; elder_id: string; instruction: string; run_at: string; status: string; result: string; claim_token: string }>(
+    `update tasks
+     set status = 'running', claimed_at = now(), claim_token = $2
+     where id = $1
+       and (status = 'pending' or (status = 'running' and (claimed_at is null or claimed_at < now() - interval '30 minutes')))
+     returning id,elder_id,instruction,run_at,status,result,claim_token`,
+    [id, claimToken]
+  );
+  const row = rows[0];
+  return row && {
+    id: row.id,
+    userId: row.elder_id,
+    instruction: row.instruction,
+    runAt: new Date(row.run_at).toISOString(),
+    status: row.status,
+    result: row.result || undefined,
+    claimToken: row.claim_token,
+  };
+}
+
+export async function finishClaimedTaskWithDelivery(
+  task: BgTask,
+  result: string
+): Promise<boolean> {
+  if (!task.claimToken) return false;
+  if (!dbOn()) {
+    const claimed = MEM_TASKS.find((candidate) => candidate.id === task.id && candidate.claimToken === task.claimToken && candidate.status === "running");
+    if (!claimed) return false;
+    claimed.status = "done";
+    claimed.result = result;
+    claimed.claimToken = undefined;
+    MEM_CHAT.push({
+      id: randomId("msg"),
+      threadId: task.userId,
+      role: "assistant",
+      content: result,
+      channel: "background",
+      createdAt: new Date().toISOString(),
+    });
+    return true;
+  }
+
+  await ready();
+  const rows = await q<{ completed: number }>(
+    `with completed as (
+       update tasks
+       set status = 'done', result = $1, claimed_at = null, claim_token = null
+       where id = $2 and status = 'running' and claim_token = $3
+       returning elder_id
+     ),
+     delivered as (
+       insert into chat_messages(thread_id,role,content,channel)
+       select elder_id,'assistant',$1,'background' from completed
+       returning id
+     ),
+     receipt as (
+       insert into escalations(elder_id,level,message)
+       select elder_id,'info',$4 from completed
+       returning id
+     )
+     select count(*)::int as completed from completed`,
+    [result, task.id, task.claimToken, `Background agent completed: ${result.slice(0, 200)}`]
+  );
+  return Number(rows[0]?.completed ?? 0) === 1;
+}
+
+export async function releaseClaimedTask(id: string, claimToken: string): Promise<boolean> {
+  if (!dbOn()) {
+    const task = MEM_TASKS.find((candidate) => candidate.id === id && candidate.claimToken === claimToken && candidate.status === "running");
+    if (!task) return false;
+    task.status = "pending";
+    task.claimToken = undefined;
+    return true;
+  }
+
+  await ready();
+  const rows = await q<{ id: string }>(
+    `update tasks
+     set status = 'pending', claimed_at = null, claim_token = null
+     where id = $1 and status = 'running' and claim_token = $2
+     returning id`,
+    [id, claimToken]
+  );
+  return rows.length === 1;
+}
+
+export async function clearBackgroundTaskHistory(userId?: string): Promise<number> {
+  if (!dbOn()) {
+    const before = MEM_TASKS.length;
+    for (let i = MEM_TASKS.length - 1; i >= 0; i -= 1) {
+      const task = MEM_TASKS[i];
+      if ((!userId || task.userId === userId) && (task.status === "done" || task.status === "failed")) {
+        MEM_TASKS.splice(i, 1);
+      }
+    }
+    for (let i = MEM_CHAT.length - 1; i >= 0; i -= 1) {
+      const message = MEM_CHAT[i];
+      if ((!userId || message.threadId === userId) && message.channel === "background") {
+        MEM_CHAT.splice(i, 1);
+      }
+    }
+    return before - MEM_TASKS.length;
+  }
+
+  await ready();
+  await q(
+    `delete from chat_messages
+     where channel = 'background'
+       and ($1::text is null or thread_id = $1)`,
+    [userId ?? null]
+  );
+  const rows = await q<{ id: string }>(
+    `delete from tasks
+     where status in ('done', 'failed')
+       and ($1::text is null or elder_id = $1)
+     returning id`,
+    [userId ?? null]
+  );
+  return rows.length;
+}
+
 export async function getTask(id: string): Promise<BgTask | undefined> {
   if (!dbOn()) return MEM_TASKS.find((t) => t.id === id);
   await ready();
@@ -274,7 +450,16 @@ export async function updateTask(id: string, patch: Partial<Pick<BgTask, "status
     return t;
   }
   await ready();
-  if (patch.status !== undefined) await q("update tasks set status=$1 where id=$2", [patch.status, id]);
+  if (patch.status !== undefined) {
+    await q(
+      `update tasks
+       set status=$1,
+           claimed_at=case when $1='running' then coalesce(claimed_at, now()) else null end,
+           claim_token=case when $1='running' then claim_token else null end
+       where id=$2`,
+      [patch.status, id]
+    );
+  }
   if (patch.result !== undefined) await q("update tasks set result=$1 where id=$2", [patch.result, id]);
   return getTask(id);
 }

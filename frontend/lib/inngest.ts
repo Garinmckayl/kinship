@@ -23,19 +23,18 @@ export const processElderTask = inngest.createFunction(
     }
 
     const outcome = await step.run("execute-agent-task", async () => {
-      const { getTask, updateTask } = await import("./store");
-      const { chat } = await import("./guardian");
-      const task = await getTask(taskId);
-      if (!task) return { ok: false, error: "task not found" };
-      await updateTask(taskId, { status: "running" });
-      try {
-        const out = await chat(task.userId, `[background task — Eleanor may be offline, act via tools and escalate if needed] ${task.instruction}`, { heartbeat: false });
-        await updateTask(taskId, { status: "done", result: out.reply.slice(0, 500) });
-        return { ok: true };
-      } catch (e) {
-        await updateTask(taskId, { status: "failed", result: String(e).slice(0, 300) });
-        return { ok: false };
+      const { claimTask, getTask } = await import("./store");
+      const { executeClaimedBackgroundTask } = await import("./background-tasks");
+      const task = await claimTask(taskId);
+      if (!task) {
+        const existing = await getTask(taskId);
+        if (!existing) return { ok: false, error: "task not found" };
+        if (existing.status === "done" || existing.status === "failed") {
+          return { ok: true, skipped: `task already ${existing.status}` };
+        }
+        throw new Error(`Task ${taskId} is already being executed`);
       }
+      return { ok: await executeClaimedBackgroundTask(task) };
     });
     return outcome;
   }

@@ -84,8 +84,12 @@ create table if not exists tasks (
   run_at timestamptz not null,
   status text default 'pending',
   result text default '',
+  claimed_at timestamptz,
+  claim_token text,
   created_at timestamptz default now()
 );
+alter table tasks add column if not exists claimed_at timestamptz;
+alter table tasks add column if not exists claim_token text;
 create table if not exists reports (
   id serial primary key,
   elder_id text not null,
