@@ -148,8 +148,8 @@ Reliable execution, explicit approval, truthful failure, durable state, and visi
 
 ## Try it
 
-- **Live app:** https://elderai-omega.vercel.app
-- **Caregiver dashboard:** https://elderai-omega.vercel.app/family
+- **Live app:** https://kinship.arcumet.com
+- **Caregiver dashboard:** https://kinship.arcumet.com/family
 - **Demo login:** `caregiver@demo.local` / `demo1234`
 - **Source:** https://github.com/Garinmckayl/elderai
 - **Demo video:** add final video URL
