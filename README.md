@@ -143,7 +143,6 @@ The web app is functional without the browser worker. To execute real browser ta
 | `agentcore/` | Standalone TypeScript Guardian Agent for Bedrock AgentCore Runtime |
 | `nova-act/` | Local Python Nova Act sidecar and its setup instructions |
 | `nova-act-agentcore/` | AgentCore-hosted Nova Act browser worker |
-| `kinship-demo/` | Source compositions and assets for the demo video |
 | `ARCHITECTURE.md` | System diagram and autonomous-loop explanation |
 | `DEVPOST_DESCRIPTION.md` | Plain-language submission description |
 
