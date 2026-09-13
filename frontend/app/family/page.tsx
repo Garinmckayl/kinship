@@ -9,6 +9,7 @@ import { BeamInput } from "@/components/BeamInput";
 import { Tabs } from "@/components/ui";
 import { Nav } from "@/components/Nav";
 import { BellIcon, CheckIcon, ClockIcon, HeartIcon, LogoutIcon, PillIcon, PlusIcon, TrashIcon } from "@/components/icons";
+import { browserProofStage } from "@/lib/safety-policy";
 
 const API = "/api";
 const BrowserLiveView = dynamic(
@@ -43,6 +44,7 @@ type BrowserTaskPreview = {
   result: Record<string, unknown> | null;
   error: string | null;
   recording_url?: string | null;
+  sidecar_task_id?: string | null;
 };
 type RiskSignal = { label: string; severity: string; detail: string };
 type CompoundRisk = {
@@ -98,6 +100,7 @@ export default function FamilyPage() {
   const [demoTaskBusy, setDemoTaskBusy] = useState(false);
   const [approvingTaskId, setApprovingTaskId] = useState<string | null>(null);
   const [clearingBrowserTasks, setClearingBrowserTasks] = useState(false);
+  const [resettingJudgeDemo, setResettingJudgeDemo] = useState(false);
   const [clearingBackgroundTasks, setClearingBackgroundTasks] = useState(false);
   const [browserActionError, setBrowserActionError] = useState<string | null>(null);
   const hasRunningBrowserTask = browserTasks.some((task) => task.status === "running" || task.status === "approved");
@@ -218,6 +221,22 @@ export default function FamilyPage() {
       if (d?.messages?.length) setElderHistory(d.messages);
     }).catch(() => {});
   }, [authChecked, me]);
+
+  async function resetJudgeDemo() {
+    setResettingJudgeDemo(true);
+    setBrowserActionError(null);
+    try {
+      const response = await fetch(API + "/demo/reset", { method: "POST" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Could not reset judge demo");
+      setBrowserTasks(data.task ? [data.task] : []);
+      window.location.reload();
+    } catch (error) {
+      setBrowserActionError(error instanceof Error ? error.message : "Could not reset judge demo");
+    } finally {
+      setResettingJudgeDemo(false);
+    }
+  }
 
   async function logout() {
     await fetch(`${API}/auth/logout`, { method: "POST" });
@@ -590,6 +609,7 @@ export default function FamilyPage() {
                 <p className="text-slate-400 text-sm">Real browser tasks powered by Amazon Nova Act. Approve to execute.</p>
               </div>
               <div className="flex items-center gap-2">
+                <button onClick={resetJudgeDemo} disabled={resettingJudgeDemo} className="rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/20 disabled:opacity-60">{resettingJudgeDemo ? "Resetting…" : "Reset judge demo"}</button>
                 {!browserTasks.some((task) => task.status === "running" || task.status === "approved" || task.status === "pending_approval") && (
                   <button
                     onClick={createProviderSearchDemo}
@@ -686,6 +706,16 @@ export default function FamilyPage() {
                           </button>
                         )}
                       </div>
+                    </div>
+                    <div className="mb-3 rounded-xl bg-slate-950/60 p-3 ring-1 ring-white/10">
+                      <div className="mb-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Execution proof</div>
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide">
+                        <span className="rounded-md bg-violet-400/15 px-2 py-1 text-violet-200">Strands task</span><span className="text-slate-500">→</span>
+                        <span className={isPending ? "rounded-md bg-amber-400/20 px-2 py-1 text-amber-200" : "rounded-md bg-emerald-400/15 px-2 py-1 text-emerald-200"}>Caregiver approval</span><span className="text-slate-500">→</span>
+                        <span className={isRunning || isDone ? "rounded-md bg-sky-400/20 px-2 py-1 text-sky-200" : "rounded-md bg-slate-400/10 px-2 py-1 text-slate-400"}>Nova Act + AgentCore</span><span className="text-slate-500">→</span>
+                        <span className={isDone ? "rounded-md bg-emerald-400/20 px-2 py-1 text-emerald-200" : isFailed ? "rounded-md bg-red-400/20 px-2 py-1 text-red-200" : "rounded-md bg-slate-400/10 px-2 py-1 text-slate-400"}>{browserProofStage(bt.status)}</span>
+                      </div>
+                      {bt.sidecar_task_id && <div className="mt-2 font-mono text-[10px] text-slate-500">sidecar_task_id: {bt.sidecar_task_id}</div>}
                     </div>
                     {bt.params && Object.keys(bt.params).length > 0 && (
                       <div className="text-sm text-slate-300 mb-2">

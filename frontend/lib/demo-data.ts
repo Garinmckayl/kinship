@@ -1,6 +1,7 @@
 export const MEDS = [
   { id: "lisinopril-am", name: "Lisinopril 10mg", time: "09:00", label: "morning pill" },
   { id: "metformin-lunch", name: "Metformin 500mg", time: "13:00", label: "lunch pill" },
+  { id: "vitamin-d-lunch", name: "Vitamin D 2000 IU", time: "13:00", label: "lunch supplement" },
   { id: "atorvastatin-pm", name: "Atorvastatin 20mg", time: "21:00", label: "night pill" },
 ];
 

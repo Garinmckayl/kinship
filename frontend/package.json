@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "node scripts/copy-dcv-assets.mjs"
+    "postinstall": "node scripts/copy-dcv-assets.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-agentcore": "^3.1128.0",
@@ -38,6 +39,8 @@
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.40",
     "tailwindcss": "^3.4.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
   }
 }

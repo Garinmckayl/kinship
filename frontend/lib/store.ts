@@ -1,6 +1,7 @@
 import { dbOn, ready, q } from "./db";
 import { MEDS, MEMORIES, STATE, getState } from "./demo-data";
 import { randomId } from "./crypto";
+import { canClaimBrowserTask, isDuplicateIntake, judgeProviderTaskParams } from "./safety-policy";
 
 // Unified persistence: Postgres when DATABASE_URL is set, in-memory demo
 // store otherwise. All agent tools + routes go through here.
@@ -95,8 +96,11 @@ export async function takenMedIds(elder = "eleanor-79"): Promise<string[]> {
 
 export async function confirmIntake(elder: string, medId: string, source = "chat"): Promise<number> {
   if (!dbOn()) {
-    getState(elder).intakes[medId] = new Date().toISOString();
-    return Object.keys(getState(elder).intakes).length;
+    const state = getState(elder);
+    if (!isDuplicateIntake(Object.keys(state.intakes), medId)) {
+      state.intakes[medId] = new Date().toISOString();
+    }
+    return Object.keys(state.intakes).length;
   }
   await ready();
   const inserted = await q<{ id: number }>(
@@ -638,8 +642,7 @@ export async function claimBrowserTaskApproval(
 ): Promise<{ task: BrowserTaskRow; claimed: boolean }> {
   if (!dbOn()) {
     const existing = MEM_BROWSER_TASKS.find((task) => task.id === id);
-    const retryableApproval = existing?.status === "approved" && !existing.sidecar_task_id;
-    if (existing && !["pending_approval", "failed"].includes(existing.status) && !retryableApproval) {
+    if (existing && !canClaimBrowserTask(existing.status, existing.sidecar_task_id)) {
       return { task: existing, claimed: false };
     }
     if (existing) {
@@ -721,6 +724,63 @@ export async function deleteBrowserTask(id: string): Promise<void> {
   }
   await q("delete from browser_tasks where id=$1", [id]);
   await q("delete from escalations where elder_id='eleanor-79' and message like $1", [`%${id}%`]);
+}
+
+export async function resetJudgeDemo(): Promise<BrowserTaskRow> {
+  const params = judgeProviderTaskParams();
+  const task: BrowserTaskRow = {
+    id: "judge-provider-search",
+    task_type: "provider_search",
+    status: "pending_approval",
+    sidecar_task_id: null,
+    params,
+    steps: [],
+    result: null,
+    error: null,
+    created_at: new Date().toISOString(),
+    completed_at: null,
+  };
+
+  if (!dbOn()) {
+    MEM_BROWSER_TASKS.splice(0, MEM_BROWSER_TASKS.length);
+    MEM_BROWSER_TASKS.unshift(task);
+    const state = getState("eleanor-79");
+    state.intakes = {};
+    state.moods = [];
+    state.escalations = [{ level: "info", message: "Judge demo ready: caregiver approval is required before browser work.", time: new Date().toLocaleTimeString() }];
+    return task;
+  }
+
+  await ready();
+  await q("delete from dismissed_browser_tasks");
+  await q("delete from browser_tasks where elder_id='eleanor-79'");
+  await q("delete from intakes where elder_id='eleanor-79'");
+  await q("delete from moods where elder_id='eleanor-79'");
+  await q("delete from symptoms where elder_id='eleanor-79'");
+  await q("delete from escalations where elder_id='eleanor-79'");
+  await q("delete from tasks where elder_id='eleanor-79'");
+  await q("delete from reports where elder_id='eleanor-79'");
+  await q("delete from chat_messages where thread_id like '%eleanor-79%' or thread_id like '%caregiver%'");
+  await q("delete from medications where elder_id='eleanor-79'");
+  for (const med of MEDS) {
+    const parts = med.name.split(" ");
+    await q(
+      "insert into medications(id,elder_id,name,dosage,time,label,pills_left) values($1,'eleanor-79',$2,$3,$4,$5,30)",
+      [med.id, parts[0], parts.slice(1).join(" "), med.time, med.label],
+    );
+  }
+  await q("delete from memories where elder_id='eleanor-79'");
+  for (const memory of MEMORIES) {
+    await q("insert into memories(elder_id,title,note) values('eleanor-79',$1,$2)", [memory.title, memory.note]);
+  }
+  await q(
+    "insert into escalations(elder_id,level,message) values('eleanor-79','info','Judge demo ready: caregiver approval is required before browser work.')",
+  );
+  await q(
+    "insert into browser_tasks(id,elder_id,task_type,status,params) values($1,'eleanor-79','provider_search','pending_approval',$2)",
+    [task.id, JSON.stringify(params)],
+  );
+  return task;
 }
 
 export async function getDismissedBrowserTasks(): Promise<string[]> {
