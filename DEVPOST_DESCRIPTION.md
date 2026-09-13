@@ -155,6 +155,10 @@ Reliable execution, explicit approval, truthful failure, durable state, and visi
 - Add production wearable integrations
 - Expand from one elder to coordinated family and community care networks
 
+## Originality and prior work
+
+Kinship was created during the Agents for Humans hackathon period. No source code or assets from Title AI—or any other prior project—were copied into Kinship. Previous hackathon experience informed our product judgment, but this project’s implementation and assets are new.
+
 ## Try it
 
 - **Live app:** https://kinship.arcumet.com

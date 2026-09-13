@@ -154,6 +154,10 @@ The web app is functional without the browser worker. To execute real browser ta
 ## Safety
 Reminder + escalation log only. Not medical advice. Urgent keywords (chest pain, fall, dizzy) → URGENT escalation + advise emergency button/911.
 
+## Originality and prior work
+
+Kinship was created during the Agents for Humans hackathon period. No source code or assets from Title AI—or any other prior project—were copied into Kinship. Previous hackathon experience informed product judgment only; Kinship’s implementation and assets are new.
+
 ## License
 
 [MIT](LICENSE). The repository contains the source code, original project assets, configuration template, and instructions needed to run Kinship; third-party hosted services require their own credentials.

@@ -5,6 +5,7 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 ## Devpost submission items
 - [x] Public repo URL: `github.com/Garinmckayl/kinship`
 - [x] MIT license in repo (LICENSE)
+- [x] Prior-work disclosure added: no Title AI source code or assets were reused
 - [x] Repo verified public and GitHub recognizes the **MIT License**
 - [x] README (problem / who / why / run / deploy)
 - [x] Architecture diagram (ARCHITECTURE.md, mermaid renders on GitHub)
