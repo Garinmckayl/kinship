@@ -2,7 +2,7 @@
 
 **Track:** Everyday Agents
 
-**Elevator pitch:** Kinship talks with older adults, logs medications, schedules and monitors follow-ups, and uses Amazon Nova Act to complete caregiver-approved tasks such as finding Medicare doctors—alerting family only when a risk or real decision needs them.
+**Elevator pitch:** Kinship talks with older adults, logs medications, schedules and monitors follow-ups, and uses Amazon Nova Act to complete caregiver-approved tasks such as finding Medicare doctors—so seniors stay independent and family is alerted only when a risk or real decision needs them.
 
 ## Inspiration
 
@@ -168,7 +168,7 @@ Kinship was created during the Agents for Humans hackathon period. No source cod
 - **Builder article 1:** https://builder.aws.com/content/3JDRwUYHIIqyFxDdCzvkmYCucRY/agents-for-humans-building-kinship-a-care-agent-that-keeps-its-promises
 - **Builder article 2:** https://builder.aws.com/content/3JGQ3vqC3sWSzOxRuxNqKuusgIp/agents-for-humans-why-kinship-uses-four-agents-instead-of-one
 - **Builder article 3:** https://builder.aws.com/content/3JGQZ7cl3hF77OWB4TH6Qyxnh7B/agents-for-humans-from-approval-to-evidence-with-nova-act-and-agentcore-browser
-- **Demo video:** add final video URL
+- **Demo video:** https://youtu.be/SG4x3Tv50IY
 
 ### Recommended judge path
 
