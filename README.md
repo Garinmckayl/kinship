@@ -13,6 +13,7 @@ Kinship is built explicitly with the **Strands Agents SDK**. A Guardian Agent co
 - **Live app:** [kinship.arcumet.com](https://kinship.arcumet.com)
 - **Submission narrative:** [DEVPOST_DESCRIPTION.md](DEVPOST_DESCRIPTION.md)
 - **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Builder articles:** [Project story](https://builder.aws.com/content/3JDRwUYHIIqyFxDdCzvkmYCucRY/agents-for-humans-building-kinship-a-care-agent-that-keeps-its-promises) · [Strands architecture](https://builder.aws.com/content/3JGQ3vqC3sWSzOxRuxNqKuusgIp/agents-for-humans-why-kinship-uses-four-agents-instead-of-one) · [Nova Act evidence](https://builder.aws.com/content/3JGQZ7cl3hF77OWB4TH6Qyxnh7B/agents-for-humans-from-approval-to-evidence-with-nova-act-and-agentcore-browser)
 
 ## Architecture
 

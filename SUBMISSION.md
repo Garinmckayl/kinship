@@ -13,10 +13,10 @@ Track: **Everyday Agents** ("runs quietly in the background and only pings you w
 - [ ] Text description on Devpost (see DEVPOST_DESCRIPTION.md)
 - [ ] AWS Builder ID (create at builder.aws.com, paste into submission)
 - [x] Live demo: `https://kinship.arcumet.com` (HTTP 200 verified Sep 13, 2026)
-- [ ] Bonus post 1: publish `BUILDER_AWS_POST.md`, then add its public URL to Devpost
-- [ ] Bonus post 2: publish `BUILDER_AWS_POST_2_STRANDS.md`, then add its public URL to Devpost
-- [ ] Bonus post 3: publish `BUILDER_AWS_POST_3_NOVA_ACT.md`, then add its public URL to Devpost
-- [ ] Confirm every post title contains the exact phrase **Agents for Humans**
+- [x] Bonus post 1: https://builder.aws.com/content/3JDRwUYHIIqyFxDdCzvkmYCucRY/agents-for-humans-building-kinship-a-care-agent-that-keeps-its-promises
+- [x] Bonus post 2: https://builder.aws.com/content/3JGQ3vqC3sWSzOxRuxNqKuusgIp/agents-for-humans-why-kinship-uses-four-agents-instead-of-one
+- [x] Bonus post 3: https://builder.aws.com/content/3JGQZ7cl3hF77OWB4TH6Qyxnh7B/agents-for-humans-from-approval-to-evidence-with-nova-act-and-agentcore-browser
+- [x] Every post title contains the exact phrase **Agents for Humans**
 
 ## Demo script
 

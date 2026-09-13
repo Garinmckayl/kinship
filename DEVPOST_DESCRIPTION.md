@@ -165,6 +165,9 @@ Kinship was created during the Agents for Humans hackathon period. No source cod
 - **Caregiver dashboard:** https://kinship.arcumet.com/family
 - **Demo login:** `caregiver@demo.local` / `demo1234`
 - **Source:** https://github.com/Garinmckayl/kinship
+- **Builder article 1:** https://builder.aws.com/content/3JDRwUYHIIqyFxDdCzvkmYCucRY/agents-for-humans-building-kinship-a-care-agent-that-keeps-its-promises
+- **Builder article 2:** https://builder.aws.com/content/3JGQ3vqC3sWSzOxRuxNqKuusgIp/agents-for-humans-why-kinship-uses-four-agents-instead-of-one
+- **Builder article 3:** https://builder.aws.com/content/3JGQZ7cl3hF77OWB4TH6Qyxnh7B/agents-for-humans-from-approval-to-evidence-with-nova-act-and-agentcore-browser
 - **Demo video:** add final video URL
 
 ### Recommended judge path
