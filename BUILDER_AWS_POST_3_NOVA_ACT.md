@@ -18,17 +18,14 @@ Kinship prepares a request to find nearby Internal Medicine clinicians who accep
 
 Only that click starts Amazon Nova Act.
 
-![Sarah reviews the bounded provider-search request before any browser work begins.](images/03-caregiver-approval.png)
 
 Nova Act opens the official Medicare Care Compare site inside an Amazon Bedrock AgentCore Browser. It selects doctors and clinicians, enters Eleanor’s Columbus ZIP, filters for Internal Medicine, and reads the visible results.
 
 Sarah can watch the real remote browser session while it works.
 
-![Nova Act operates Medicare Care Compare in the live AgentCore browser.](images/03-nova-act-live-browser.png)
 
 The output is not a success toast. Kinship presents a receipt with the search criteria, provider details, contact information, and source.
 
-![The finished provider receipt keeps the Medicare source attached.](images/04-provider-receipt.png)
 
 ## The state machine behind the button
 

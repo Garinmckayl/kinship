@@ -23,7 +23,6 @@ Kinship uses the Strands Agents SDK to organize four specialized roles:
 
 This is not a swarm of interchangeable chatbots. Each agent exists because it has a different audience, permission set, or failure cost.
 
-![Four-agent Kinship architecture with the shared durable care record at the center.](images/07-architecture.png)
 
 ## The Guardian’s tools are contracts
 
@@ -81,7 +80,6 @@ The agents do not coordinate by passing unstructured summaries to one another. M
 
 This matters because a promise can outlive a conversation. When Eleanor asks for a blood-pressure reminder in 30 minutes, the reminder becomes a durable task. Inngest carries it forward after the call ends. Sarah can see the task without supervising it, and she is interrupted only if follow-through fails or a decision is required.
 
-![A reminder created during Eleanor’s conversation persists on Sarah’s dashboard.](images/02-durable-background-task.png)
 
 The agent response is not the product. The complete loop is:
 

@@ -20,7 +20,6 @@ Kinship is designed around one operating principle:
 
 > Handle the repetition quietly. Protect the human decision. Close the loop.
 
-![Eleanor asks Kinship to log her medication and schedule a follow-up while the real tool status remains visible.](images/01-real-care-conversation.png)
 
 ## A real care loop
 
@@ -34,7 +33,6 @@ Kinship does not merely answer. It streams the response, records the medication 
 
 The call can end, but the promise remains.
 
-![The exact blood-pressure reminder persists on Sarah’s caregiver dashboard after Eleanor’s call ends.](images/02-durable-background-task.png)
 
 Sarah can see the task without supervising it. Kinship only needs to interrupt her if Eleanor misses the follow-up or a consequential decision requires approval.
 
@@ -121,7 +119,6 @@ Only that explicit decision starts the external browser work.
 
 After approval, Amazon Nova Act opens Medicare Care Compare in an Amazon Bedrock AgentCore Browser.
 
-![Amazon Nova Act operates Medicare Care Compare in the real AgentCore browser while the caregiver watches each step.](images/03-nova-act-live-browser.png)
 
 The workflow:
 
@@ -154,7 +151,6 @@ An agent saying “completed” is not evidence.
 
 Kinship returns a human-readable receipt with the search criteria, official source, and extracted result.
 
-![Kinship returns specific nearby providers, contact information, search ZIP, and the Medicare source.](images/04-provider-receipt.png)
 
 In a production verification, the workflow found Christopher Barlow and Shannon C. Codispoti, MD, both 0.1 miles from Eleanor’s ZIP, with an address and phone number.
 
@@ -168,9 +164,7 @@ Kinship persists medication intake, heartbeats, alerts, tasks, appointments, rep
 
 The product does not promote the scheduler as the experience. The experience is simply that Kinship keeps its promise.
 
-![Calendar state remains explicit: Kinship proposes, Sarah approves, and only then can the appointment be booked or synchronized.](images/05-calendar-approval.png)
 
-![Health signals remain connected to medication and conversation as care context, never as an automated diagnosis.](images/06-health-context.png)
 
 ## Detecting when nothing happened
 
@@ -203,7 +197,6 @@ The same conversation can continue through the web experience, phone, or messagi
 
 ## Architecture
 
-![Kinship connects elder and caregiver experiences to Strands orchestration, Bedrock reasoning, durable state, approval gates, and observable Nova Act execution.](images/07-architecture.png)
 
 At a high level:
 
