@@ -1,4 +1,4 @@
-# Building Kinship: A Voice AI Agent That Logs Medications, Runs Follow-Ups, and Finds Medicare Doctors
+# Agents for Humans: Building Kinship, a Care Agent That Keeps Its Promises
 
 Family caregiving rarely looks like one dramatic emergency. It looks like dozens of small questions repeated every day:
 
@@ -265,7 +265,7 @@ The model response is only one moment. The product is the complete loop.
 - **Live app:** https://kinship.arcumet.com
 - **Caregiver dashboard:** https://kinship.arcumet.com/family
 - **Demo login:** `caregiver@demo.local` / `demo1234`
-- **Source:** https://github.com/Garinmckayl/elderai
+- **Source:** https://github.com/Garinmckayl/kinship
 - **Competition video:** add final video URL
 
 Kinship does not replace a family’s care. It makes sure care does not disappear between a conversation and the next necessary action.

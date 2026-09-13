@@ -1,16 +1,18 @@
-# Kinship — An AI Care Agent for Older Adults Living Alone
+# Kinship — an AI care agent for older adults living alone
 
-> Agents for Humans Hackathon — **Everyday Agents** track.
-> Proactive Strands agent that listens, acts with human approval, verifies completion, and only asks family to step in when it matters.
+> Agents for Humans Hackathon — **Everyday Agents** track
 
-Demo persona: **Eleanor, 79, lives alone, 3 meds.**
+Family caregiving is a second shift made of small, relentless questions: Did Mom take her medication? Is today’s silence normal? Was the appointment confirmed? Most care products detect a problem, send another alert, and leave the family with the same work and uncertainty.
 
-Single codebase: Next.js PWA + Strands TS SDK in `frontend/` — no separate Python backend.
+Kinship is a voice-first companion for an older adult and a decision surface for their family. It checks in, records medications, remembers care context, follows up after the conversation ends, and escalates only when a risk or real decision needs a person. When outside work is required, Kinship asks the caregiver first, uses Amazon Nova Act to operate the website, and returns a result the family can verify.
 
-## Problem / Who / Why
-- **Problem:** elders miss meds + suffer loneliness; families worry constantly; doctors get no adherence signal.
-- **Who:** elders living alone (simple voice-first PWA at `/elder`, or her **real phone** via Twilio voice) + adult children (dashboard at `/family`) + doctors (1-page summary via `summarize_for_doctor` tool).
-- **Why:** 65+ US 58M → 84M by 2050; non-adherence ~$300B/yr; loneliness mortality ≈ smoking 15 cigs/day. High spending power, underserved.
+The demo follows **Eleanor, 79, who lives alone**, and her daughter Sarah. Eleanor can talk naturally through the senior-friendly web app, ElevenLabs voice, phone, or WhatsApp. Sarah sees meaningful updates, approval requests, and receipts without having to monitor every interaction. Kinship supports care coordination; it does not diagnose conditions or change medication dosages.
+
+Kinship is built explicitly with the **Strands Agents SDK**. A Guardian Agent coordinates 17 typed care and safety tools, a separate Caregiver Agent serves Sarah, and the Guardian delegates suspicious situations to a ScamGuard Strands sub-agent. Amazon Bedrock supplies reasoning and tool selection; PostgreSQL and Inngest preserve care state and follow-ups across conversations.
+
+- **Live app:** [kinship.arcumet.com](https://kinship.arcumet.com)
+- **Submission narrative:** [DEVPOST_DESCRIPTION.md](DEVPOST_DESCRIPTION.md)
+- **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## Architecture
 
@@ -25,7 +27,7 @@ They coordinate through typed tools, approval states, and the shared PostgreSQL 
 
 ```
 [PWA /elder + /family] --fetch /api--> [Next.js API routes] --> [Strands TS guardian-agent]
-        |                              /api/chat /status /tasks      | 8 tools (lib/guardian.ts):
+        |                              /api/chat /status /tasks      | 17 typed tools (lib/guardian.ts):
    orb + beam UI,                                                   | meds, mood, memory, notify_family,
    ElevenLabs voice                                                  | summarize_for_doctor, schedule_task,
    in-app Call Mode                                                  | call_elder
@@ -90,13 +92,62 @@ The official platform supports knowledge, authenticated webhook tools, dynamic v
 - shadcn-style `components/ui.tsx` (card, button, badge, input, calendar, tabs) used across new pages.
 
 ## Run locally
+
+### Prerequisites
+
+- Node.js 20 or later and npm
+- Optional: a PostgreSQL database for durable state and caregiver login
+- Optional: AWS credentials with Bedrock access for live Strands reasoning
+
+### Fastest path: local demo
+
+The elder experience and rule-based care loop run without cloud credentials or a database. State is held in memory until the development server restarts.
+
 ```bash
-cd frontend && npm install && npm run dev
-# -> http://localhost:3000  (/elder, /family, /login, /signup)
+git clone https://github.com/Garinmckayl/kinship.git
+cd kinship/frontend
+npm ci
+npm run dev
 ```
 
+Open [http://localhost:3000/elder](http://localhost:3000/elder). The family dashboard needs PostgreSQL-backed authentication; follow the full setup below to use it.
+
+### Full local setup
+
+1. Create an empty PostgreSQL database (Neon or local PostgreSQL both work).
+2. Copy `frontend/.env.example` to `frontend/.env.local`.
+3. Set `DATABASE_URL`, `AUTH_SECRET`, and `REPORT_SECRET`. Generate the secrets with `openssl rand -hex 32`.
+4. To enable live Strands Agents instead of the built-in fallback, also set `AWS_REGION` and standard AWS credentials with Amazon Bedrock model access.
+5. From `frontend/`, run `npm ci` and `npm run dev`.
+6. Open `/login` and sign in with `caregiver@demo.local` / `demo1234`. On first database use, Kinship creates its schema and demo records automatically.
+
+All other integrations are optional and documented in [`frontend/.env.example`](frontend/.env.example): ElevenLabs voice, Inngest background jobs, Twilio, WhatsApp, Resend, Google Calendar, and the Nova Act browser worker.
+
+### Verify the build
+
+```bash
+cd frontend
+npm run build
+```
+
+### Optional: run Nova Act locally
+
+The web app is functional without the browser worker. To execute real browser tasks locally, see [`nova-act/README.md`](nova-act/README.md). Without `NOVA_ACT_API_KEY`, that service uses its simulated demo path.
+
+## Repository map
+
+| Path | Purpose |
+|---|---|
+| `frontend/` | Next.js product, Strands agents, API routes, UI, and bundled visual assets |
+| `agentcore/` | Standalone TypeScript Guardian Agent for Bedrock AgentCore Runtime |
+| `nova-act/` | Local Python Nova Act sidecar and its setup instructions |
+| `nova-act-agentcore/` | AgentCore-hosted Nova Act browser worker |
+| `kinship-demo/` | Source compositions and assets for the demo video |
+| `ARCHITECTURE.md` | System diagram and autonomous-loop explanation |
+| `DEVPOST_DESCRIPTION.md` | Plain-language submission description |
+
 ## Deploy (Vercel)
-- Import `Garinmckayl/elderai`, root directory `frontend`.
+- Import `Garinmckayl/kinship`, root directory `frontend`.
 - Env vars: AWS creds, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (or private `ELEVENLABS_AGENT_ID`), `ELEVENLABS_TOOL_SECRET`, `ELEVENLABS_WEBHOOK_SECRET`, Inngest keys, Twilio vars, `PUBLIC_BASE_URL=https://<your-app>.vercel.app`.
 - Inngest syncs via `/api/inngest` automatically.
 
@@ -104,4 +155,5 @@ cd frontend && npm install && npm run dev
 Reminder + escalation log only. Not medical advice. Urgent keywords (chest pain, fall, dizzy) → URGENT escalation + advise emergency button/911.
 
 ## License
-MIT — see LICENSE.
+
+[MIT](LICENSE). The repository contains the source code, original project assets, configuration template, and instructions needed to run Kinship; third-party hosted services require their own credentials.

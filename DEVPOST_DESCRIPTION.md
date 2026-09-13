@@ -56,7 +56,7 @@ Kinship reduces that gap without taking control away from Eleanor or Sarah:
 - **Accessible:** Eleanor gets large controls, natural voice interaction, an immersive call, and a full-screen conversation.
 - **Safety-bounded:** health signals are context, not diagnosis; medication confirmation includes double-dose protection.
 
-More than 50 million Americans provide unpaid family care. Returning even one hour per week would restore more than 2.6 billion hours to families each year.
+The [2025 AARP and National Alliance for Caregiving study](https://www.aarp.org/press/releases/2025-07-24-new-report-reveals-crisis-point-for-americas-63-million-family-caregivers.html) reports that 59 million Americans care for an adult with complex needs. Returning even one hour per week at that scale would restore roughly 3.1 billion hours to families each year. This is illustrative potential, not a measured product outcome.
 
 ## How we built it
 
@@ -160,7 +160,7 @@ Reliable execution, explicit approval, truthful failure, durable state, and visi
 - **Live app:** https://kinship.arcumet.com
 - **Caregiver dashboard:** https://kinship.arcumet.com/family
 - **Demo login:** `caregiver@demo.local` / `demo1234`
-- **Source:** https://github.com/Garinmckayl/elderai
+- **Source:** https://github.com/Garinmckayl/kinship
 - **Demo video:** add final video URL
 
 ### Recommended judge path

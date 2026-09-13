@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
+import { requireCaregiver } from "@/lib/auth";
 import { addEscalation, claimBrowserTaskApproval, updateBrowserTask } from "@/lib/store";
 import { normalizeBrowserTaskParams } from "@/lib/browser-task";
 
 // Approve and execute a browser task.
 // Priority: 1) Sidecar via NOVA_SIDECAR_URL  2) Inngest -> AgentCore  3) Direct AgentCore
 export async function POST(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await requireCaregiver();
+  } catch (error) {
+    return error as Response;
+  }
   let body: Record<string, unknown> = {};
   try {
     body = await req.json().catch(() => ({}));

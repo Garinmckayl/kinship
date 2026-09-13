@@ -130,5 +130,5 @@ mode: autonomous
 - duration: 21.13s
 - timing: 221.6–242.73s
 - motion: dataviz-countup + logo-assemble-lockup
-- scene: 50M+ unpaid U.S. family caregivers and the potential 2.6B+ hours/year framing resolve into the Kinship close.
+- scene: The AARP/NAC 2025 estimate of 59M Americans caring for adults and the illustrative 3.1B hours/year potential resolve into the Kinship close.
 - narrativeRole: Land credible potential impact and the differentiated promise.

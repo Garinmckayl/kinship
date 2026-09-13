@@ -3,19 +3,23 @@
 Track: **Everyday Agents** ("runs quietly in the background and only pings you when there's a real decision to make" = our thesis, say it verbatim in the video).
 
 ## Devpost submission items
-- [x] Public repo URL: `github.com/Garinmckayl/elderai`
+- [x] Public repo URL: `github.com/Garinmckayl/kinship`
 - [x] MIT license in repo (LICENSE)
+- [x] Repo verified public and GitHub recognizes the **MIT License**
 - [x] README (problem / who / why / run / deploy)
 - [x] Architecture diagram (ARCHITECTURE.md, mermaid renders on GitHub)
-- [ ] Demo video <= 5 min -- MUST cover: (1) problem, (2) who it's for, (3) why it matters + working demo
+- [ ] Demo video <= 5 min -- current cut is ~4:03 and covers: (1) problem, (2) intended users, (3) why it matters + working demo
 - [ ] Text description on Devpost (see DEVPOST_DESCRIPTION.md)
 - [ ] AWS Builder ID (create at builder.aws.com, paste into submission)
-- [ ] Live demo link (Vercel URL -- scores Technical points)
-- [ ] Bonus: builder.aws.com post titled with "Agents for Humans" (see BUILDER_AWS_POST.md)
+- [x] Live demo: `https://kinship.arcumet.com` (HTTP 200 verified Sep 13, 2026)
+- [ ] Bonus post 1: publish `BUILDER_AWS_POST.md`, then add its public URL to Devpost
+- [ ] Bonus post 2: publish `BUILDER_AWS_POST_2_STRANDS.md`, then add its public URL to Devpost
+- [ ] Bonus post 3: publish `BUILDER_AWS_POST_3_NOVA_ACT.md`, then add its public URL to Devpost
+- [ ] Confirm every post title contains the exact phrase **Agents for Humans**
 
 ## Demo script
 
-See `DEMO_VIDEO_SCRIPT.md` for the full 4:30 video script with beat timings and narration.
+See `DEMO_VIDEO_SCRIPT.md` and `kinship-demo/SCRIPT.md`; the current rendered composition is approximately 4:03.
 
 Quick summary:
 - **Beat 0** (0:00-0:45): Compound-risk detection hook -- five weak signals combine into one urgent escalation.

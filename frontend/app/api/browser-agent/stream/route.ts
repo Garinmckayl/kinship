@@ -1,11 +1,14 @@
-import { getSession } from "@/lib/auth";
+import { requireCaregiver } from "@/lib/auth";
 
 const SIDECAR_URL = process.env.NOVA_SIDECAR_URL;
 const SIDECAR_SECRET = process.env.NOVA_SIDECAR_SECRET ?? "elderlove-nova-dev";
 
 export async function POST(req: Request) {
-  const u = await getSession();
-  if (!u) return new Response("Unauthorized", { status: 401 });
+  try {
+    await requireCaregiver();
+  } catch (error) {
+    return error as Response;
+  }
 
   const body = await req.json().catch(() => ({}));
   const watchTaskId = body.task_id as string | undefined;

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireCaregiver } from "@/lib/auth";
 import { listBrowserTasks as listFromDB, saveBrowserTask, updateBrowserTask, getDismissedBrowserTasks } from "@/lib/store";
 import { type BrowserTaskType } from "@/lib/browser-agent";
 import { normalizeBrowserTaskParams } from "@/lib/browser-task";
@@ -19,6 +20,7 @@ async function fetchSidecar(path: string): Promise<Response | null> {
 // GET: list browser tasks -- sidecar is source of truth for running tasks
 export async function GET() {
   try {
+    await requireCaregiver();
     const dbTasks = await listFromDB("eleanor-79");
     const dismissedIds = await getDismissedBrowserTasks();
 
@@ -85,6 +87,7 @@ export async function GET() {
 
     return NextResponse.json({ tasks: merged, sidecar: sidecarTasks.length > 0 });
   } catch (error) {
+    if (error instanceof Response) return error;
     console.error("[browser-agent] Failed to list tasks:", String(error).slice(0, 300));
     return NextResponse.json(
       { tasks: [], sidecar: false, error: "Browser tasks are temporarily unavailable" },
@@ -95,14 +98,19 @@ export async function GET() {
 
 // POST: create a new browser task
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => ({}));
-  const { task_type, params } = body as { task_type?: BrowserTaskType; params?: Record<string, unknown> };
-  if (!task_type) return NextResponse.json({ error: "task_type required" }, { status: 400 });
+  try {
+    await requireCaregiver();
+    const body = await req.json().catch(() => ({}));
+    const { task_type, params } = body as { task_type?: BrowserTaskType; params?: Record<string, unknown> };
+    if (!task_type) return NextResponse.json({ error: "task_type required" }, { status: 400 });
 
-  const taskId = `bt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const task = await saveBrowserTask(taskId, task_type, normalizeBrowserTaskParams(task_type, params ?? {}), "pending_approval");
-  return NextResponse.json({
-    task_id: task.id, task_type: task.task_type, status: task.status,
-    params: task.params, steps: [], result: null, error: null,
-  });
+    const taskId = `bt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const task = await saveBrowserTask(taskId, task_type, normalizeBrowserTaskParams(task_type, params ?? {}), "pending_approval");
+    return NextResponse.json({
+      task_id: task.id, task_type: task.task_type, status: task.status,
+      params: task.params, steps: [], result: null, error: null,
+    });
+  } catch (error) {
+    return error instanceof Response ? error : NextResponse.json({ error: "failed" }, { status: 500 });
+  }
 }
