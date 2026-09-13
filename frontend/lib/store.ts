@@ -729,7 +729,7 @@ export async function deleteBrowserTask(id: string): Promise<void> {
 export async function resetJudgeDemo(): Promise<BrowserTaskRow> {
   const params = judgeProviderTaskParams();
   const task: BrowserTaskRow = {
-    id: "judge-provider-search",
+    id: "judge-provider-search-" + Date.now(),
     task_type: "provider_search",
     status: "pending_approval",
     sidecar_task_id: null,
@@ -752,7 +752,12 @@ export async function resetJudgeDemo(): Promise<BrowserTaskRow> {
   }
 
   await ready();
-  await q("delete from dismissed_browser_tasks");
+  const previousBrowserTasks = await q<{ id: string; sidecar_task_id: string | null }>("select id, sidecar_task_id from browser_tasks where elder_id='eleanor-79'");
+  for (const previous of previousBrowserTasks) {
+    for (const taskId of [previous.id, previous.sidecar_task_id].filter((value): value is string => Boolean(value))) {
+      await q("insert into dismissed_browser_tasks(id,task_id) values($1,$2) on conflict(id) do nothing", ["dismissed-" + taskId, taskId]);
+    }
+  }
   await q("delete from browser_tasks where elder_id='eleanor-79'");
   await q("delete from intakes where elder_id='eleanor-79'");
   await q("delete from moods where elder_id='eleanor-79'");
